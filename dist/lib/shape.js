@@ -1,1 +1,482 @@
-"use strict";function _classCallCheck(i,t){if(!(i instanceof t))throw new TypeError("Cannot call a class as a function")}function _defineProperties(i,t){for(var s=0;s<t.length;s++){var e=t[s];e.enumerable=e.enumerable||!1,e.configurable=!0,"value"in e&&(e.writable=!0),Object.defineProperty(i,e.key,e)}}function _createClass(i,t,s){return t&&_defineProperties(i.prototype,t),s&&_defineProperties(i,s),i}var Circle=function(){function e(i,t,s){_classCallCheck(this,e),this.position={x:i,y:t},this.size={x:1,y:1},this.bounds={},this.radius=s,this.angle=0,this.vertices=[],this.sides=Math.ceil(Math.max(10,Math.min(24,this.radius))),this.updateVertices()}return _createClass(e,[{key:"updateVertices",value:function(i){var t=i||this.sides;this.vertices=[];for(var s=-Math.PI;s<Math.PI;s+=2*Math.PI/t){var e={x:this.position.x+Math.cos(s)*this.radius,y:this.position.y+Math.sin(s)*this.radius,angle:s};this.vertices.push(e)}this.updateBounds()}},{key:"updateBounds",value:function(){for(var i=[],t=[],s=0;s<this.vertices.length;s++){var e=this.vertices[s];i.push(e.x),t.push(e.y)}this.bounds={min:{x:Math.min.apply(Math,i),y:Math.min.apply(Math,t)},max:{x:Math.max.apply(Math,i),y:Math.max.apply(Math,t)}}}},{key:"setRadius",value:function(i){if(i!=this.radius){this.radius=i;for(var t=0;t<this.vertices.length;t++){var s=this.vertices[t];s.x=this.position.x+Math.cos(s.angle+this.angle)*this.radius,s.y=this.position.y+Math.sin(s.angle+this.angle)*this.radius}this.updateBounds()}}},{key:"scale",value:function(i,t){if(i!=this.size.x||t!=this.size.y){var s=i-this.size.x,e=t-this.size.y;this.size.x=i,this.size.y=t;for(var h=0;h<this.vertices.length;h++){var n=this.vertices[h],a=n.x-this.position.x,o=n.y-this.position.y;n.x=this.position.x+a*(1+s),n.y=this.position.y+o*(1+e)}this.updateBounds()}}},{key:"translate",value:function(i,t){if(i!=this.position.x||t!=this.position.y){var s=i-this.position.x,e=t-this.position.y;this.position.x=i,this.position.y=t;for(var h=0;h<this.vertices.length;h++){var n=this.vertices[h];n.x+=s,n.y+=e}this.updateBounds()}}},{key:"rotate",value:function(i){if(i!=this.angle){var t=i-this.angle;this.angle=i;for(var s=0;s<this.vertices.length;s++){var e=this.vertices[s],h=(e.x-this.position.x)*Math.cos(t)-(e.y-this.position.y)*Math.sin(t),n=(e.x-this.position.x)*Math.sin(t)+(e.y-this.position.y)*Math.cos(t);e.x=this.position.x+h,e.y=this.position.y+n}this.updateBounds()}}}]),e}(),Rectangle=function(){function h(i,t,s,e){_classCallCheck(this,h),this.position={x:i,y:t},this.size={x:1,y:1},this.bounds={},this.angle=0,this.vertices=[],this.updateVertices(s,e)}return _createClass(h,[{key:"updateVertices",value:function(i,t){this.vertices=[{x:this.position.x-.5*i,y:this.position.y-.5*t},{x:this.position.x+.5*i,y:this.position.y-.5*t},{x:this.position.x+.5*i,y:this.position.y+.5*t},{x:this.position.x-.5*i,y:this.position.y+.5*t}],this.updateBounds()}},{key:"updateBounds",value:function(){for(var i=[],t=[],s=0;s<this.vertices.length;s++){var e=this.vertices[s];i.push(e.x),t.push(e.y)}this.bounds={min:{x:Math.min.apply(Math,i),y:Math.min.apply(Math,t)},max:{x:Math.max.apply(Math,i),y:Math.max.apply(Math,t)}}}},{key:"scale",value:function(i,t){if(i!=this.size.x||t!=this.size.y){var s=i-this.size.x,e=t-this.size.y;this.size.x=i,this.size.y=t;for(var h=0;h<this.vertices.length;h++){var n=this.vertices[h],a=n.x-this.position.x,o=n.y-this.position.y;n.x=this.position.x+a*(1+s),n.y=this.position.y+o*(1+e)}this.updateBounds()}}},{key:"translate",value:function(i,t){if(i!=this.position.x||t!=this.position.y){var s=i-this.position.x,e=t-this.position.y;this.position.x=i,this.position.y=t;for(var h=0;h<this.vertices.length;h++){var n=this.vertices[h];n.x+=s,n.y+=e}this.updateBounds()}}},{key:"rotate",value:function(i){if(i!=this.angle){var t=i-this.angle;this.angle=i;for(var s=0;s<this.vertices.length;s++){var e=this.vertices[s],h=(e.x-this.position.x)*Math.cos(t)-(e.y-this.position.y)*Math.sin(t),n=(e.x-this.position.x)*Math.sin(t)+(e.y-this.position.y)*Math.cos(t);e.x=this.position.x+h,e.y=this.position.y+n}this.updateBounds()}}}]),h}(),Polygon=function(){function h(i,t,s,e){_classCallCheck(this,h),this.position={x:i,y:t},this.size={x:1,y:1},this.bounds={},this.radius=s,this.angle=0,this.vertices=[],this.sides=e,this.updateVertices()}return _createClass(h,[{key:"updateVertices",value:function(i){this.sides=i||this.sides,this.vertices=[];for(var t=-Math.PI;t<Math.PI;t+=2*Math.PI/this.sides){var s={x:this.position.x+Math.cos(t)*this.radius,y:this.position.y+Math.sin(t)*this.radius,angle:t};this.vertices.push(s)}this.updateBounds()}},{key:"updateBounds",value:function(){for(var i=[],t=[],s=0;s<this.vertices.length;s++){var e=this.vertices[s];i.push(e.x),t.push(e.y)}this.bounds={min:{x:Math.min.apply(Math,i),y:Math.min.apply(Math,t)},max:{x:Math.max.apply(Math,i),y:Math.max.apply(Math,t)}}}},{key:"setRadius",value:function(i){if(i!=this.radius){this.radius=i;for(var t=0;t<this.vertices.length;t++){var s=this.vertices[t];s.x=this.position.x+Math.cos(s.angle+this.angle)*this.radius,s.y=this.position.y+Math.sin(s.angle+this.angle)*this.radius}this.updateBounds()}}},{key:"scale",value:function(i,t){if(i!=this.size.x||t!=this.size.y){var s=i-this.size.x,e=t-this.size.y;this.size.x=i,this.size.y=t;for(var h=0;h<this.vertices.length;h++){var n=this.vertices[h],a=n.x-this.position.x,o=n.y-this.position.y;n.x=this.position.x+a*(1+s),n.y=this.position.y+o*(1+e)}this.updateBounds()}}},{key:"translate",value:function(i,t){if(i!=this.position.x||t!=this.position.y){var s=i-this.position.x,e=t-this.position.y;this.position.x=i,this.position.y=t;for(var h=0;h<this.vertices.length;h++){var n=this.vertices[h];n.x+=s,n.y+=e}this.updateBounds()}}},{key:"rotate",value:function(i){if(i!=this.angle){var t=i-this.angle;this.angle=i;for(var s=0;s<this.vertices.length;s++){var e=this.vertices[s],h=(e.x-this.position.x)*Math.cos(t)-(e.y-this.position.y)*Math.sin(t),n=(e.x-this.position.x)*Math.sin(t)+(e.y-this.position.y)*Math.cos(t);e.x=this.position.x+h,e.y=this.position.y+n}this.updateBounds()}}}]),h}();module.exports={circle:function(i,t,s){return new Circle(i=i||0,t=t||0,s=s||0)},rect:function(i,t,s,e){return new Rectangle(i=i||0,t=t||0,s=s||0,e=e||0)},polygon:function(i,t,s,e){return new Polygon(i=i||0,t=t||0,s=s||0,e=e||0)},SAT:function(i,t){function u(i){for(var t=[],s=0;s<i.length;s++){var e=i[s],h=i[s+1==i.length?0:s+1],e={x:h.y-e.y,y:-(h.x-e.x)};t.push(e)}return t}function p(i,t){for(var s=1/0,e=-1/0,h=0;h<this.vertices.length;h++)var n=this.vertices[h],s=(n=i.x*n.x+i.y*n.y)<s?n:s,e=e<n?n:e;return{min:s,max:e}}return function(i,t){for(var s=u(i),e=u(t),h=0;h<s.length;h++){var n=s[h],a=p(n),n=p(n);if(!(n.max>=a.min&&a.max>=n.min))return!1}for(h=0;h<e.length;h++){var o=e[h],r=p(o),o=p(o);if(!(o.max>=r.min&&r.max>=o.min))return!1}return!0}(i.vertices,t.vertices)}};
+class Circle {
+	constructor(x, y, radius) {
+		this.position = {
+			x: x,
+			y: y
+		};
+
+		this.size = {
+			x: 1,
+			y: 1
+		};
+
+		this.bounds = {};
+
+		this.radius = radius;
+		this.angle = 0;
+		this.vertices = [];
+		this.sides = Math.ceil(Math.max(10, Math.min(24, this.radius)));
+
+		this.updateVertices();
+	}
+
+	updateVertices(_sides) {
+		let sides = _sides || this.sides;
+
+		this.vertices = [];
+		for (var angle = -Math.PI; angle < Math.PI; angle += Math.PI * 2 / sides) {
+			let vertex = {
+				x: this.position.x + Math.cos(angle) * this.radius,
+				y: this.position.y + Math.sin(angle) * this.radius,
+				angle: angle
+			};
+
+			this.vertices.push(vertex);
+		}
+
+		this.updateBounds();
+	}
+
+	updateBounds() {
+		let x = [];
+		let y = [];
+
+		for (var i = 0; i < this.vertices.length; i++) {
+			let vertex = this.vertices[i];
+			x.push(vertex.x);
+			y.push(vertex.y);
+		}
+
+		this.bounds = {
+			min: {
+				x: Math.min(...x),
+				y: Math.min(...y)
+			},
+			max: {
+				x: Math.max(...x),
+				y: Math.max(...y)
+			}
+		}
+	}
+
+	setRadius(radius) {
+		if (radius == this.radius) return;
+
+		this.radius = radius;
+		for (var i = 0; i < this.vertices.length; i++) {
+			let vertex = this.vertices[i];
+			vertex.x = this.position.x + Math.cos(vertex.angle + this.angle) * this.radius;
+			vertex.y = this.position.y + Math.sin(vertex.angle + this.angle) * this.radius;
+		}
+
+		this.updateBounds();
+	}
+
+	scale(x, y) {
+		if (x == this.size.x && y == this.size.y) return;
+
+		let sizeDelta = {
+			x: x - this.size.x,
+			y: y - this.size.y
+		}
+
+		this.size.x = x;
+		this.size.y = y;
+
+		for (var i = 0; i < this.vertices.length; i++) {
+			let vertex = this.vertices[i];
+			let vertexDelta = {
+				x: vertex.x - this.position.x,
+				y: vertex.y - this.position.y
+			};
+
+			vertex.x = this.position.x + vertexDelta.x * (1 + sizeDelta.x);
+			vertex.y = this.position.y + vertexDelta.y * (1 + sizeDelta.y);
+		}
+
+		this.updateBounds();
+	}
+
+	translate(x, y) {
+		if (x == this.position.x && y == this.position.y) return;
+
+		let delta = {
+			x: x - this.position.x,
+			y: y - this.position.y
+		};
+
+		this.position.x = x;
+		this.position.y = y;
+		for (var i = 0; i < this.vertices.length; i++) {
+			let vertex = this.vertices[i];
+			vertex.x += delta.x;
+			vertex.y += delta.y;
+		}
+
+		this.updateBounds();
+	}
+
+	rotate(angle) {
+		if (angle == this.angle) return;
+
+		let delta = angle - this.angle;
+
+		this.angle = angle;
+		for (var i = 0; i < this.vertices.length; i++) {
+			let vertex = this.vertices[i];
+			let x = (vertex.x - this.position.x) * Math.cos(delta) - (vertex.y - this.position.y) * Math.sin(delta);
+			let y = (vertex.x - this.position.x) * Math.sin(delta) + (vertex.y - this.position.y) * Math.cos(delta);
+			vertex.x = this.position.x + x;
+			vertex.y = this.position.y + y;
+		}
+
+		this.updateBounds();
+	}
+}
+
+class Rectangle {
+	constructor(x, y, width, height) {
+		this.position = {
+			x: x,
+			y: y
+		};
+
+		this.size = {
+			x: 1,
+			y: 1
+		};
+
+		this.bounds = {};
+
+		this.angle = 0;
+		this.vertices = [];
+
+		this.updateVertices(width, height);
+	}
+
+	updateVertices(width, height) {
+		this.vertices = [{
+			x: this.position.x - width * 0.5,
+			y: this.position.y - height * 0.5
+		}, {
+			x: this.position.x + width * 0.5,
+			y: this.position.y - height * 0.5
+		}, {
+			x: this.position.x + width * 0.5,
+			y: this.position.y + height * 0.5
+		}, {
+			x: this.position.x - width * 0.5,
+			y: this.position.y + height * 0.5
+		}];
+
+		this.updateBounds();
+	}
+
+	updateBounds() {
+		let x = [];
+		let y = [];
+
+		for (var i = 0; i < this.vertices.length; i++) {
+			let vertex = this.vertices[i];
+			x.push(vertex.x);
+			y.push(vertex.y);
+		}
+
+		this.bounds = {
+			min: {
+				x: Math.min(...x),
+				y: Math.min(...y)
+			},
+			max: {
+				x: Math.max(...x),
+				y: Math.max(...y)
+			}
+		}
+	}
+
+	scale(x, y) {
+		if (x == this.size.x && y == this.size.y) return;
+
+		let sizeDelta = {
+			x: x - this.size.x,
+			y: y - this.size.y
+		}
+
+		this.size.x = x;
+		this.size.y = y;
+
+		for (var i = 0; i < this.vertices.length; i++) {
+			let vertex = this.vertices[i];
+			let vertexDelta = {
+				x: vertex.x - this.position.x,
+				y: vertex.y - this.position.y
+			};
+
+			vertex.x = this.position.x + vertexDelta.x * (1 + sizeDelta.x);
+			vertex.y = this.position.y + vertexDelta.y * (1 + sizeDelta.y);
+		}
+
+		this.updateBounds();
+	}
+
+	translate(x, y) {
+		if (x == this.position.x && y == this.position.y) return;
+
+		let delta = {
+			x: x - this.position.x,
+			y: y - this.position.y
+		};
+
+		this.position.x = x;
+		this.position.y = y;
+		for (var i = 0; i < this.vertices.length; i++) {
+			let vertex = this.vertices[i];
+			vertex.x += delta.x;
+			vertex.y += delta.y;
+		}
+
+		this.updateBounds();
+	}
+
+	rotate(angle) {
+		if (angle == this.angle) return;
+
+		let delta = angle - this.angle;
+
+		this.angle = angle;
+		for (var i = 0; i < this.vertices.length; i++) {
+			let vertex = this.vertices[i];
+			let x = (vertex.x - this.position.x) * Math.cos(delta) - (vertex.y - this.position.y) * Math.sin(delta);
+			let y = (vertex.x - this.position.x) * Math.sin(delta) + (vertex.y - this.position.y) * Math.cos(delta);
+			vertex.x = this.position.x + x;
+			vertex.y = this.position.y + y;
+		}
+
+		this.updateBounds();
+	}
+}
+
+class Polygon {
+	constructor(x, y, radius, sides) {
+		this.position = {
+			x: x,
+			y: y
+		};
+
+		this.size = {
+			x: 1,
+			y: 1
+		};
+
+		this.bounds = {};
+
+		this.radius = radius;
+		this.angle = 0;
+		this.vertices = [];
+		this.sides = sides;
+
+		this.updateVertices();
+	}
+
+	updateVertices(sides) {
+		this.sides = sides ? sides : this.sides;
+
+		this.vertices = [];
+		for (var angle = -Math.PI; angle < Math.PI; angle += (Math.PI * 2) / this.sides) {
+			let vertex = {
+				x: this.position.x + Math.cos(angle) * this.radius,
+				y: this.position.y + Math.sin(angle) * this.radius,
+				angle: angle
+			};
+
+			this.vertices.push(vertex);
+		}
+
+		this.updateBounds();
+	}
+
+	updateBounds() {
+		let x = [];
+		let y = [];
+
+		for (var i = 0; i < this.vertices.length; i++) {
+			let vertex = this.vertices[i];
+			x.push(vertex.x);
+			y.push(vertex.y);
+		}
+
+		this.bounds = {
+			min: {
+				x: Math.min(...x),
+				y: Math.min(...y)
+			},
+			max: {
+				x: Math.max(...x),
+				y: Math.max(...y)
+			}
+		}
+	}
+
+	setRadius(radius) {
+		if (radius == this.radius) return;
+
+		this.radius = radius;
+		for (var i = 0; i < this.vertices.length; i++) {
+			let vertex = this.vertices[i];
+			vertex.x = this.position.x + Math.cos(vertex.angle + this.angle) * this.radius;
+			vertex.y = this.position.y + Math.sin(vertex.angle + this.angle) * this.radius;
+		}
+
+		this.updateBounds();
+	}
+
+	scale(x, y) {
+		if (x == this.size.x && y == this.size.y) return;
+
+		let sizeDelta = {
+			x: x - this.size.x,
+			y: y - this.size.y
+		}
+
+		this.size.x = x;
+		this.size.y = y;
+
+		for (var i = 0; i < this.vertices.length; i++) {
+			let vertex = this.vertices[i];
+			let vertexDelta = {
+				x: vertex.x - this.position.x,
+				y: vertex.y - this.position.y
+			};
+
+			vertex.x = this.position.x + vertexDelta.x * (1 + sizeDelta.x);
+			vertex.y = this.position.y + vertexDelta.y * (1 + sizeDelta.y);
+		}
+
+		this.updateBounds();
+	}
+
+	translate(x, y) {
+		if (x == this.position.x && y == this.position.y) return;
+
+		let delta = {
+			x: x - this.position.x,
+			y: y - this.position.y
+		};
+
+		this.position.x = x;
+		this.position.y = y;
+		for (var i = 0; i < this.vertices.length; i++) {
+			let vertex = this.vertices[i];
+			vertex.x += delta.x;
+			vertex.y += delta.y;
+		}
+
+		this.updateBounds();
+	}
+
+	rotate(angle) {
+		if (angle == this.angle) return;
+
+		let delta = angle - this.angle;
+
+		this.angle = angle;
+		for (var i = 0; i < this.vertices.length; i++) {
+			let vertex = this.vertices[i];
+			let x = (vertex.x - this.position.x) * Math.cos(delta) - (vertex.y - this.position.y) * Math.sin(delta);
+			let y = (vertex.x - this.position.x) * Math.sin(delta) + (vertex.y - this.position.y) * Math.cos(delta);
+			vertex.x = this.position.x + x;
+			vertex.y = this.position.y + y;
+		}
+
+		this.updateBounds();
+	}
+}
+
+module.exports = {
+	circle: function(x, y, radius) {
+		x = x || 0;
+		y = y || 0;
+		radius = radius || 0;
+
+		return new Circle(x, y, radius)
+	},
+	rect: function(x, y, width, height) {
+		x = x || 0;
+		y = y || 0;
+		width = width || 0;
+		height = height || 0;
+
+		return new Rectangle(x, y, width, height);
+	},
+	polygon: function(x, y, radius, sides) {
+		x = x || 0;
+		y = y || 0;
+		radius = radius || 0;
+		sides = sides || 0;
+
+		return new Polygon(x, y, radius, sides);
+	},
+	SAT: function(shapeA, shapeB) {
+		const getAxes = function(vertices) {
+			let axes = [];
+			for (var i = 0; i < vertices.length; i++) {
+				let currentVertex = vertices[i];
+				let nextVertex = vertices[i + 1 == vertices.length ? 0 : i + 1];
+				let axisNormal = {
+					x: nextVertex.y - currentVertex.y,
+					y: -(nextVertex.x - currentVertex.x)
+				};
+
+				axes.push(axisNormal);
+			}
+
+			return axes;
+		}
+
+		const getProjection = function(axis, vertices) {
+			let min = Infinity;
+			let max = -Infinity;
+
+			for (var i = 0; i < this.vertices.length; i++) {
+				let vertex = this.vertices[i];
+				let projection = axis.x * vertex.x + axis.y * vertex.y;
+				min = projection < min ? projection : min;
+				max = projection > max ? projection : max;
+			}
+
+			return {
+				min: min,
+				max: max
+			}
+		}
+
+		const getResult = function(verticesA, verticesB) {
+			let axesA = getAxes(verticesA);
+			let axesB = getAxes(verticesB);
+
+			for (var i = 0; i < axesA.length; i++) {
+				let axis = axesA[i];
+				let projectionA = getProjection(axis, verticesA);
+				let projectionB = getProjection(axis, verticesB);
+
+				if (!(projectionB.max >= projectionA.min && projectionA.max >= projectionB.min)) {
+					return false;
+				}
+			}
+
+			for (var i = 0; i < axesB.length; i++) {
+				let axis = axesB[i];
+				let projectionA = getProjection(axis, verticesA);
+				let projectionB = getProjection(axis, verticesB);
+
+				if (!(projectionB.max >= projectionA.min && projectionA.max >= projectionB.min)) {
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		return getResult(shapeA.vertices, shapeB.vertices);
+	}
+};

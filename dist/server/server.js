@@ -1,1 +1,30 @@
-"use strict";var express=require("express"),socket=require("socket.io"),app=express(),port=process.env.PORT||3e3,server=app.listen(port,function(){console.log("Listening on port ".concat(port))}),io=socket(server);app.use(express.static(__dirname+"/../client"));var database=require("./database.js"),game=require("./classes/game.js");io.on("connection",function(e){console.log("".concat(e.id," has connected.")),e.on("client:create:room",function(e,o){game.createRoom(o)}),e.on("client:join",function(e,o){}),e.on("client:leave",function(e,o){})});
+//Setup server
+const express = require("express");
+const socket = require("socket.io");
+const app = express();
+const port = process.env.PORT || 3000;
+const server = app.listen(port, () => {
+	console.log(`Listening on port ${port}`);
+});
+const io = socket(server);
+app.use(express.static(__dirname + "/../client"));
+const database = require("./database.js");
+
+//Handle game
+const game = require("./classes/game.js");
+
+io.on("connection", socket => {
+	console.log(`${socket.id} has connected.`);
+
+	socket.on("client:create:room", (id, roomName) => {
+		game.createRoom(roomName);
+	});
+
+	socket.on("client:join", (id, roomName) => {
+
+	});
+
+	socket.on("client:leave", (id, roomName) => {
+
+	});
+});

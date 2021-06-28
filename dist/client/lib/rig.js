@@ -1,1 +1,190 @@
-"use strict";function _createForOfIteratorHelper(t,n){var e="undefined"!=typeof Symbol&&t[Symbol.iterator]||t["@@iterator"];if(!e){if(Array.isArray(t)||(e=_unsupportedIterableToArray(t))||n&&t&&"number"==typeof t.length){e&&(t=e);var i=0,n=function(){};return{s:n,n:function(){return i>=t.length?{done:!0}:{done:!1,value:t[i++]}},e:function(t){throw t},f:n}}throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}var o,a=!0,r=!1;return{s:function(){e=e.call(t)},n:function(){var t=e.next();return a=t.done,t},e:function(t){r=!0,o=t},f:function(){try{a||null==e.return||e.return()}finally{if(r)throw o}}}}function _unsupportedIterableToArray(t,n){if(t){if("string"==typeof t)return _arrayLikeToArray(t,n);var e=Object.prototype.toString.call(t).slice(8,-1);return"Map"===(e="Object"===e&&t.constructor?t.constructor.name:e)||"Set"===e?Array.from(t):"Arguments"===e||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(e)?_arrayLikeToArray(t,n):void 0}}function _arrayLikeToArray(t,n){(null==n||n>t.length)&&(n=t.length);for(var e=0,i=new Array(n);e<n;e++)i[e]=t[e];return i}function _typeof(t){return(_typeof="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t})(t)}function _classCallCheck(t,n){if(!(t instanceof n))throw new TypeError("Cannot call a class as a function")}function _defineProperties(t,n){for(var e=0;e<n.length;e++){var i=n[e];i.enumerable=i.enumerable||!1,i.configurable=!0,"value"in i&&(i.writable=!0),Object.defineProperty(t,i.key,i)}}function _createClass(t,n,e){return n&&_defineProperties(t.prototype,n),e&&_defineProperties(t,e),t}var Rig=function(){function a(t,n,e,i){_classCallCheck(this,a),this.position={x:t||0,y:n||0},e=e||0,this.segments=[];for(var o=0;o<e;o++)this.addSegment(i);this.setTarget(this.position)}return _createClass(a,[{key:"addSegment",value:function(t,n){n="number"==typeof n?n:0;t={pointA:{x:this.position.x,y:this.position.y},pointB:{x:this.position.x-this.segments.length*t,y:this.position.y},angle:0,angleLimit:Math.PI,length:t};return this.segments.splice(n,0,t),t}},{key:"setSource",value:function(){var t="object"==_typeof(arguments[0])?arguments[0].x:arguments[0],n="object"==_typeof(arguments[0])?arguments[0].y:arguments[1],e=this.segments[0];e.pointB.x=t,e.pointB.y=n;for(var i=0;i<this.segments.length;i++){var o=this.segments[i],a=this.segments[i+1];a&&(o.angle=Math.atan2(a.pointB.y-o.pointB.y,a.pointB.x-o.pointB.x),o.pointA.x=o.pointB.x+Math.cos(o.angle)*o.length,o.pointA.y=o.pointB.y+Math.sin(o.angle)*o.length,a.pointB.x=o.pointA.x,a.pointB.y=o.pointA.y),o==this.getLastSegment()&&(o.pointA.x=o.pointB.x+Math.cos(o.angle)*o.length,o.pointA.y=o.pointB.y+Math.sin(o.angle)*o.length)}}},{key:"setTarget",value:function(){var t="object"==_typeof(arguments[0])?arguments[0].x:arguments[0],n="object"==_typeof(arguments[0])?arguments[0].y:arguments[1];this.position.x=t,this.position.y=n;t=this.getLastSegment();t.angle=Math.atan2(this.position.y-t.pointB.y,this.position.x-t.pointB.x),t.pointA.x=this.position.x,t.pointA.y=this.position.y;n=this.segments[this.segments.indexOf(t)-1];n&&((n=Math.atan2(Math.sin(t.angle-n.angle),Math.cos(t.angle-n.angle)))>t.angleLimit&&(t.angle-=n-t.angleLimit),n<-t.angleLimit&&(t.angle-=n+t.angleLimit)),t.pointB.x=t.pointA.x-Math.cos(t.angle)*t.length,t.pointB.y=t.pointA.y-Math.sin(t.angle)*t.length;for(var e=this.segments.length-1;0<=e;e--){var i=this.segments[e],o=this.segments[e+1];o&&(i.pointA.x=o.pointB.x,i.pointA.y=o.pointB.y,i.angle=Math.atan2(i.pointA.y-i.pointB.y,i.pointA.x-i.pointB.x),(o=Math.atan2(Math.sin(i.angle-o.angle),Math.cos(i.angle-o.angle)))>i.angleLimit&&(i.angle-=o-i.angleLimit),o<-i.angleLimit&&(i.angle-=o+i.angleLimit),i.pointB.x=i.pointA.x-Math.cos(i.angle)*i.length,i.pointB.y=i.pointA.y-Math.sin(i.angle)*i.length)}}},{key:"rotateSegment",value:function(t,n){var e=this.segments[t="number"==typeof t?t:0];e.angle=Math.atan2(e.pointA.y-e.pointB.y,e.pointA.x-e.pointB.x),e.pointA.x=e.pointB.x+Math.cos(n)*e.length,e.pointA.y=e.pointB.y+Math.sin(n)*e.length;for(var i=0;i<this.segments.length;i++){var o=this.segments[i],a=this.segments[i-1];o!=e&&a&&(o.pointB.x=a.pointA.x,o.pointB.y=a.pointA.y,o.angle=Math.atan2(o.pointA.y-o.pointB.y,o.pointA.x-o.pointB.x),(a=Math.atan2(Math.sin(o.angle-a.angle),Math.cos(o.angle-a.angle)))>o.angleLimit&&(o.angle-=a-o.angleLimit),a<-o.angleLimit&&(o.angle-=a+o.angleLimit),o.pointA.x=o.pointB.x+Math.cos(o.angle)*o.length,o.pointA.y=o.pointB.y+Math.sin(o.angle)*o.length)}}},{key:"setAngleLimit",value:function(t){var n,e=_createForOfIteratorHelper(this.segments);try{for(e.s();!(n=e.n()).done;)n.value.angleLimit=t}catch(t){e.e(t)}finally{e.f()}}},{key:"getLastSegment",value:function(){return this.segments[this.segments.length-1]}}]),a}();module.exports={create:function(t,n,e,i){return new Rig(t,n,e,i)}};
+const vector = require("../../../lib/vector.js");
+
+class Rig {
+	constructor(x, y, segmentCount, segmentLength) {
+		this.position = {
+			x: x || 0,
+			y: y || 0
+		};
+
+		segmentCount = segmentCount || 0;
+
+		this.segments = [];
+
+		for (var i = 0; i < segmentCount; i++) {
+			this.addSegment(segmentLength);
+		}
+
+		this.setTarget(this.position);
+		this._lastId = 0;
+	}
+
+	addSegment() {
+		let x = typeof arguments[0] == "object" ? arguments[0].x : arguments[0];
+		let y = typeof arguments[0] == "object" ? arguments[0].y : arguments[1];
+
+		let lastSegment = this.segments[0];
+		let pointA = vector(x, y);
+		let pointB = lastSegment ? vector(lastSegment.pointA) : pointA.copy();
+		let angle = lastSegment ? pointA.heading(pointB) : 0;
+		let length = lastSegment ? pointA.dist(pointB) : 0;
+		let segment = {
+			id: this.nextId(),
+			pointA: pointA,
+			pointB: pointB,
+			angle: angle,
+			angleLimit: Math.PI,
+			length: length
+		};
+
+		this.segments.splice(0, 0, segment);
+		return segment;
+	}
+
+	setSource() {
+		let x = typeof arguments[0] == "object" ? arguments[0].x : arguments[0];
+		let y = typeof arguments[0] == "object" ? arguments[0].y : arguments[1];
+
+		let firstSegment = this.segments[0];
+		firstSegment.pointB.x = x;
+		firstSegment.pointB.y = y;
+
+		for (var i = 0; i < this.segments.length; i++) {
+			let segment = this.segments[i];
+			let nextSegment = this.segments[i + 1];
+			if (nextSegment) {
+				segment.angle = Math.atan2(nextSegment.pointB.y - segment.pointB.y, nextSegment.pointB.x - segment.pointB.x);
+				segment.pointA.x = segment.pointB.x + Math.cos(segment.angle) * segment.length;
+				segment.pointA.y = segment.pointB.y + Math.sin(segment.angle) * segment.length;
+				nextSegment.pointB.x = segment.pointA.x;
+				nextSegment.pointB.y = segment.pointA.y;
+			}
+
+			//Make sure the last segment doesn't stick with the target
+			if (segment == this.getLastSegment()) {
+				segment.pointA.x = segment.pointB.x + Math.cos(segment.angle) * segment.length;
+				segment.pointA.y = segment.pointB.y + Math.sin(segment.angle) * segment.length;
+			}
+		}
+	}
+
+	setTarget() {
+		let x = typeof arguments[0] == "object" ? arguments[0].x : arguments[0];
+		let y = typeof arguments[0] == "object" ? arguments[0].y : arguments[1];
+		this.position.x = x;
+		this.position.y = y;
+
+		//Calculate angle for target
+		let lastSegment = this.segments[1];
+		if (lastSegment) {
+			lastSegment.angle = Math.atan2(this.position.y - lastSegment.pointB.y, this.position.x - lastSegment.pointB.x);
+			lastSegment.pointA.x = this.position.x;
+			lastSegment.pointA.y = this.position.y;
+
+			//Limiting the angle
+			let segmentBefore = this.segments[this.segments.indexOf(lastSegment) - 1];
+			if (segmentBefore) {
+				let fixedAngle = Math.atan2(Math.sin(lastSegment.angle - segmentBefore.angle), Math.cos(lastSegment.angle - segmentBefore.angle));
+
+				if (fixedAngle > lastSegment.angleLimit) {
+					lastSegment.angle -= fixedAngle - lastSegment.angleLimit;
+				}
+
+				if (fixedAngle < -lastSegment.angleLimit) {
+					lastSegment.angle -= fixedAngle + lastSegment.angleLimit;
+				}
+			}
+
+			//Move
+			lastSegment.pointB.x = lastSegment.pointA.x - Math.cos(lastSegment.angle) * lastSegment.length;
+			lastSegment.pointB.y = lastSegment.pointA.y - Math.sin(lastSegment.angle) * lastSegment.length;
+		}
+
+		//Connect the other segments
+		for (var i = this.segments.length - 1; i >= 0; i--) {
+			const currentSegment = this.segments[i];
+			const nextSegment = this.segments[i + 1];
+			if (nextSegment) {
+				//Calculate angle/position
+				currentSegment.pointA.x = nextSegment.pointB.x;
+				currentSegment.pointA.y = nextSegment.pointB.y;
+				currentSegment.angle = Math.atan2(currentSegment.pointA.y - currentSegment.pointB.y, currentSegment.pointA.x - currentSegment.pointB.x);
+
+				//Limiting the angle
+				let fixedAngle = Math.atan2(Math.sin(currentSegment.angle - nextSegment.angle), Math.cos(currentSegment.angle - nextSegment.angle));
+
+				if (fixedAngle > currentSegment.angleLimit) {
+					currentSegment.angle -= fixedAngle - currentSegment.angleLimit;
+				}
+
+				if (fixedAngle < -currentSegment.angleLimit) {
+					currentSegment.angle -= fixedAngle + currentSegment.angleLimit;
+				}
+
+				//Move
+				currentSegment.pointB.x = currentSegment.pointA.x - Math.cos(currentSegment.angle) * currentSegment.length;
+				currentSegment.pointB.y = currentSegment.pointA.y - Math.sin(currentSegment.angle) * currentSegment.length;
+			}
+		}
+	}
+
+	rotateSegment(segmentIndex, angle) {
+		segmentIndex = typeof segmentIndex == "number" ? segmentIndex : 0;
+
+		//Rotate the segment
+		let segment = this.segments[segmentIndex];
+		segment.angle = Math.atan2(segment.pointA.y - segment.pointB.y, segment.pointA.x - segment.pointB.x);
+		segment.pointA.x = segment.pointB.x + Math.cos(angle) * segment.length;
+		segment.pointA.y = segment.pointB.y + Math.sin(angle) * segment.length;
+
+		//Connect the other segments
+		for (var i = 0; i < this.segments.length; i++) {
+			const currentSegment = this.segments[i];
+			const prevSegment = this.segments[i - 1];
+			if (currentSegment != segment) {
+				if (prevSegment) {
+					//Calculate angle/position
+					currentSegment.pointB.x = prevSegment.pointA.x;
+					currentSegment.pointB.y = prevSegment.pointA.y;
+					currentSegment.angle = Math.atan2(currentSegment.pointA.y - currentSegment.pointB.y, currentSegment.pointA.x - currentSegment.pointB.x);
+
+					//Limiting the angle
+					let fixedAngle = Math.atan2(Math.sin(currentSegment.angle - prevSegment.angle), Math.cos(currentSegment.angle - prevSegment.angle));
+
+					if (fixedAngle > currentSegment.angleLimit) {
+						currentSegment.angle -= fixedAngle - currentSegment.angleLimit;
+					}
+
+					if (fixedAngle < -currentSegment.angleLimit) {
+						currentSegment.angle -= fixedAngle + currentSegment.angleLimit;
+					}
+
+					//Move
+					currentSegment.pointA.x = currentSegment.pointB.x + Math.cos(currentSegment.angle) * currentSegment.length;
+					currentSegment.pointA.y = currentSegment.pointB.y + Math.sin(currentSegment.angle) * currentSegment.length;
+				}
+			}
+		}
+	}
+
+	nextId() {
+		this._lastId++;
+		return this._lastId;
+	}
+
+	setAngleLimit(angle) {
+		for (let segment of this.segments) {
+			segment.angleLimit = angle;
+		}
+	}
+
+	getLastSegment() {
+		return this.segments[this.segments.length - 1];
+	}
+}
+
+module.exports = {
+	create: function(x, y, segmentCount, segmentLength) {
+		return new Rig(x, y, segmentCount, segmentLength);
+	}
+};

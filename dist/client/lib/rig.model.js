@@ -1,1 +1,122 @@
-"use strict";function _classCallCheck(e,r){if(!(e instanceof r))throw new TypeError("Cannot call a class as a function")}function _defineProperties(e,r){for(var t=0;t<r.length;t++){var n=r[t];n.enumerable=n.enumerable||!1,n.configurable=!0,"value"in n&&(n.writable=!0),Object.defineProperty(e,n.key,n)}}function _createClass(e,r,t){return r&&_defineProperties(e.prototype,r),t&&_defineProperties(e,t),e}var rig=require("../lib/rig.js"),mouse=require("../../../lib/mouse.js"),RigModel=function(){function e(){_classCallCheck(this,e),this.parts=[],this.currentPart}return _createClass(e,[{key:"add",value:function(e,r){var t;this.currentPart?this.currentPart.addSegment(20,0):((t=rig.create(mouse.x,mouse.y,2,20)).setSource(mouse.x,mouse.y),this.parts.push(t),this.currentPart=t),console.log(this.parts)}},{key:"render",value:function(e){for(var r=0;r<this.parts.length;r++)for(var t=this.parts[r],n=0;n<t.segments.length;n++){var i=t.segments[n];e.circle(i.pointA.x,i.pointA.y,7,{fill:"red"}),e.fromVertices([i.pointA,i.pointB],{stroke:"yellow",lineWidth:5})}this.currentPart}}]),e}();module.exports={create:function(){return new RigModel}};
+const mouse = require("../../../lib/mouse.js");
+const vector = require("../../../lib/vector.js");
+const config = require("../../../lib/config.js");
+
+class RigModel {
+	constructor() {
+		this.joints = [];
+		this.segments = [];
+		this.mouseBuffer = 5;
+		this.selected = null;
+		this._lastId = 0;
+	}
+
+	nextId() {
+		this._lastId++;
+		return this._lastId;
+	}
+	
+	addJoint(x, y) {
+		let before = this.selected;
+		let joint = {
+			id: this.nextId(),
+			position: vector(x, y),
+			source: before,
+			destinations: [],
+			length: this.selected ? this.selected.position.dist(x, y) : 0
+		};
+
+		if (before) before.destinations.push(joint);
+
+		this.selected = joint;
+
+		this.joints.push(joint);
+	}
+
+	selectJoint(x, y) {
+		for (var i = 0; i < this.joints.length; i++) {
+			let joint = this.joints[i];
+			if (joint.position.dist(x, y) < config.render.joint.radius + this.mouseBuffer) {
+				this.selected = joint;
+			}
+		}
+	}
+
+	removeJoint(x, y) {
+		for (var i = 0; i < this.joints.length; i++) {
+			let joint = this.joints[i];
+			if (joint.position.dist(x, y) < config.render.joint.radius + this.mouseBuffer) {
+				for(var j = 0; j < joint.destinations.length; j++){
+					let dest = joint.destinations[j];
+					dest.source = joint.source;
+					dest.length += joint.length;
+				}
+
+				joint.source.destinations.splice(joint.source.destinations.indexOf(joint), 1);
+				joint.source.destinations.push(...joint.destinations);
+				
+				this.joints.splice(this.joints.indexOf(joint), 1);
+			}
+		}
+	}
+
+	moveJoint(x, y) {
+		if (!this.selected) return;
+		this.selected.position.set(x, y);
+
+		for (var i = 0; i < this.joints.length; i++) {
+			let joint = this.joints[i];
+			for (var j = 0; j < joint.destinations.length; j++) {
+				let dest = joint.destinations[j];
+				if (/*dest !== this.selected*/ 1) {
+					let destAngle = dest.position.heading(joint.position);
+					dest.position.set({
+						x: joint.position.x - Math.cos(destAngle) * dest.length,
+						y: joint.position.y - Math.sin(destAngle) * dest.length
+					});
+				}
+			}
+		}
+
+		for (var i = this.joints.length - 1; i >= 0; i--) {
+			let joint = this.joints[i];
+			if (joint.source !== this.selected) {
+				if (joint.source) {
+					let sourceAngle = joint.position.heading(joint.source.position);
+					joint.source.position.set({
+						x: joint.position.x + Math.cos(sourceAngle) * joint.length,
+						y: joint.position.y + Math.sin(sourceAngle) * joint.length
+					});
+				}
+			}
+		}
+	}
+
+	render(renderer) {
+		//Render the line that connects the joints
+		for (var i = 0; i < this.joints.length; i++) {
+			let joint = this.joints[i];
+			if (joint.source) {
+				renderer.line(joint.position.x, joint.position.y, joint.source.position.x, joint.source.position.y, {
+					lineWidth: config.render.segment.width,
+					stroke: config.render.segment.color
+				});
+			}
+		}
+
+		//Render the joints
+		for (var i = 0; i < this.joints.length; i++) {
+			let joint = this.joints[i];
+			let jointColor = joint === this.selected ? config.render.joint.color.selected : config.render.joint.color.default;
+			renderer.circle(joint.position.x, joint.position.y, config.render.joint.radius, {
+				fill: jointColor
+			});
+		}
+	}
+}
+
+module.exports = {
+	create: function() {
+		return new RigModel();
+	}
+}

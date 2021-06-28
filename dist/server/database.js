@@ -1,1 +1,37 @@
-"use strict";function _classCallCheck(e,a){if(!(e instanceof a))throw new TypeError("Cannot call a class as a function")}function _defineProperties(e,a){for(var t=0;t<a.length;t++){var n=a[t];n.enumerable=n.enumerable||!1,n.configurable=!0,"value"in n&&(n.writable=!0),Object.defineProperty(e,n.key,n)}}function _createClass(e,a,t){return a&&_defineProperties(e.prototype,a),t&&_defineProperties(e,t),e}var Datastore=require("nedb"),fs=require("fs"),Database=function(){function e(){_classCallCheck(this,e),this.tables=[],this.loadTables()}return _createClass(e,[{key:"loadTables",value:function(){for(var e=this,t=fs.readdirSync("./server/database"),n=0;n<t.length;n++)!function(){var a=t[n].split(".db")[0];e.tables.find(function(e){return e.name==a})||e.load(a)}()}},{key:"load",value:function(e){var a=new Datastore("./server/database/".concat(e,".db"));return a.loadDatabase(),this.tables.push({name:e,data:a}),a}},{key:"in",value:function(a){return this.tables.find(function(e){return e.name==a}).data}}]),e}();module.exports=new Database;
+const Datastore = require("nedb");
+const fs = require("fs");
+
+class Database {
+	constructor() {
+		this.tables = [];
+		this.loadTables();
+	}
+
+	loadTables() {
+		let files = fs.readdirSync("./server/database");
+		for (var i = 0; i < files.length; i++) {
+			let name = files[i].split(".db")[0];
+			let added = this.tables.find(tb => tb.name == name);
+			if (!added) {
+				this.load(name);
+			}
+		}
+	}
+
+	load(name) {
+		let database = new Datastore(`./server/database/${name}.db`);
+		database.loadDatabase();
+		this.tables.push({
+			name: name,
+			data: database
+		});
+		return database;
+	}
+
+	in (name) {
+		let table = this.tables.find(tb => tb.name == name);
+		return table.data;
+	}
+}
+
+module.exports = new Database();

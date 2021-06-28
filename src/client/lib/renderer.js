@@ -1,4 +1,4 @@
-const camera = require("../../../lib/camera.js");
+const camera = require("./camera.js");
 const engine = require("./engine.js");
 
 class Renderer {
@@ -76,6 +76,18 @@ class Renderer {
 
 			context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 		}
+	}
+
+	line(x1, y1, x2, y2, options, context) {
+		let ctx = context || this.context;
+		ctx.beginPath();
+		ctx.moveTo(x1, y1);
+		ctx.lineTo(x2, y2);
+		this._hasProperty(options, "close", () => {
+			ctx.closePath();
+		});
+
+		this._evaluateOptions(options, ctx);
 	}
 
 	circle(x, y, radius, options, context) {
