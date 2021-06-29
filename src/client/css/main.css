@@ -1,14 +1,9 @@
 :root {
 	--white: #f6fafb;
 	--black: #1d1f23;
-	--red: #ff1b41;
-	--dim: #120b11;
-	--darko-a: #2a2b33;
-}
-
-::selection {
-	background: var(--red);
-	color: var(--white);
+	--accent: #5984d2;
+	--darko-a: #34353f;
+	--darko-b: #2a2b33;
 }
 
 * {
@@ -20,6 +15,11 @@
 	color: var(--black);
 }
 
+img {
+	pointer-events: none;
+	user-select: none;
+}
+
 input {
 	padding: 2px 3px;
 }
@@ -27,6 +27,9 @@ input {
 button {
 	cursor: pointer;
 	user-select: none;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 button:hover {
@@ -37,15 +40,36 @@ button:active {
 	filter: brightness(1.4) hue-rotate(10deg);
 }
 
+button img {
+	width: 60%;
+	height: 60%;
+}
+
+button img[src*="play.svg"], button img[src*="previous.svg"], button img[src*="next.svg"], button img[src*="round-square.svg"] {
+	width: 35%;
+	height: 35%;
+}
+
+.filter-white {
+	filter: invert(0.95) sepia(0.05) brightness(1) saturate(7) hue-rotate(178deg);
+}
+
 .darko-a {
 	background: var(--darko-a);
 	color: var(--white);
-	border: 1px solid rgba(255, 255, 255, 0.04);
+	border: 1px solid rgba(255, 255, 255, 0.02);
 	border-radius: 3px;
 }
 
+.darko-b {
+	background: var(--darko-b);
+	color: var(--white);
+	border: 1px solid rgba(255, 255, 255, 0.02);
+	border-radius: 0px;
+}
+
 .wrapper {
-	width: 100%;fsefasef
+	width: 100%;
 	height: 100%;
 }
 
@@ -56,4 +80,5 @@ canvas#gameCanvas {
 	top: 0;
 	left: 0;
 	display: block;
+	cursor: none;
 }

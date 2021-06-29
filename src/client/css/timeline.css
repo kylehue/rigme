@@ -3,17 +3,15 @@
 	z-index: 1;
 	bottom: 0;
 	width: 100vw;
-	height: 200px;
+	height: fit-content;
 	padding: 5px;
 	box-sizing: border-box;
-	background: green;
 }
 
 #timelineApp .wrapper {
 	position: relative;
 	width: 100%;
 	height: 100%;
-	background: blue;
 }
 
 #timelineApp .wrapper [class^="row-"] {
@@ -22,19 +20,75 @@
 	align-items: center;
 	width: 100%;
 	height: fit-content;
-	background: yellow;
+}
+
+#timelineApp .input-wrapper {
+	display: flex;
+	align-content: center;
+	width: fit-content;
+	height: fit-content;
+}
+
+#timelineApp .input-wrapper img {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	width: auto;
+	height: 16px;
+	margin: auto;
+	margin-left: 7px;
+}
+
+#timelineApp .input-wrapper img[src*="fr.svg"] {
+	width: auto;
+	height: 14px;
+}
+
+#timelineApp .input-wrapper input {
+	height: 25px;
+	width: 20px;
+	padding-left: 30px;
+	background: none;
+	border: none;
+}
+
+#timelineApp .input-wrapper input:focus {
+	background: var(--darko-a);
+	border: 1px solid rgba(255, 255, 255, 0.02);
 }
 
 input#frameCount {
-	height: 25px;
-	width: 60px;
+	margin-right: 10px;
+}
+
+#timelineApp .left-auto {
 	margin-left: auto;
 }
 
 #timelineApp .wrapper .row-a button {
 	position: relative;
-	display: block;
 	width: 30px;
 	height: 30px;
 	margin-right: 3px;
+}
+
+#timelineApp .wrapper .row-a button {
+	position: relative;
+	width: 30px;
+	height: 30px;
+	margin-right: 3px;
+}
+
+.row-b {
+	margin-top: 10px;
+	background: rgba(20, 10, 30, 0.05);
+	border-top: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+#timelineGraphWrapper {
+	position: relative;
+	display: block;
+	margin-top: 10px;
+	height: 150px;
+	width: 100%;
 }
