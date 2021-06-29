@@ -16,100 +16,163 @@ let mouseLast = vector();
 let worldMouse = vector();
 
 let actions = {
+	pan: "pan",
 	add: "add",
 	select: "select",
 	move: "move",
-	remove: "remove",
-	pan: "pan"
+	remove: "remove"
 };
 
 let shortcuts = {
-	KeyQ: actions.add,
-	KeyW: actions.select,
-	KeyE: actions.move,
-	KeyR: actions.remove,
-	KeyA: actions.pan
+	KeyQ: actions.pan,
+	KeyW: actions.add,
+	KeyE: actions.select,
+	KeyR: actions.move,
+	KeyT: actions.remove
 };
 
-let action = actions.add;
+let actionIcons = {};
+
+actionIcons.add = new Image();
+actionIcons.add.src = "assets/svg/joint-plus.svg";
+actionIcons.select = new Image();
+actionIcons.select.src = "assets/svg/joint-click.svg";
+actionIcons.move = new Image();
+actionIcons.move.src = "assets/svg/joint-arrow.svg";
+actionIcons.remove = new Image();
+actionIcons.remove.src = "assets/svg/joint-trash.svg";
+actionIcons.pan = new Image();
+actionIcons.pan.src = "assets/svg/quad-arrow.svg";
+
+let action = actions.pan;
+
+let buttons = {
+	add: document.getElementById("addJoint"),
+	select: document.getElementById("selectJoint"),
+	move: document.getElementById("moveJoint"),
+	remove: document.getElementById("removeJoint"),
+	pan: document.getElementById("panCamera")
+};
+
+let _buttons = Object.keys(buttons);
+let __buttons = Object.values(buttons);
+
+function removeActives() {
+	for (let btn of _buttons) {
+		buttons[btn].classList.remove("active-tool");
+	}
+}
+
+function mouseInside(el) {
+	return mouse.x >= el.offsetLeft && mouse.x <= el.offsetLeft + el.offsetWidth && mouse.y >= el.offsetTop && mouse.y <= el.offsetTop + el.offsetHeight;
+}
+
+for (let btn of _buttons) {
+	buttons[btn].addEventListener("click", function() {
+		action = actions[btn];
+		rigModel.action = action;
+
+		removeActives();
+		buttons[btn].classList.add("active-tool");
+	});
+}
 
 key.on("keydown", function(event) {
-	action = actions[shortcuts[event.code]];
-	rigModel.action = action;
-	console.log(`Current action: ${action}`);
+	let pickedAction = actions[shortcuts[event.code]];
+	if (pickedAction) {
+		action = pickedAction;
+		rigModel.action = action;
+
+		if (buttons[action]) {
+			removeActives();
+			buttons[action].classList.add("active-tool");
+		}
+	}
 });
 
-mouse.on("click", function() {
+renderer.canvas.addEventListener("click", function() {
 	if (action == actions.add) {
 		let worldMouse = renderer.camera.screenToWorld(mouse.x, mouse.y);
 		rigModel.addJoint(worldMouse.x, worldMouse.y);
 	}
 });
 
-mouse.on("mousewheel", function () {
+renderer.canvas.addEventListener("mousewheel", function() {
 	if (mouse.scrollTop) {
 		cameraDistance -= 200;
-	}else{
+	} else {
 		cameraDistance += 200;
 	}
 
-	cameraDistance = cameraDistance < 100 ? 100 : cameraDistance;
-	cameraDistance = cameraDistance > 3000 ? 3000 : cameraDistance;
+	cameraDistance = cameraDistance < config.world.minZoom ? config.world.minZoom : cameraDistance;
+	cameraDistance = cameraDistance > config.world.maxZoom ? config.world.maxZoom : cameraDistance;
 });
 
 renderer.fullscreen();
 renderer.camera.setZoomSpeed(0.2);
 renderer.camera.setMoveSpeed(0.4);
 renderer.render(function() {
+	let onWorld = !mouseInside(vue.toolApp) && !mouseInside(vue.timelineApp.$el);
 	worldMouse.set(renderer.camera.screenToWorld(mouse.x, mouse.y));
 
 	renderer.camera.begin(function() {
 		renderer.camera.moveTo(cameraMovement.x, cameraMovement.y);
 		renderer.camera.zoomTo(cameraDistance);
 
-		if (action === actions.add) {
-			let currentPart = rigModel.selected;
-			if (currentPart) {
-				renderer.line(worldMouse.x, worldMouse.y, currentPart.position.x, currentPart.position.y, {
-					lineWidth: config.render.segment.width,
-					lineCap: "round",
-					stroke: "rgba(255, 255, 255, 0.2)"
+		if (onWorld) {
+			if (action === actions.add) {
+				let color = "#323439";
+				let currentPart = rigModel.activeJoint;
+				if (currentPart) {
+					renderer.line(worldMouse.x, worldMouse.y, currentPart.position.x, currentPart.position.y, {
+						lineWidth: config.render.segment.width,
+						lineCap: "round",
+						stroke: color
+					});
+				}
+
+				renderer.circle(worldMouse.x, worldMouse.y, config.render.joint.radius, {
+					fill: color
 				});
 			}
+
+			renderer.context.drawImage(actionIcons[action], worldMouse.x, worldMouse.y, 14, 14);
 		}
 
 		rigModel.render(renderer);
 	});
 
-	if (action === actions.pan) {
-		if (mouse.dragged) {
-			cameraMovement.set({
-				x: mouseLast.x - worldMouse.x + renderer.camera.movement.x,
-				y: mouseLast.y - worldMouse.y + renderer.camera.movement.y
-			});
+	if (onWorld) {
+		if (action === actions.pan) {
+			if (mouse.dragged) {
+				cameraMovement.set({
+					x: mouseLast.x - worldMouse.x + renderer.camera.movement.x,
+					y: mouseLast.y - worldMouse.y + renderer.camera.movement.y
+				});
 
-			mouse.dragged = false;
-		}else {
-			mouseLast.set(worldMouse);
+				mouse.dragged = false;
+			} else {
+				mouseLast.set(worldMouse);
+			}
 		}
-	}
 
-	if (action === actions.select) {
-		if (mouse.pressed) {
-			rigModel.selectJoint(worldMouse.x, worldMouse.y);
+		if (action === actions.select) {
+			if (mouse.pressed) {
+				rigModel.selectJoint(worldMouse.x, worldMouse.y);
+			}
 		}
-	}
 
-	if (action === actions.move) {
-		if (mouse.pressed) {
-			rigModel.moveJoint(worldMouse.x, worldMouse.y);
+		if (action === actions.move) {
+			if (mouse.pressed) {
+				rigModel.moveJoint(worldMouse.x, worldMouse.y);
+			}
 		}
-	}
 
-	if (action === actions.remove) {
-		if (mouse.pressed) {
-			rigModel.selectJoint(worldMouse.x, worldMouse.y);
-			rigModel.removeJoint(worldMouse.x, worldMouse.y);
+		if (action === actions.remove) {
+			if (mouse.pressed) {
+				rigModel.selectJoint(worldMouse.x, worldMouse.y);
+				rigModel.removeJoint(worldMouse.x, worldMouse.y);
+			}
 		}
 	}
 });
