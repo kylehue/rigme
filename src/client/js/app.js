@@ -7,9 +7,8 @@ const utils = require("../../../lib/utils.js");
 const client = require("./client.js");
 const config = require("../../../lib/config.js");
 const vue = require("./vue/vue.js");
-const model = require("../lib/rig.model.js");
+const rigModel = require("../lib/rig.model.js");
 
-let rigModel = model.create();
 let cameraDistance = config.world.zoom;
 let cameraMovement = vector();
 let mouseLast = vector();
@@ -112,7 +111,7 @@ renderer.fullscreen();
 renderer.camera.setZoomSpeed(0.2);
 renderer.camera.setMoveSpeed(0.4);
 renderer.render(function() {
-	let onWorld = !mouseInside(vue.toolApp) && !mouseInside(vue.timelineApp.$el);
+	let onWorld = !mouseInside(vue.toolApp) && !mouseInside(vue.timeline.app.$el);
 	worldMouse.set(renderer.camera.screenToWorld(mouse.x, mouse.y));
 
 	renderer.camera.begin(function() {
@@ -136,7 +135,7 @@ renderer.render(function() {
 				});
 			}
 
-			renderer.context.drawImage(actionIcons[action], worldMouse.x, worldMouse.y, 14, 14);
+			renderer.context.drawImage(actionIcons[action], worldMouse.x + 12, worldMouse.y - 8, 14, 14);
 		}
 
 		rigModel.render(renderer);
@@ -180,9 +179,7 @@ renderer.render(function() {
 key.on("keydown", function() {
 	if (key.code === 16) {
 		console.log(rigModel);
+		console.log(vue.timeline.graph.state);
 		console.log(config);
 	}
-})
-
-
-console.log(rigModel);
+});
