@@ -4,6 +4,7 @@
 	--accent: #5984d2;
 	--darko-a: #34353f;
 	--darko-b: #2a2b33;
+	--darko-c: #26272f;
 }
 
 * {
@@ -68,6 +69,13 @@ button img[src*="play.svg"], button img[src*="previous.svg"], button img[src*="n
 	border-radius: 0px;
 }
 
+.darko-c {
+	background: var(--darko-c);
+	color: var(--white);
+	border: 1px solid rgba(255, 255, 255, 0.02);
+	border-radius: 3px;
+}
+
 .wrapper {
 	width: 100%;
 	height: 100%;
@@ -80,5 +88,5 @@ canvas#gameCanvas {
 	top: 0;
 	left: 0;
 	display: block;
-	cursor: none;
+	/*cursor: none;*/
 }
