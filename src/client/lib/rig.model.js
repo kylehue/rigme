@@ -24,19 +24,17 @@ class RigModel {
 		this.activeJoint = null;
 	}
 
-	setKeyframe(index) {
-		if (typeof index != "number") return;
+	getKeyframe(findKey, value) {
+		let keyframes = Object.values(this.keyframes);
+		let res = keyframes.find(k => k[findKey] === value);
+		if (res) {
+			return this.keyframes[res.index];
+		}
 
-		let keyframe = {
-			type: "head",
-			index: index,
-			activeJointId: this.activeJoint ? this.activeJoint.id : null,
-			joints: clonedeep(this.joints)
-		};
+		return null;
+	}
 
-		this.keyframes[index] = keyframe;
-
-		//Hidden keyframes
+	addSubKeyframes(start, end) {
 		if (timeline.graph) {
 			let keys = Object.keys(this.keyframes);
 			for (var i = 0; i < keys.length; i++) {
@@ -50,17 +48,21 @@ class RigModel {
 			if (keys.length > 1) {
 				//...then add the hidden key frames
 				timeline.graph.updateState();
-				let currentFrame = timeline.graph.state.currentFrame;
-				let previousFrame = timeline.graph.state.previousFrame;
 
-				for (var i = currentFrame - 1; i >= previousFrame + 1; i--) {
-					let subJoints = clonedeep(this.keyframes[currentFrame].joints);
+				for (var i = end - 1; i >= start + 1; i--) {
+					let subJoints = clonedeep(this.keyframes[end].joints);
 
 					let subKeyframe = {
+						id: utils.uid(),
 						type: "sub",
 						index: i,
 						activeJointId: null,
-						joints: subJoints
+						joints: subJoints,
+						render: {
+							size: 12,
+							color: "red",
+							position: vector(i * timeline.graph.hatchMark.spacing + timeline.graph.hatchMark.spacing / 2, config.render.keyframe.y)
+						}
 					};
 
 					this.keyframes[i] = subKeyframe;
@@ -69,44 +71,75 @@ class RigModel {
 		}
 
 		this.updateSubKeyframes();
+		timeline.graph.updateState();
+		timeline.graph.redraw();
+	}
+
+	setKeyframe(index, options) {
+		if (typeof index != "number") return;
+		options = options || {};
+
+		let keyframe = {
+			id: utils.uid(),
+			type: "head",
+			index: index,
+			activeJointId: this.activeJoint ? this.activeJoint.id : null,
+			joints: options.joints || clonedeep(this.joints),
+			render: {
+				size: config.render.keyframe.size,
+				color: config.render.keyframe.color.default,
+				position: options.position || vector(index * timeline.graph.hatchMark.spacing + timeline.graph.hatchMark.spacing / 2, config.render.keyframe.y)
+			},
+			locked: options.locked || false
+		};
+
+		this.keyframes[index] = keyframe;
 
 		if (timeline.graph) {
 			timeline.graph.updateState();
+			let currentFrame = timeline.graph.state.currentFrame;
+			let previousFrame = timeline.graph.state.previousFrame;
+			this.addSubKeyframes(previousFrame, currentFrame);
 			timeline.graph.redraw();
 		}
+
+		return keyframe;
 	}
 
-	deleteKeyframe(index) {
+	deleteKeyframe(id) {
+		let keyframe = this.getKeyframe("id", id);
+
+		if (!keyframe) return;
 		if (Object.keys(this.keyframes).length <= 1) return;
 		let subs = [];
 		let leftHead;
 		let rightHead;
 
 		//Get left subs
-		for (var i = index - 1; i >= 0; i--) {
+		for (var i = keyframe.index - 1; i >= 0; i--) {
 			let key = this.keyframes[i];
 			if (key) {
 				if (key.type == "sub") {
-					subs.push(key.index);
+					subs.push(key);
 				}
 
 				if (key.type == "head") {
-					leftHead = key.index;
+					leftHead = key;
 					break;
 				}
 			}
 		}
 
 		//Get right subs
-		for (var i = index + 1; i < timeline.app.totalFrames; i++) {
+		for (var i = keyframe.index + 1; i < timeline.app.totalFrames; i++) {
 			let key = this.keyframes[i];
 			if (key) {
 				if (key.type == "sub") {
-					subs.push(key.index);
+					subs.push(key);
 				}
 
 				if (key.type == "head") {
-					rightHead = key.index;
+					rightHead = key;
 					break;
 				}
 			}
@@ -114,34 +147,19 @@ class RigModel {
 
 		//Delete left & right subs
 		for (var i = 0; i < subs.length; i++) {
-			delete this.keyframes[subs[i]];
+			let frame = this.getKeyframe("id", subs[i].id);
+			delete this.keyframes[frame.index];
 		}
 
 		//Delete head
-		delete this.keyframes[index];
+		delete this.keyframes[keyframe.index];
 
-		let lastPos;
-
-		if (timeline.graph) {
-			lastPos = timeline.graph.state.currentMark;
-
-			//Temporarily set the current mark to the next frame's index to get the correct states when resetting the keyframe
-			timeline.graph.setCurrentMark(timeline.graph.state.nextFrame || timeline.graph.state.currentFrame);
-		}
-
-		//Merge the left-end head and the right-end head by simply resetting the right-end head's keyframe
-		this.setKeyframe(rightHead)
+		if (rightHead && leftHead) this.addSubKeyframes(leftHead.index, rightHead.index);
 
 		if (timeline.graph) {
-			//Set back the current mark to old one
-			timeline.graph.setCurrentMark(lastPos);
-
-			//
 			timeline.graph.updateState();
 			timeline.graph.redraw();
 		}
-
-		this.updateSubKeyframes();
 	}
 
 	updateKeyframe(index, data) {
@@ -190,37 +208,59 @@ class RigModel {
 
 			for (var j = 0; j < frame.joints.length; j++) {
 				let joint = frame.joints[j];
-				let frontJoint = frontFrame.joints.find(fj => fj.id === joint.id);
-				let backJoint = backFrame.joints.find(bj => bj.id === joint.id);
-				let position = frontJoint.position.copy().lerp(backJoint.position, lerpWeight);
+				if (joint) {
+					let frontJoint = frontFrame.joints.find(fj => fj.id === joint.id);
+					let backJoint = backFrame.joints.find(bj => bj.id === joint.id);
 
-				joint.position.set(position);
+					if (frontJoint && backJoint) {
+						let position = frontJoint.position.copy().lerp(backJoint.position, lerpWeight);
+
+						joint.position.set(position);
+						for (var k = 0; k < joint.children.length; k++) {
+							let child = joint.children[k];
+							child.angle = child.position.heading(joint.position);
+						}
+					}
+				}
 			}
 
-			this.fixJointsPosition(frame.joints);
+			if (!config.linear) this.computeKinematics(frame.joints);
 		}
 	}
 
-	addJoint(x, y, arr) {
-		arr = arr || this.joints;
+	addJoint(x, y, jointChain) {
+		jointChain = jointChain || this.joints;
+
+		//Make sure the joint that is going to be added doesn't go over the top of other joints
+		for (var i = 0; i < this.joints.length; i++) {
+			let joint = this.joints[i];
+			if (joint.position.dist(x, y) < config.render.joint.radius * 2) {
+				return;
+			}
+		}
+
+		if (timeline.graph) {
+			timeline.graph.setCurrentMark(timeline.graph.state.currentFrame, false);
+		}
 
 		let before = this.activeJoint;
 		let joint = {
 			id: utils.uid(),
 			position: vector(x, y),
-			source: before,
-			destinations: [],
-			length: this.activeJoint ? this.activeJoint.position.dist(x, y) : 0
+			angle: before ? before.position.heading(x, y) : 0,
+			parent: before || null,
+			children: [],
+			length: before ? before.position.dist(x, y) : 0,
+			hierarchy: before ? before.hierarchy + 1 : 1 /*this.joints.length*/
 		};
 
-		if (before) before.destinations.push(joint);
+		if (before) before.children.push(joint);
 
 		this.activeJoint = joint;
 
-		arr.push(joint);
+		jointChain.push(joint);
 
 		if (timeline.graph) {
-			timeline.graph.setCurrentMark(timeline.graph.state.currentFrame, false);
 			this.updateKeyframe(timeline.graph.state.currentFrame, {
 				activeJointId: this.activeJoint.id
 			});
@@ -228,6 +268,8 @@ class RigModel {
 	}
 
 	selectJoint(x, y) {
+		if (!this.joints.length) return;
+
 		let joints = this.joints.slice();
 		joints.sort((a, b) => {
 			return a.position.dist(x, y) - b.position.dist(x, y);
@@ -242,30 +284,32 @@ class RigModel {
 		}
 	}
 
-	removeJoint(x, y, arr) {
-		arr = arr || this.joints;
+	removeJoint(x, y, jointChain) {
+		if (!this.joints.length) return;
 
-		for (var i = 0; i < arr.length; i++) {
-			let joint = arr[i];
+		jointChain = jointChain || this.joints;
+
+		for (var i = 0; i < jointChain.length; i++) {
+			let joint = jointChain[i];
 			if (joint.position.dist(x, y) < config.render.joint.radius + this.mouseBuffer) {
-				for (var j = 0; j < joint.destinations.length; j++) {
-					let dest = joint.destinations[j];
-					dest.source = joint.source;
-					dest.length += joint.length;
-					this.activeJoint = dest;
+				for (var j = 0; j < joint.children.length; j++) {
+					let child = joint.children[j];
+					child.parent = joint.parent;
+					child.length += joint.length;
+					this.activeJoint = child;
 				}
 
-				if (joint.source) {
-					joint.source.destinations.splice(joint.source.destinations.indexOf(joint), 1);
-					joint.source.destinations.push(...joint.destinations);
-					this.activeJoint = joint.source;
+				if (joint.parent) {
+					joint.parent.children.splice(joint.parent.children.indexOf(joint), 1);
+					joint.parent.children.push(...joint.children);
+					this.activeJoint = joint.parent;
 				}
 
-				if (!joint.destinations.length && !joint.source) {
+				if (!joint.children.length && !joint.parent) {
 					this.activeJoint = null;
 				}
 
-				arr.splice(arr.indexOf(joint), 1);
+				jointChain.splice(jointChain.indexOf(joint), 1);
 			}
 		}
 
@@ -279,42 +323,72 @@ class RigModel {
 		}
 	}
 
-	fixJointsPosition(arr) {
-		for (var i = 0; i < arr.length; i++) {
-			let joint = arr[i];
-			for (var j = 0; j < joint.destinations.length; j++) {
-				let dest = joint.destinations[j];
-				if ( /*dest !== this.activeJoint*/ 1) {
-					let destAngle = dest.position.heading(joint.position);
-					dest.position.set({
-						x: joint.position.x - Math.cos(destAngle) * dest.length,
-						y: joint.position.y - Math.sin(destAngle) * dest.length
-					});
-				}
+	computeKinematics(jointChain) {
+		//Forward kinematics
+		for (var i = 0; i < jointChain.length; i++) {
+			let joint = jointChain[i];
+			for (var j = 0; j < joint.children.length; j++) {
+				let child = joint.children[j];
+				child.angle = child.position.heading(joint.position);
+				child.position.set({
+					x: joint.position.x - Math.cos(child.angle) * child.length,
+					y: joint.position.y - Math.sin(child.angle) * child.length
+				});
 			}
 		}
 
-		for (var i = arr.length - 1; i >= 0; i--) {
-			let joint = arr[i];
-			if (joint.source !== this.activeJoint) {
-				if (joint.source) {
-					let sourceAngle = joint.position.heading(joint.source.position);
-					joint.source.position.set({
-						x: joint.position.x + Math.cos(sourceAngle) * joint.length,
-						y: joint.position.y + Math.sin(sourceAngle) * joint.length
+		/*let doforward = [];
+		let doinverse = [];
+
+		for (var i = 0; i < jointChain.length; i++) {
+			let joint = jointChain[i];
+			if (joint.hierarchy <= this.activeJoint.hierarchy) {
+				doinverse.push(joint);
+			} 
+
+			if (joint.hierarchy >= this.activeJoint.hierarchy) {
+				doforward.push(joint);
+			}
+		}
+
+		doforward.sort((a, b) => a.hierarchy - b.hierarchy);
+		for (var i = 0; i < doforward.length; i++) {
+			let joint = doforward[i];
+			for (var j = 0; j < joint.children.length; j++) {
+				let child = joint.children[j];
+				child.angle = child.position.heading(joint.position);
+				child.position.set({
+					x: joint.position.x - Math.cos(child.angle) * child.length,
+					y: joint.position.y - Math.sin(child.angle) * child.length
+				});
+			}
+		}
+
+		doinverse.sort((a, b) => b.hierarchy - a.hierarchy);
+		for (var i = doinverse.length - 1; i >= 0; i--) {
+			let joint = doinverse[i];
+			if (joint.parent !== this.activeJoint) {
+				if (joint.parent) {
+					joint.parent.angle = joint.position.heading(joint.parent.position);
+					joint.parent.position.set({
+						x: joint.position.x + Math.cos(joint.parent.angle) * joint.length,
+						y: joint.position.y + Math.sin(joint.parent.angle) * joint.length
 					});
 				}
 			}
-		}
+		}*/
+
 	}
 
-	moveJoint(x, y, arr) {
-		arr = arr || this.joints;
+	moveJoint(x, y, jointChain) {
+		jointChain = jointChain || this.joints;
 
 		if (!this.activeJoint) return;
-		if (x && y) this.activeJoint.position.set(x, y);
+		if (x && y) {
+			this.activeJoint.position.set(x, y);
+		}
 
-		this.fixJointsPosition(this.joints);
+		if (!config.linear) this.computeKinematics(this.joints);
 
 		if (timeline.graph) {
 			timeline.graph.setCurrentMark(timeline.graph.state.currentFrame, false);
@@ -328,15 +402,11 @@ class RigModel {
 	}
 
 	render(renderer) {
-		if (timeline.graph) {
-
-		}
-
 		//Render the line that connects the joints
 		for (var i = 0; i < this.joints.length; i++) {
 			let joint = this.joints[i];
-			if (joint.source) {
-				renderer.line(joint.position.x, joint.position.y, joint.source.position.x, joint.source.position.y, {
+			if (joint.parent) {
+				renderer.line(joint.position.x, joint.position.y, joint.parent.position.x, joint.parent.position.y, {
 					lineWidth: config.render.segment.width,
 					stroke: config.render.segment.color
 				});
@@ -349,8 +419,8 @@ class RigModel {
 			let jointColor = joint === this.activeJoint ? config.render.joint.color.selected : config.render.joint.color.default;
 			if (timeline.graph) {
 				if (this.activeJoint && !timeline.graph.state.isPlaying) {
-					if (this.activeJoint.destinations.length) jointColor = this.activeJoint.destinations.includes(joint) ? "#5bff85" : jointColor;
-					if (this.activeJoint.source) jointColor = this.activeJoint.source === joint ? "#6893e1" : jointColor;
+					if (this.activeJoint.children.length) jointColor = this.activeJoint.children.includes(joint) ? "#5bff85" : jointColor;
+					if (this.activeJoint.parent) jointColor = this.activeJoint.parent === joint ? "#9b68e1" : jointColor;
 				}
 
 				if (timeline.graph.state.isPlaying) {
