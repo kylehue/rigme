@@ -9,6 +9,8 @@ const config = require("../../../lib/config.js");
 const vue = require("./vue/vue.js");
 const rigModel = require("../lib/rig.model.js");
 
+window.rigModel = rigModel;
+
 let cameraDistance = config.world.zoom;
 let cameraMovement = vector();
 let mouseLast = vector();
@@ -113,6 +115,10 @@ renderer.camera.setMoveSpeed(0.4);
 renderer.render(function() {
 	let onWorld = !mouseInside(vue.toolApp) && !mouseInside(vue.timeline.app.$el);
 	worldMouse.set(renderer.camera.screenToWorld(mouse.x, mouse.y));
+
+	renderer.rect(0, 0, renderer.width, renderer.height, {
+		fill: config.world.background
+	});
 
 	renderer.camera.begin(function() {
 		renderer.camera.moveTo(cameraMovement.x, cameraMovement.y);

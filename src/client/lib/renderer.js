@@ -4,6 +4,8 @@ const engine = require("./engine.js");
 class Renderer {
 	constructor() {
 		this.canvas = document.getElementById("gameCanvas");
+		this.canvas.width = innerWidth;
+		this.canvas.height = innerHeight;
 		this.width = this.canvas.width;
 		this.height = this.canvas.height;
 		this.context = this.canvas.getContext("2d");

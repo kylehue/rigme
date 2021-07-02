@@ -16,6 +16,10 @@
 	color: var(--black);
 }
 
+body {
+	overflow: hidden;
+}
+
 img {
 	pointer-events: none;
 	user-select: none;
@@ -82,7 +86,6 @@ button img[src*="play.svg"], button img[src*="previous.svg"], button img[src*="n
 }
 
 canvas#gameCanvas {
-	background: var(--black);
 	z-index: 0;
 	position: absolute;
 	top: 0;

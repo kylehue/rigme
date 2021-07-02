@@ -6,6 +6,9 @@
 	height: fit-content;
 	padding: 5px;
 	box-sizing: border-box;
+
+	transition-duration: 150ms;
+	transition-timing-function: cubic-bezier(0.275, 0.010, 0.115, 0.875);
 }
 
 #timelineApp .wrapper {
@@ -90,4 +93,10 @@ input#frameCount {
 	margin-top: 10px;
 	height: 150px;
 	width: 100%;
+}
+
+#minimize {
+	position: absolute !important;
+	right: 0px;
+	transform: translateY(-45px);
 }
