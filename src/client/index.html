@@ -9,26 +9,44 @@
 		<link rel="stylesheet" type="text/css" href="css/main.css">
 		<link rel="stylesheet" type="text/css" href="css/timeline.css">
 		<link rel="stylesheet" type="text/css" href="css/tool.css">
+		<link rel="stylesheet" type="text/css" href="css/contextMenu.css">
 	</head>
 	<body>
 		<div id="gameContainer">
+			<!-- Context Menu App -->
+			<div id="contextMenuApp" class="darko-d" v-if="!hidden">
+				<div class="wrapper">
+					<button id="copyKeyframe" class="darko-d" v-on:click="copy">
+					<div class="buttonIcon">
+						<img src="assets/svg/copy.svg" class="" />
+						<p>Copy</p>
+					</div>
+					</button>
+					<button id="pasteKeyframe" class="darko-d" v-on:click="paste">
+					<div class="buttonIcon">
+						<img src="assets/svg/clipboard.svg" class="" />
+						<p>Paste</p>
+					</div>
+					</button>
+				</div>
+			</div>
 			<!-- Tool App -->
 			<div id="toolApp" class="darko-b">
 				<div class="wrapper">
 					<button id="panCamera" class="darko-a active-tool">
-						<img src="assets/svg/quad-arrow.svg" class=""></img>
+					<img src="assets/svg/quad-arrow.svg" class="" />
 					</button>
 					<button id="addJoint" class="darko-a">
-						<img src="assets/svg/joint-plus.svg" class=""></img>
+					<img src="assets/svg/joint-plus.svg" class="" />
 					</button>
 					<button id="selectJoint" class="darko-a">
-						<img src="assets/svg/joint-click.svg" class=""></img>
+					<img src="assets/svg/joint-click.svg" class="" />
 					</button>
 					<button id="moveJoint" class="darko-a">
-						<img src="assets/svg/joint-arrow.svg" class=""></img>
+					<img src="assets/svg/joint-arrow.svg" class="" />
 					</button>
 					<button id="removeJoint" class="darko-a">
-						<img src="assets/svg/joint-trash.svg" class=""></img>
+					<img src="assets/svg/joint-trash.svg" class="" />
 					</button>
 				</div>
 			</div>
@@ -37,19 +55,19 @@
 				<div class="wrapper">
 					<div class="row-a">
 						<button id="lastFrame" class="darko-a">
-							<img src="assets/svg/previous.svg" class=""></img>
+						<img src="assets/svg/previous.svg" class="" />
 						</button>
 						<button id="playStop" class="darko-a">
-							<img src="assets/svg/play.svg" class=""></img>
+						<img src="assets/svg/play.svg" class="" />
 						</button>
 						<button id="nextFrame" class="darko-a">
-							<img src="assets/svg/next.svg" class=""></img>
+						<img src="assets/svg/next.svg" class="" />
 						</button>
 						<button id="addKeyframe" class="darko-a">
-							<img src="assets/svg/key-plus.svg" class=""></img>
+						<img src="assets/svg/key-plus.svg" class="" />
 						</button>
 						<button id="deleteKeyframe" class="darko-a">
-							<img src="assets/svg/key-minus.svg" class=""></img>
+						<img src="assets/svg/key-minus.svg" class="" />
 						</button>
 						<div class="input-wrapper left-auto">
 							<img src="assets/svg/fr.svg">
@@ -60,8 +78,9 @@
 							<img src="assets/svg/rabbit.svg">
 							<input id="animationSpeed" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="30" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
 						</div>
-
-						<button id="minimize" class="darko-a">x</button>
+						<button id="minimize" class="">
+						<img src="assets/svg/triangle.svg" class="" />
+						</button>
 					</div>
 					<!-- Timeline -->
 					<div class="row-b">
@@ -71,7 +90,6 @@
 					</div>
 				</div>
 			</div>
-
 			<canvas id="gameCanvas"></canvas>
 		</div>
 		<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>

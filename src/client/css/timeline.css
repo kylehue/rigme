@@ -96,7 +96,18 @@ input#frameCount {
 }
 
 #minimize {
+	background: none;
+	border: none;
+
 	position: absolute !important;
 	right: 0px;
-	transform: translateY(-45px);
+
+	transition-duration: 300ms;
+	transform: translateY(-40px) rotate(180deg);
+}
+
+#minimize img {
+
+	width: 60% !important;
+	height: 60% !important;
 }
