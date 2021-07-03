@@ -1,10 +1,15 @@
+const clonedeep = require("lodash.clonedeep");
 const mouse = require("../../../../lib/mouse.js");
 const config = require("../../../../lib/config.js");
 const utils = require("../../../../lib/utils.js");
 const rigModel = require("../../lib/rig.model.js");
+const vector = require("../../../../lib/vector.js");
+const contextMenuApp = require("./contextMenu.js");
+const history = require("../../lib/history.js");
 
 var lastActiveJointId, lastActiveJointSub;
 var timeline;
+var selectedKeyframe, keyframeClipboard;
 
 const timelineApp = new Vue({
 	el: "#timelineApp",
@@ -15,9 +20,15 @@ const timelineApp = new Vue({
 		currentFrame: 0
 	},
 	methods: {
+		fixData: function() {
+			this.animationSpeed = parseInt(document.getElementById("animationSpeed").value);
+			this.totalFrames = parseInt(document.getElementById("frameCount").value);
+			timeline.hatchMark.spacing = timeline.canvas.width / this.totalFrames;
+			timeline.snap();
+			timeline.redraw();
+		},
 		validateFormat: function(e) {
 			timeline.redraw();
-
 			//Only allow numbers & backspace/delete
 			if (e.keyCode != 8 & e.keyCode != 46) {
 				let nums = new RegExp("[0-9]");
@@ -27,30 +38,50 @@ const timelineApp = new Vue({
 				}
 			}
 
-			this.animationSpeed = parseInt(document.getElementById("animationSpeed").value);
-			this.totalFrames = parseInt(document.getElementById("frameCount").value);
-			timeline.hatchMark.spacing = timeline.canvas.width / this.totalFrames;
-			timeline.snap();
+			this.fixData();
 		},
 		validateAmount: function(e) {
 			timelineApp.validateMin(e);
 			timelineApp.validateMax(e);
 
-			timeline.redraw();
+			this.fixData();
 		},
 		validateMax: function(e) {
 			let value = e.target.value;
 			if (parseInt(value) > config.maxFPS) {
 				e.target.value = config.maxFPS.toString();
 			}
-			timeline.redraw();
+
+			this.fixData();
 		},
 		validateMin: function(e) {
 			let value = e.target.value;
 			if (parseInt(value) < config.minFPS) {
 				e.target.value = config.minFPS.toString();
 			}
-			timeline.redraw();
+
+			this.fixData();
+		},
+		addToHistory: function() {
+			if (this.totalFrames != this._previousTotalFrames) {
+				history.add({
+					label: "Change frame count",
+					value: this.totalFrames,
+					group: "input"
+				});
+			}
+
+			if (this.animationSpeed != this._previousAnimationSpeed) {
+				history.add({
+					label: "Change animation speed",
+					value: this.animationSpeed,
+					group: "input"
+				});
+			}
+
+			this._previousTotalFrames = this.totalFrames;
+			this._previousAnimationSpeed = this.animationSpeed;
+			console.log(history)
 		},
 		toggleAmount: function(e) {
 			let isDown = e.wheelDeltaY < 0;
@@ -63,11 +94,7 @@ const timelineApp = new Vue({
 
 			e.target.value = value.toString();
 			timelineApp.validateAmount(e);
-			this.animationSpeed = parseInt(document.getElementById("animationSpeed").value);
-			this.totalFrames = parseInt(document.getElementById("frameCount").value);
-			timeline.hatchMark.spacing = timeline.canvas.width / this.totalFrames;
-			timeline.snap();
-			timeline.redraw();
+			this.fixData();
 		},
 		setCurrentFrame: function(index) {
 			this.currentFrame = index;
@@ -75,27 +102,11 @@ const timelineApp = new Vue({
 	}
 });
 
-function getOffsetLeft(elem) {
-	/*https://stackoverflow.com/a/5598797*/
-	var offsetLeft = 0;
-	do {
-		if (!isNaN(elem.offsetLeft)) {
-			offsetLeft += elem.offsetLeft;
-		}
-	} while (elem = elem.offsetParent);
-	return offsetLeft;
-}
-
-function getOffsetTop(elem) {
-	/*https://stackoverflow.com/a/5598797*/
-	var offsetTop = 0;
-	do {
-		if (!isNaN(elem.offsetTop)) {
-			offsetTop += elem.offsetTop;
-		}
-	} while (elem = elem.offsetParent);
-	return offsetTop;
-}
+timelineApp._previousTotalFrames = timelineApp.totalFrames;
+timelineApp._previousAnimationSpeed = timelineApp.animationSpeed;
+timelineApp.$el.addEventListener("focusout", () => {
+	//timelineApp.addToHistory();
+});
 
 function getFrames() {
 	let totalFrames = timelineApp.totalFrames;
@@ -144,11 +155,20 @@ function getFrames() {
 	};
 }
 
+function mouseInside(el) {
+	el = document.getElementById(el.id);
+	if (el) {
+		let bounds = el.getBoundingClientRect();
+		return mouse.x >= bounds.x && mouse.x <= bounds.x + bounds.width && mouse.y >= bounds.y && mouse.y <= bounds.y + bounds.height;
+	}
+
+	return false;
+}
+
 class Timeline {
 	constructor() {
 		this.canvas = document.getElementById("timelineGraph");
 		this.context = this.canvas.getContext("2d");
-		this.updateSize();
 
 		this.buttons = {
 			previous: document.getElementById("lastFrame"),
@@ -158,14 +178,6 @@ class Timeline {
 			delete: document.getElementById("deleteKeyframe"),
 			minimize: document.getElementById("minimize")
 		};
-
-		this.addButtonEvents();
-		this.addMouseEvents();
-
-		addEventListener("resize", () => {
-			this.updateSize()
-			this.redraw();
-		});
 
 		this.state = {
 			isPlaying: false,
@@ -183,24 +195,98 @@ class Timeline {
 			height: 6
 		};
 
+		this.bounds = this.canvas.getBoundingClientRect();
+
 		this.loop = null;
+
+
+		this.addButtonEvents();
+		this.addMouseEvents();
+		this.addKeyboardEvents();
+		this.updateSize();
+
+		addEventListener("resize", () => {
+			this.updateSize()
+			this.redraw();
+		});
+	}
+
+	ignoreHeader() {
+		let header = document.querySelector("#timelineApp div.row-a");
+		header.style.pointerEvents = "none";
+		header.style.userSelect = "none";
+	}
+
+	focusHeader() {
+		let header = document.querySelector("#timelineApp div.row-a");
+		header.style.pointerEvents = "all";
+		header.style.userSelect = "all";
+	}
+
+	storeSelectedKeyframe() {
+		let keys = Object.keys(rigModel.keyframes);
+		for (var i = 0; i < keys.length; i++) {
+			let key = keys[i];
+			let frame = rigModel.keyframes[key];
+
+			if (frame.index == this.state.currentMark) {
+				frame.selected = true;
+			} else {
+				frame.selected = false;
+			}
+		}
+	}
+
+	addKeyboardEvents() {
+		addEventListener("keydown", event => {
+			let keys = Object.keys(rigModel.keyframes);
+			this.storeSelectedKeyframe();
+
+			if (event.ctrlKey) {
+				if (event.keyCode == 67) {
+					rigModel.copiedKeyframe = clonedeep(rigModel.getKeyframe("selected", true));
+				}
+
+				if (event.keyCode == 86) {
+					let copiedKeyframe = rigModel.copiedKeyframe;
+					if (copiedKeyframe) {
+						rigModel.setKeyframe(this.state.currentMark, {
+							position: vector(this.state.currentMark * this.hatchMark.spacing + this.hatchMark.spacing / 2, config.render.keyframe.y),
+							locked: this.state.currentMark == 0 ? true : false,
+							id: utils.uid(),
+							joints: copiedKeyframe.joints
+						});
+					}
+				}
+			}
+		});
 	}
 
 	addMouseEvents() {
-		//Moving the timeline marker...
+		this.canvas.addEventListener("contextmenu", event => {
+			let mouseX = mouse.x - this.bounds.x;
+			let mouseY = mouse.y - this.bounds.y;
+			if (mouseInside(this.canvas)) {
+				this.storeSelectedKeyframe();
 
-		const isInsideGraph = (x, y) => {
-			return x >= 0 && x <= this.canvas.width && y >= 0 && y <= this.canvas.height;
-		}
+				let offsetX = mouse.x + contextMenuApp.width > innerWidth ? -contextMenuApp.width : 0;
+				let offsetY = mouse.y + contextMenuApp.height > innerHeight ? -contextMenuApp.height : 0;
+				contextMenuApp.show(mouse.x + offsetX, mouse.y + offsetY);
+			}
+		});
 
 		//Timeline click
 		mouse.on("click", event => {
-			let mouseX = event.clientX - getOffsetLeft(this.canvas);
-			let mouseY = event.clientY - getOffsetTop(this.canvas);
-			if (isInsideGraph(mouseX, mouseY)) {
-				let pos = Math.round((mouseX + this.hatchMark.spacing / 2) / this.hatchMark.spacing) - 1;
-				if (pos >= 0 && pos <= timelineApp.totalFrames) this.setCurrentMark(pos);
+			let mouseX = mouse.x - this.bounds.x;
+			let mouseY = mouse.y - this.bounds.y;
+			if (mouseInside(this.canvas)) {
+				if (contextMenuApp.hidden) {
+					let pos = Math.round((mouseX + this.hatchMark.spacing / 2) / this.hatchMark.spacing) - 1;
+					if (pos >= 0 && pos <= timelineApp.totalFrames) this.setCurrentMark(pos);
+				}
 			}
+
+			contextMenuApp.hide();
 		});
 
 		let activeKeyframe;
@@ -208,19 +294,19 @@ class Timeline {
 		//Timeline drag
 		mouse.on("mousemove", event => {
 			let keys = Object.keys(rigModel.keyframes);
-			let mouseX = event.clientX - getOffsetLeft(this.canvas);
-			let mouseY = event.clientY - getOffsetTop(this.canvas);
+			let mouseX = event.clientX - this.bounds.x;
+			let mouseY = event.clientY - this.bounds.y;
 
 			this.state._x = utils.clamp(mouseX, this.hatchMark.spacing / 2, this.canvas.width - this.hatchMark.spacing / 2);
-			if (isInsideGraph(mouseX, mouseY)) {
+			if (mouseInside(this.canvas)) {
+				if (!contextMenuApp.hidden) return;
+
 				//Check if frames are hovered
 				for (var i = 0; i < keys.length; i++) {
 					let key = keys[i];
 					let frame = rigModel.keyframes[key];
 
-					if (!frame) continue;
 					if (frame.type == "sub") continue;
-					if (frame.locked) continue;
 
 					let frameX = frame.render.position.x;
 					let frameY = frame.render.position.y;
@@ -229,7 +315,7 @@ class Timeline {
 						if (!frame.hovered) {
 							frame.hovered = true;
 							frame.render.color = config.render.keyframe.color.hovered;
-							this.canvas.style.cursor = "pointer";
+							if (!frame.locked) this.canvas.style.cursor = "pointer";
 							this.redraw();
 						}
 					} else {
@@ -243,16 +329,24 @@ class Timeline {
 				}
 
 				if (mouse.pressed) {
-					//Marker drag
+					this.ignoreHeader();
+
 					this.state.isDragging = true;
+
+					//Marker drag
 					let pos = Math.round((mouseX + this.hatchMark.spacing / 2) / this.hatchMark.spacing) - 1;
 					if (pos >= 0 && pos <= timelineApp.totalFrames) this.setCurrentMark(pos);
+
+					if (mouseInside(contextMenuApp.$el)) contextMenuApp.hide();
 
 					//Check if keyframes is getting hovered
 					for (var i = 0; i < keys.length; i++) {
 						let key = keys[i];
 						let frame = rigModel.keyframes[key];
 
+						if (!frame) continue;
+						if (frame.type == "sub") continue;
+						if (frame.locked) continue;
 						if (activeKeyframe) continue;
 						if (frame.hovered) activeKeyframe = frame;
 					}
@@ -260,6 +354,7 @@ class Timeline {
 				} else {
 					this.state.isDragging = false;
 					activeKeyframe = null;
+					this.focusHeader();
 				}
 
 				//Keyframe drag
@@ -291,6 +386,7 @@ class Timeline {
 			this.state.isDragging = false;
 			activeKeyframe = null;
 			this.canvas.style.cursor = "default";
+			this.focusHeader();
 		});
 	}
 
@@ -328,18 +424,26 @@ class Timeline {
 		//Delete keyframe button
 		this.buttons.delete.addEventListener("click", () => {
 			let frame = rigModel.getKeyframe("index", this.state.currentMark);
-			if (frame) rigModel.deleteKeyframe(frame.id);
+			if (frame) {
+				rigModel.deleteKeyframe(frame.id);
+
+				if (frame.type == "head" && !frame.locked) {
+					history.add({
+						label: "Delete keyframe",
+						value: rigModel.clone(),
+						group: "keyframe"
+					});
+				}
+			}
 		});
 
 		//Minimize / Maximize
 		this.buttons.minimize.addEventListener("click", () => {
 			if (!this.state.isMinimized) {
-				this.maximize();
-			}else {
 				this.minimize();
+			} else {
+				this.maximize();
 			}
-
-			this.state.isMinimized = !this.state.isMinimized;
 		});
 	}
 
@@ -393,10 +497,17 @@ class Timeline {
 	}
 
 	draw() {
+		let timelineGraphParent = this.canvas.parentNode;
+		if (this.canvas.width != timelineGraphParent.offsetWidth || this.canvas.height != timelineGraphParent.offsetHeight) {
+			this.canvas.width = timelineGraphParent.offsetWidth;
+			this.canvas.height = timelineGraphParent.offsetHeight;
+		}
+
 		//Drawing the timeline...
 
 		//Hatch marks
 		let hatchMarkCount = parseInt(timelineApp.totalFrames);
+		this.hatchMark.spacing = this.canvas.width / parseInt(timelineApp.totalFrames);
 		for (var i = 0; i < hatchMarkCount; i++) {
 			let x = this.hatchMark.spacing * i + this.hatchMark.spacing / 2;
 			this.createLine(x, 0, x, this.hatchMark.height, "rgba(255, 255, 255, 0.2)");
@@ -426,7 +537,7 @@ class Timeline {
 			if (frame.type == "head") {
 				this.createKeyframe(frame.render.position.x, frame.render.position.y, frame.render.size, frame.render.color);
 			} else {
-				this.createKeyframe(frame.render.position.x, frame.render.position.y, 4, "#f9404d");
+				//this.createKeyframe(frame.render.position.x, frame.render.position.y, 4, "#f9404d");
 			}
 		}
 	}
@@ -475,18 +586,28 @@ class Timeline {
 		let timelineGraphParent = this.canvas.parentNode;
 		this.canvas.width = timelineGraphParent.offsetWidth;
 		this.canvas.height = timelineGraphParent.offsetHeight;
-	}
-
-	maximize() {
-		let height = timelineApp.$el.offsetHeight;
-		let body = document.querySelector("#timelineApp div.row-b");
-
-		timelineApp.$el.style.transform = `translateY(${height - body.offsetTop - 2}px)`;
+		this.bounds = this.canvas.getBoundingClientRect();
+		this.redraw();
 	}
 
 	minimize() {
 		let height = timelineApp.$el.offsetHeight;
+		let body = document.querySelector("#timelineApp div.row-b");
+
+		timelineApp.$el.style.transform = `translateY(${height - body.offsetTop - 2}px)`;
+
+		this.buttons.minimize.style.transform = "translateY(-40px) rotate(0deg)";
+
+		this.state.isMinimized = true;
+	}
+
+	maximize() {
+		let height = timelineApp.$el.offsetHeight;
 		timelineApp.$el.style.transform = `translateY(${0}px)`;
+
+		this.buttons.minimize.style.transform = "translateY(-40px) rotate(180deg)";
+
+		this.state.isMinimized = false;
 	}
 }
 
@@ -500,7 +621,7 @@ rigModel.setKeyframe(timeline.state.currentMark, {
 	locked: true
 });
 timeline.updateState();
-timeline.draw();
+timeline.redraw();
 
 module.exports = {
 	app: timelineApp,

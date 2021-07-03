@@ -2,6 +2,7 @@ const mouse = require("../../../lib/mouse.js");
 const vector = require("../../../lib/vector.js");
 const config = require("../../../lib/config.js");
 const utils = require("../../../lib/utils.js");
+const history = require("./history.js");
 const clonedeep = require("lodash.clonedeep");
 
 let timeline = require("../js/vue/timeline.js");
@@ -19,9 +20,16 @@ class RigModel {
 		this.joints = [];
 		this.segments = [];
 		this.keyframes = {};
+		this.totalKeyframes = 0;
 
 		this.mouseBuffer = 10;
 		this.activeJoint = null;
+
+		this._moved = false;
+	}
+
+	clone() {
+		return clonedeep(this.keyframes);
 	}
 
 	getKeyframe(findKey, value) {
@@ -80,10 +88,9 @@ class RigModel {
 		options = options || {};
 
 		let keyframe = {
-			id: utils.uid(),
 			type: "head",
-			index: index,
-			activeJointId: this.activeJoint ? this.activeJoint.id : null,
+			index: options.keyframe ? options.keyframe.index : index,
+			activeJointId: options.keyframe ? options.keyframe.activeJointId : (this.activeJoint ? this.activeJoint.id : null),
 			joints: options.joints || clonedeep(this.joints),
 			render: {
 				size: config.render.keyframe.size,
@@ -92,6 +99,8 @@ class RigModel {
 			},
 			locked: options.locked || false
 		};
+
+		keyframe.id = options.id || utils.uid();
 
 		this.keyframes[index] = keyframe;
 
@@ -103,6 +112,25 @@ class RigModel {
 			timeline.graph.redraw();
 		}
 
+		let frames = Object.values(this.keyframes);
+		let headCount = 0;
+		for (var i = 0; i < frames.length; i++) {
+			let frame = frames[i];
+			if (frame.type == "head") headCount++;
+		}
+
+		let historyLabel = "Add keyframe";
+		if (headCount == this.totalKeyframes) {
+			historyLabel = "Move keyframe";
+		}
+
+		history.add({
+			label: historyLabel,
+			value: this.clone(),
+			group: "keyframe"
+		});
+
+		this.totalKeyframes = headCount;
 		return keyframe;
 	}
 
@@ -247,6 +275,7 @@ class RigModel {
 		let joint = {
 			id: utils.uid(),
 			position: vector(x, y),
+			positionPrev: vector(x, y),
 			angle: before ? before.position.heading(x, y) : 0,
 			parent: before || null,
 			children: [],
@@ -265,6 +294,12 @@ class RigModel {
 				activeJointId: this.activeJoint.id
 			});
 		}
+
+		history.add({
+			label: "Add joint",
+			value: this.clone(),
+			group: "keyframe"
+		});
 	}
 
 	selectJoint(x, y) {
@@ -317,10 +352,16 @@ class RigModel {
 
 		if (timeline.graph) {
 			timeline.graph.setCurrentMark(timeline.graph.state.currentFrame, false);
-			this.updateKeyframe(timeline.graph.state.currentFrame, {
+			if (this.activeJoint) this.updateKeyframe(timeline.graph.state.currentFrame, {
 				activeJointId: this.activeJoint.id
 			});
 		}
+
+		history.add({
+			label: "Remove joint",
+			value: this.clone(),
+			group: "keyframe"
+		});
 	}
 
 	computeKinematics(jointChain) {
@@ -385,6 +426,11 @@ class RigModel {
 
 		if (!this.activeJoint) return;
 		if (x && y) {
+			if (this.activeJoint.position.dist(this.activeJoint.positionPrev) > 1) {
+				this._moved = true;
+				this.activeJoint.positionPrev.set(this.activeJoint.position.x, this.activeJoint.position.y);
+			}
+
 			this.activeJoint.position.set(x, y);
 		}
 
@@ -401,37 +447,75 @@ class RigModel {
 		return joint;
 	}
 
+	import (keyframes) {
+		this.keyframes = clonedeep(keyframes);
+
+		let frames = Object.values(this.keyframes);
+		let headCount = 0;
+		for (var i = 0; i < frames.length; i++) {
+			let frame = frames[i];
+			if (frame.type == "head") headCount++;
+		}
+
+		this.totalKeyframes = headCount;
+	}
+
 	render(renderer) {
-		//Render the line that connects the joints
-		for (var i = 0; i < this.joints.length; i++) {
-			let joint = this.joints[i];
-			if (joint.parent) {
-				renderer.line(joint.position.x, joint.position.y, joint.parent.position.x, joint.parent.position.y, {
-					lineWidth: config.render.segment.width,
-					stroke: config.render.segment.color
+		let _render = (jointChain, isPrev) => {
+			//Render the line that connects the joints
+			for (var i = 0; i < jointChain.length; i++) {
+				let joint = jointChain[i];
+				if (joint.parent) {
+					renderer.line(joint.position.x, joint.position.y, joint.parent.position.x, joint.parent.position.y, {
+						lineWidth: config.render.segment.width,
+						stroke: isPrev ? "#242629" : config.render.segment.color
+					});
+				}
+			}
+
+			//Render the joints
+			for (var i = 0; i < jointChain.length; i++) {
+				let joint = jointChain[i];
+
+				let jointColor = joint === this.activeJoint ? config.render.joint.color.selected : config.render.joint.color.default;
+				if (timeline.graph && !isPrev) {
+					if (this.activeJoint && !timeline.graph.state.isPlaying) {
+						if (this.activeJoint.children.length) jointColor = this.activeJoint.children.includes(joint) ? "#5bff85" : jointColor;
+						if (this.activeJoint.parent) jointColor = this.activeJoint.parent === joint ? "#9b68e1" : jointColor;
+					}
+
+					if (timeline.graph.state.isPlaying) {
+						jointColor = config.render.joint.color.default;
+					}
+				}
+
+				renderer.circle(joint.position.x, joint.position.y, config.render.joint.radius, {
+					fill: isPrev ? "#242629" : jointColor
 				});
 			}
 		}
 
-		//Render the joints
-		for (var i = 0; i < this.joints.length; i++) {
-			let joint = this.joints[i];
-			let jointColor = joint === this.activeJoint ? config.render.joint.color.selected : config.render.joint.color.default;
-			if (timeline.graph) {
-				if (this.activeJoint && !timeline.graph.state.isPlaying) {
-					if (this.activeJoint.children.length) jointColor = this.activeJoint.children.includes(joint) ? "#5bff85" : jointColor;
-					if (this.activeJoint.parent) jointColor = this.activeJoint.parent === joint ? "#9b68e1" : jointColor;
-				}
+		//Render previous keyframe
+		if (timeline.graph) {
+			let previousFrame = this.keyframes[timeline.graph.state.previousFrame];
+			let currentFrame = this.keyframes[timeline.graph.state.currentFrame];
+			let nextFrame = this.keyframes[timeline.graph.state.nextFrame];
 
-				if (timeline.graph.state.isPlaying) {
-					jointColor = config.render.joint.color.default;
-				}
+			if (currentFrame && !timeline.graph.state.isPlaying) {
+				_render(currentFrame.joints, true);
 			}
 
-			renderer.circle(joint.position.x, joint.position.y, config.render.joint.radius, {
-				fill: jointColor
-			});
+			if (previousFrame && !timeline.graph.state.isPlaying) {
+				_render(previousFrame.joints, true);
+			}
+
+			if (nextFrame && !timeline.graph.state.isPlaying) {
+				_render(nextFrame.joints, true);
+			}
 		}
+
+		//Render current frame
+		_render(this.joints);
 	}
 }
 

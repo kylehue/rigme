@@ -8,8 +8,12 @@ const client = require("./client.js");
 const config = require("../../../lib/config.js");
 const vue = require("./vue/vue.js");
 const rigModel = require("../lib/rig.model.js");
+const history = require("../lib/history.js");
 
 window.rigModel = rigModel;
+
+//Disable rightclick menu
+document.addEventListener('contextmenu', event => event.preventDefault());
 
 let cameraDistance = config.world.zoom;
 let cameraMovement = vector();
@@ -55,6 +59,8 @@ let buttons = {
 	pan: document.getElementById("panCamera")
 };
 
+let frameCountInput = document.getElementById("frameCount");
+let animationSpeedInput = document.getElementById("animationSpeed");
 let _buttons = Object.keys(buttons);
 let __buttons = Object.values(buttons);
 
@@ -66,6 +72,30 @@ function removeActives() {
 
 function mouseInside(el) {
 	return mouse.x >= el.offsetLeft && mouse.x <= el.offsetLeft + el.offsetWidth && mouse.y >= el.offsetTop && mouse.y <= el.offsetTop + el.offsetHeight;
+}
+
+function undo() {
+	let prev = history.getPrevious();
+	if (!prev) return;
+	if (prev.group == "keyframe") {
+		rigModel.import(prev.value);
+		history.backward();
+
+		vue.timeline.graph.updateState();
+		vue.timeline.graph.redraw();
+	}
+}
+
+function redo() {
+	let next = history.getNext();
+	if (!next) return;
+	if (next.group == "keyframe") {
+		rigModel.import(next.value);
+		history.forward();
+
+		vue.timeline.graph.updateState();
+		vue.timeline.graph.redraw();
+	}
 }
 
 for (let btn of _buttons) {
@@ -89,12 +119,43 @@ key.on("keydown", function(event) {
 			buttons[action].classList.add("active-tool");
 		}
 	}
+
+	if (event.ctrlKey) {
+		if (event.keyCode == 90) {
+			undo();
+		}
+
+		if (event.keyCode == 89) {
+			redo();
+		}
+	}
 });
+
+mouse.on("mouseup", function() {
+	if (rigModel._moved) {
+		history.add({
+			label: "Move joint",
+			value: rigModel.clone(),
+			group: "keyframe"
+		});
+
+		rigModel._moved = false;
+	}
+})
 
 renderer.canvas.addEventListener("click", function() {
 	if (action == actions.add) {
 		let worldMouse = renderer.camera.screenToWorld(mouse.x, mouse.y);
 		rigModel.addJoint(worldMouse.x, worldMouse.y);
+	}
+
+	if (action === actions.remove) {
+		rigModel.selectJoint(worldMouse.x, worldMouse.y);
+		rigModel.removeJoint(worldMouse.x, worldMouse.y);
+	}
+
+	if (action === actions.select) {
+		rigModel.selectJoint(worldMouse.x, worldMouse.y);
 	}
 });
 
@@ -161,24 +222,13 @@ renderer.render(function() {
 			}
 		}
 
-		if (action === actions.select) {
-			if (mouse.pressed) {
-				rigModel.selectJoint(worldMouse.x, worldMouse.y);
-			}
-		}
-
 		if (action === actions.move) {
 			if (mouse.pressed) {
 				rigModel.moveJoint(worldMouse.x, worldMouse.y);
 			}
 		}
 
-		if (action === actions.remove) {
-			if (mouse.pressed) {
-				rigModel.selectJoint(worldMouse.x, worldMouse.y);
-				rigModel.removeJoint(worldMouse.x, worldMouse.y);
-			}
-		}
+
 	}
 });
 
