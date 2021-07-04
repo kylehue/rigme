@@ -204,8 +204,8 @@ class RigModel {
 
 		for (var i = keys.length - 1; i >= 0; i--) {
 			let frame = this.keyframes[keys[i]];
-			if (frame.type == "head") continue;
 			if (!frame) continue;
+			if (frame.type == "head") continue;
 
 			let back = null;
 			for (var j = frame.index; j >= 0; j--) {
@@ -241,7 +241,7 @@ class RigModel {
 					let backJoint = backFrame.joints.find(bj => bj.id === joint.id);
 
 					if (frontJoint && backJoint) {
-						let position = frontJoint.position.copy().lerp(backJoint.position, lerpWeight);
+						let position = frontJoint.position.copy().lerp(backJoint.position, lerpWeight)
 
 						joint.position.set(position);
 						for (var k = 0; k < joint.children.length; k++) {
