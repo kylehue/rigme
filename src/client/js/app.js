@@ -9,8 +9,32 @@ const config = require("../../../lib/config.js");
 const vue = require("./vue/vue.js");
 const rigModel = require("../lib/rig.model.js");
 const history = require("../lib/history.js");
+const extractKeyframes = require("../lib/video.js");
 
 window.rigModel = rigModel;
+
+let uploadOverlay = document.getElementById("uploadOverlay");
+let overlayFrames = [];
+
+uploadOverlay.addEventListener("change", () => {
+	let file = uploadOverlay.files[0];
+	if (!file) return;
+	let fileURL = URL.createObjectURL(file);
+	if (fileURL) {
+		extractKeyframes(fileURL, {
+			frameRate: 120,
+			frameCount: 60,
+			start: 39,
+			end: 54,
+			progress: function(img, pct) {
+				console.log(pct);
+			},
+			done: function(images) {
+				overlayFrames = images;
+			}
+		});
+	}
+})
 
 //Disable rightclick menu
 document.addEventListener('contextmenu', event => event.preventDefault());
@@ -59,6 +83,7 @@ let buttons = {
 	pan: document.getElementById("panCamera")
 };
 
+let appDock = document.getElementById("appDock");
 let frameCountInput = document.getElementById("frameCount");
 let animationSpeedInput = document.getElementById("animationSpeed");
 let _buttons = Object.keys(buttons);
@@ -71,7 +96,13 @@ function removeActives() {
 }
 
 function mouseInside(el) {
-	return mouse.x >= el.offsetLeft && mouse.x <= el.offsetLeft + el.offsetWidth && mouse.y >= el.offsetTop && mouse.y <= el.offsetTop + el.offsetHeight;
+	el = document.getElementById(el.id);
+	if (el) {
+		let bounds = el.getBoundingClientRect();
+		return mouse.x >= bounds.x && mouse.x <= bounds.x + bounds.width && mouse.y >= bounds.y && mouse.y <= bounds.y + bounds.height;
+	}
+
+	return false;
 }
 
 function undo() {
@@ -174,7 +205,7 @@ renderer.fullscreen();
 renderer.camera.setZoomSpeed(0.2);
 renderer.camera.setMoveSpeed(0.4);
 renderer.render(function() {
-	let onWorld = !mouseInside(vue.toolApp) && !mouseInside(vue.timeline.app.$el);
+	let onWorld = !mouseInside(vue.toolApp) && !mouseInside(appDock);
 	worldMouse.set(renderer.camera.screenToWorld(mouse.x, mouse.y));
 
 	renderer.rect(0, 0, renderer.width, renderer.height, {
@@ -184,6 +215,11 @@ renderer.render(function() {
 	renderer.camera.begin(function() {
 		renderer.camera.moveTo(cameraMovement.x, cameraMovement.y);
 		renderer.camera.zoomTo(cameraDistance);
+
+		let overlayFrame = overlayFrames[vue.timeline.graph.state.currentMark];
+		if (overlayFrame && !window.hide) {
+			renderer.context.drawImage(overlayFrame, -overlayFrame.width / 2, -overlayFrame.height / 2);
+		}
 
 		if (onWorld) {
 			if (action === actions.add) {
