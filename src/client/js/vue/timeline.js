@@ -191,8 +191,8 @@ class Timeline {
 		};
 
 		this.hatchMark = {
-			spacing: this.canvas.width / parseInt(timelineApp.totalFrames),
-			height: 6
+			spacing: this.canvas.width / (timelineApp.totalFrames),
+			height: 4
 		};
 
 		this.bounds = this.canvas.getBoundingClientRect();
@@ -296,7 +296,6 @@ class Timeline {
 			let keys = Object.keys(rigModel.keyframes);
 			let mouseX = event.clientX - this.bounds.x;
 			let mouseY = event.clientY - this.bounds.y;
-
 			this.state._x = utils.clamp(mouseX, this.hatchMark.spacing / 2, this.canvas.width - this.hatchMark.spacing / 2);
 			if (mouseInside(this.canvas)) {
 				if (!contextMenuApp.hidden) return;
@@ -399,7 +398,7 @@ class Timeline {
 
 		//Next mark button
 		this.buttons.next.addEventListener("click", () => {
-			let pos = this.state.currentMark < parseInt(timelineApp.totalFrames) - 1 ? this.state.currentMark + 1 : this.state.currentMark;
+			let pos = this.state.currentMark < timelineApp.totalFrames - 1 ? this.state.currentMark + 1 : this.state.currentMark;
 			this.setCurrentMark(pos);
 		});
 
@@ -505,30 +504,53 @@ class Timeline {
 
 		//Drawing the timeline...
 
+		//Background
+		this.context.beginPath();
+		this.context.rect(0, 0, this.canvas.width, this.canvas.height - config.render.timeline.height);
+		this.context.fillStyle = "rgba(0, 0, 0, 0.15)";
+		this.context.fill();
+		this.context.closePath();
+
 		//Hatch marks
-		let hatchMarkCount = parseInt(timelineApp.totalFrames);
-		this.hatchMark.spacing = this.canvas.width / parseInt(timelineApp.totalFrames);
+		let hatchMarkCount = timelineApp.totalFrames;
+		let hatchMarkColor = "rgba(255, 255, 255, 0.25)";
+		this.hatchMark.spacing = this.canvas.width / hatchMarkCount;
 		for (var i = 0; i < hatchMarkCount; i++) {
+			let gap = Math.floor(utils.clamp(timelineApp.totalFrames, 30, Number.MAX_SAFE_INTEGER) / 30) * 5;
+			let offsetHeight = (i + 1) % gap == 0 ? 2 : 0;
 			let x = this.hatchMark.spacing * i + this.hatchMark.spacing / 2;
-			this.createLine(x, 0, x, this.hatchMark.height, "rgba(255, 255, 255, 0.2)");
+			let y = this.canvas.height - config.render.timeline.height - this.hatchMark.height - offsetHeight;
+			let height = this.canvas.height - config.render.timeline.height;
+			this.createLine(x, y, x, height, hatchMarkColor);
+			if (offsetHeight && i != this.state.currentMark) {
+				this.text(i + 1, x, y - 1, hatchMarkColor);
+			}
 		}
 
 		//Current frame marker
 		let currentFrameMarkerX = this.state.isDragging ? this.state._x : Math.round(this.state.currentMark * this.hatchMark.spacing + this.hatchMark.spacing / 2);
-		this.createLine(currentFrameMarkerX, 0, currentFrameMarkerX, this.canvas.height, config.accent);
+		//this.createLine(currentFrameMarkerX, 0, currentFrameMarkerX, this.canvas.height, config.accent);
 
 		//Current frame marker controller
 		let currentFrameMarkerHandleWidth = 10;
-		let currentFrameMarkerHandleHeight = 20;
-		this.context.beginPath();
+		let currentFrameMarkerHandleHeight = this.canvas.height - config.render.timeline.height - this.hatchMark.height - 5;
+		let currentFrameMarkerText = this.state.currentMark + 1;
+		let currentFrameMarkerTextWidth = this.context.measureText(currentFrameMarkerText).width;
+		/*this.context.beginPath();
 		this.context.moveTo(currentFrameMarkerX, this.canvas.height - currentFrameMarkerHandleHeight);
 		this.context.lineTo(currentFrameMarkerX + currentFrameMarkerHandleWidth / 2, this.canvas.height - currentFrameMarkerHandleHeight + currentFrameMarkerHandleHeight / 4);
 		this.context.lineTo(currentFrameMarkerX + currentFrameMarkerHandleWidth / 2, this.canvas.height);
 		this.context.lineTo(currentFrameMarkerX - currentFrameMarkerHandleWidth / 2, this.canvas.height);
 		this.context.lineTo(currentFrameMarkerX - currentFrameMarkerHandleWidth / 2, this.canvas.height - currentFrameMarkerHandleHeight + currentFrameMarkerHandleHeight / 4);
+		this.context.closePath();*/
+		this.context.beginPath();
+		this.context.rect(currentFrameMarkerX - currentFrameMarkerHandleWidth / 2, 0, currentFrameMarkerHandleWidth, currentFrameMarkerHandleHeight);
 		this.context.closePath();
 		this.context.fillStyle = config.accent;
 		this.context.fill();
+		let currentFrameMarkerTextOffsetX = 2;
+		let currentFrameMarkerTextX = (this.state.currentMark + 2) % 5 == 0 || this.state.currentMark >= timelineApp.totalFrames - 1 ? -currentFrameMarkerTextWidth - currentFrameMarkerTextOffsetX - 1 : currentFrameMarkerHandleWidth + currentFrameMarkerTextOffsetX;
+		this.text(currentFrameMarkerText, currentFrameMarkerX + currentFrameMarkerTextX, currentFrameMarkerHandleHeight / 2 + 8, config.accent);
 
 		//Keyframes
 		let keyframes = Object.keys(rigModel.keyframes);
@@ -540,6 +562,15 @@ class Timeline {
 				//this.createKeyframe(frame.render.position.x, frame.render.position.y, 4, "#f9404d");
 			}
 		}
+	}
+
+	text(text, x, y, color) {
+		this.context.beginPath();
+		this.context.fillStyle = color;
+		this.context.font = "12px Catamaran";
+		this.context.textAlign = "center";
+		this.context.textBaseline = "bottom";
+		this.context.fillText(text, x, y);
 	}
 
 	createLine(x1, y1, x2, y2, color) {
