@@ -8,11 +8,14 @@
 		<link href="https://fonts.googleapis.com/css2?family=Catamaran:wght@400;700;800&display=swap" rel="stylesheet">
 		<link rel="stylesheet" type="text/css" href="css/main.css">
 		<link rel="stylesheet" type="text/css" href="css/timeline.css">
+		<link rel="stylesheet" type="text/css" href="css/panel.css">
 		<link rel="stylesheet" type="text/css" href="css/tool.css">
 		<link rel="stylesheet" type="text/css" href="css/contextMenu.css">
 	</head>
 	<body>
+		<!-- <iframe src="https://youtu.be/AWEm4tA2hMc"></iframe> -->
 		<div id="gameContainer">
+
 			<!-- Context Menu App -->
 			<div id="contextMenuApp" class="darko-d" v-if="!hidden">
 				<div class="wrapper">
@@ -33,6 +36,7 @@
 			<!-- Tool App -->
 			<div id="toolApp" class="darko-b">
 				<div class="wrapper">
+					<input id="uploadOverlay" type="file" accept="video/*" class="darko-a" style="width:70px" />
 					<button id="panCamera" class="darko-a active-tool">
 					<img src="assets/svg/quad-arrow.svg" class="" />
 					</button>
@@ -50,44 +54,64 @@
 					</button>
 				</div>
 			</div>
-			<!-- Timeline App -->
-			<div id="timelineApp" class="darko-b">
-				<div class="wrapper">
-					<div class="row-a">
-						<button id="lastFrame" class="darko-a">
-						<img src="assets/svg/previous.svg" class="" />
-						</button>
-						<button id="playStop" class="darko-a">
-						<img src="assets/svg/play.svg" class="" />
-						</button>
-						<button id="nextFrame" class="darko-a">
-						<img src="assets/svg/next.svg" class="" />
-						</button>
-						<button id="addKeyframe" class="darko-a">
-						<img src="assets/svg/key-plus.svg" class="" />
-						</button>
-						<button id="deleteKeyframe" class="darko-a">
-						<img src="assets/svg/key-minus.svg" class="" />
-						</button>
-						<div class="input-wrapper left-auto">
-							<img src="assets/svg/fr.svg">
-							<input id="frameCount" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="30" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
+			<div id="appDock" class="bottom">
+				<div class="flex-row">
+					<!-- Timeline App -->
+					<div id="timelineApp" class="darko-b">
+						<div class="wrapper">
+							<!-- Timeline -->
+							<div class="row-a">
+								<div id="timelineGraphWrapper">
+									<canvas id="timelineGraph"></canvas>
+								</div>
+							</div>
+							<!-- Timeline control -->
+							<div class="row-b">
+								<button id="lastFrame" class="darko-a">
+								<img src="assets/svg/previous.svg" class="" />
+								</button>
+								<button id="playStop" class="darko-a">
+								<img src="assets/svg/play.svg" class="" />
+								</button>
+								<button id="nextFrame" class="darko-a">
+								<img src="assets/svg/next.svg" class="" />
+								</button>
+								<button id="addKeyframe" class="darko-a">
+								<img src="assets/svg/key-plus.svg" class="" />
+								</button>
+								<button id="deleteKeyframe" class="darko-a">
+								<img src="assets/svg/key-minus.svg" class="" />
+								</button>
+								<div class="input-wrapper left-auto">
+									<img src="assets/svg/fr.svg">
+									<input id="frameCount" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="30" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
+								</div>
+								
+								<div class="input-wrapper">
+									<img src="assets/svg/rabbit.svg">
+									<input id="animationSpeed" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="30" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
+								</div>
+								<button id="minimize" class="">
+								<img src="assets/svg/triangle.svg" class="" />
+								</button>
+							</div>
 						</div>
-						
-						<div class="input-wrapper">
-							<img src="assets/svg/rabbit.svg">
-							<input id="animationSpeed" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="30" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
-						</div>
-						<button id="minimize" class="">
-						<img src="assets/svg/triangle.svg" class="" />
-						</button>
 					</div>
-					<!-- Timeline -->
-					<div class="row-b">
-						<div id="timelineGraphWrapper">
-							<canvas id="timelineGraph"></canvas>
+					<!-- Panel -->
+					<!-- <div id="panelApp">
+						<div class="wrapper">
+							<div class="row-a">
+								<div class="wrapper-material">
+									<div class="menu">
+										<button id="fileButton" class="darko-a">File</button>
+									</div>
+								</div>
+								<div class="wrapper-layer">
+									
+								</div>
+							</div>
 						</div>
-					</div>
+					</div> -->
 				</div>
 			</div>
 			<canvas id="gameCanvas"></canvas>

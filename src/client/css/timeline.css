@@ -1,7 +1,5 @@
 #timelineApp {
-	position: absolute;
 	z-index: 1;
-	bottom: 0;
 	width: 100vw;
 	height: fit-content;
 	padding: 5px;
@@ -33,9 +31,6 @@
 }
 
 #timelineApp .input-wrapper img {
-	position: absolute;
-	top: 0;
-	bottom: 0;
 	width: auto;
 	height: 16px;
 	margin: auto;
@@ -50,7 +45,8 @@
 #timelineApp .input-wrapper input {
 	height: 25px;
 	width: 20px;
-	padding-left: 30px;
+	padding-left: 5px;
+	margin-left: 4px;
 	background: none;
 	border: none;
 }
@@ -67,37 +63,41 @@ input#frameCount {
 	margin-left: auto;
 }
 
-#timelineApp .wrapper .row-a button {
-	position: relative;
-	width: 30px;
-	height: 30px;
-	margin-right: 3px;
-}
-
-#timelineApp .wrapper .row-a button {
-	position: relative;
-	width: 30px;
-	height: 30px;
-	margin-right: 3px;
-}
-
-.row-b {
-	margin-top: 10px;
+#timelineApp .wrapper .row-b {
+	padding-top: 10px;
 	background: rgba(20, 10, 30, 0.05);
 	border-top: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+#timelineApp .wrapper .row-b button {
+	position: relative;
+	width: 30px;
+	height: 30px;
+	margin-right: 3px;
+}
+
+#timelineApp .wrapper .row-b button {
+	position: relative;
+	width: 30px;
+	height: 30px;
+	margin-right: 3px;
+}
+
+.row-a {
+	
 }
 
 #timelineGraphWrapper {
 	position: relative;
 	display: block;
-	margin-top: 10px;
-	height: 150px;
+	height: 39px;
 	width: 100%;
 }
 
 #minimize {
 	background: none;
 	border: none;
+	display: none;
 
 	position: absolute !important;
 	right: 0px;

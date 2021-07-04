@@ -114,6 +114,27 @@ button div.buttonIcon p {
 	height: 100%;
 }
 
+.bottom {
+	position: absolute;
+	bottom: 0;
+	width: fit-content;
+	height: fit-content;
+}
+
+.flex-row {
+	width: 100%;
+	height: fit-content;
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: column;
+	align-items: flex-end;
+}
+
+#gameContainer {
+	width: 100vw;
+	height: 100vh;
+}
+
 canvas#gameCanvas {
 	z-index: 0;
 	position: absolute;
