@@ -1,24 +1,15 @@
+const events = require("../../../lib/events.js");
 const mouse = require("../../../lib/mouse.js");
 const vector = require("../../../lib/vector.js");
 const config = require("../../../lib/config.js");
 const utils = require("../../../lib/utils.js");
 const history = require("./history.js");
-const clonedeep = require("lodash.clonedeep");
 
-let timeline = require("../js/vue/timeline.js");
-
-let _forceRequireTimeline = setInterval(function() {
-	if (!timeline.graph) {
-		timeline = require("../js/vue/timeline.js");
-	} else {
-		clearInterval(_forceRequireTimeline);
-	}
-}, 10);
+let timeline;
 
 class RigModel {
 	constructor() {
 		this.joints = [];
-		this.segments = [];
 		this.keyframes = {};
 		this.totalKeyframes = 0;
 
@@ -28,8 +19,30 @@ class RigModel {
 		this._moved = false;
 	}
 
-	clone() {
-		return clonedeep(this.keyframes);
+	reset() {
+		this.keyframes = {};
+		this.joints = [];
+		this.totalKeyframes = 0;
+		this.activeJoint = null;
+
+		if (timeline.graph) {
+			this.setKeyframe(timeline.graph.state.currentMark, {
+				position: {
+					x: timeline.graph.hatchMark.spacing / 2,
+					y: config.render.keyframe.y
+				},
+				locked: true
+			});
+
+			timeline.graph.setCurrentMark(0);
+			timeline.graph.updateState();
+		}
+	}
+
+	clone(keyframes) {
+		keyframes = keyframes || this.keyframes;
+		let clone = this.fromJSON(this.toJSON(keyframes));
+		return clone;
 	}
 
 	getKeyframe(findKey, value) {
@@ -52,13 +65,15 @@ class RigModel {
 				}
 			}
 
+			let clone = this.clone();
+
 			//If there's more than 1 frame
 			if (keys.length > 1) {
 				//...then add the hidden key frames
 				timeline.graph.updateState();
 
 				for (var i = end - 1; i >= start + 1; i--) {
-					let subJoints = clonedeep(this.keyframes[end].joints);
+					let subJoints = clone[end].joints;
 
 					let subKeyframe = {
 						id: utils.uid(),
@@ -91,7 +106,7 @@ class RigModel {
 			type: "head",
 			index: options.keyframe ? options.keyframe.index : index,
 			activeJointId: options.keyframe ? options.keyframe.activeJointId : (this.activeJoint ? this.activeJoint.id : null),
-			joints: options.joints || clonedeep(this.joints),
+			joints: options.joints,
 			render: {
 				size: config.render.keyframe.size,
 				color: config.render.keyframe.color.default,
@@ -99,6 +114,11 @@ class RigModel {
 			},
 			locked: options.locked || false
 		};
+
+		let clone = this.clone()[keyframe.index];
+		let joints = clone ? clone.joints : [];
+		if (options.joints) joints = options.joints;
+		keyframe.joints = joints;
 
 		keyframe.id = options.id || utils.uid();
 
@@ -112,6 +132,7 @@ class RigModel {
 			timeline.graph.redraw();
 		}
 
+		//History
 		let frames = Object.values(this.keyframes);
 		let headCount = 0;
 		for (var i = 0; i < frames.length; i++) {
@@ -252,7 +273,7 @@ class RigModel {
 				}
 			}
 
-			if (!config.linear) this.computeKinematics(frame.joints);
+			if (!config.animation.linear) this.computeKinematics(frame.joints);
 		}
 	}
 
@@ -260,12 +281,12 @@ class RigModel {
 		jointChain = jointChain || this.joints;
 
 		//Make sure the joint that is going to be added doesn't go over the top of other joints
-		for (var i = 0; i < this.joints.length; i++) {
+		/*for (var i = 0; i < this.joints.length; i++) {
 			let joint = this.joints[i];
 			if (joint.position.dist(x, y) < config.render.joint.radius * 2) {
 				return;
 			}
-		}
+		}*/
 
 		if (timeline.graph) {
 			timeline.graph.setCurrentMark(timeline.graph.state.currentFrame, false);
@@ -434,7 +455,7 @@ class RigModel {
 			this.activeJoint.position.set(x, y);
 		}
 
-		if (!config.linear) this.computeKinematics(this.joints);
+		if (!config.animation.linear) this.computeKinematics(this.joints);
 
 		if (timeline.graph) {
 			timeline.graph.setCurrentMark(timeline.graph.state.currentFrame, false);
@@ -447,8 +468,124 @@ class RigModel {
 		return joint;
 	}
 
+	toJSON(_keyframes) {
+		let keyframes = _keyframes || this.clone();
+		let json = {};
+		let keys = Object.keys(keyframes);
+
+		for (var i = 0; i < keys.length; i++) {
+			let key = keys[i];
+			let frame = keyframes[key];
+
+			let keyframe = {
+				id: frame.id,
+				activeJointId: frame.activeJointId,
+				index: frame.index,
+				joints: [],
+				render: frame.render,
+				type: frame.type,
+				locked: frame.locked
+			};
+
+			for (var j = 0; j < frame.joints.length; j++) {
+				let joint = frame.joints[j];
+
+				let jointData = {
+					id: joint.id,
+					angle: joint.angle,
+					position: joint.position,
+					positionPrev: joint.positionPrev,
+					parent: joint.parent ? joint.parent.id : null,
+					hierarchy: joint.hierarchy,
+					children: []
+				};
+
+				for (var k = 0; k < joint.children.length; k++) {
+					let child = joint.children[k];
+					jointData.children.push(child.id);
+				}
+
+				keyframe.joints.push(jointData);
+			}
+
+			json[keyframe.index] = keyframe;
+		}
+
+		return json;
+	}
+
+	fromJSON(json) {
+		if (!json) return;
+
+		let result = {};
+		let keys = Object.keys(json);
+
+		for (var i = 0; i < keys.length; i++) {
+			let key = keys[i];
+			let frame = json[key];
+			let activeJoint = frame.joints.find(j => j.id === frame.activeJointId);
+
+			let parsedJoints = [];
+
+			//Parse joint data
+			for (var j = 0; j < frame.joints.length; j++) {
+				let joint = frame.joints[j];
+				let data = {
+					id: joint.id,
+					angle: joint.angle,
+					position: vector(joint.position),
+					positionPrev: vector(joint.positionPrev),
+					length: joint.length,
+					hierarchy: joint.hierarchy,
+					parent: joint.parent,
+					children: joint.children.slice()
+				}
+
+				parsedJoints.push(data);
+			}
+
+			//Find parent and children
+			for (var j = 0; j < parsedJoints.length; j++) {
+				let joint = parsedJoints[j];
+
+				joint.parent = parsedJoints.find(pj => pj.id === joint.parent) || null;
+
+				for (var k = 0; k < joint.children.length; k++) {
+					let child = joint.children[k];
+
+					joint.children[k] = parsedJoints.find(pj => pj.id === child) || null;
+				}
+			}
+
+			let parsedFrame = {
+				activeJointId: frame.activeJointId,
+				id: frame.id,
+				index: frame.index,
+				joints: parsedJoints,
+				locked: frame.locked,
+				render: frame.render,
+				type: frame.type
+			};
+
+			result[frame.index] = parsedFrame;
+		}
+
+		return result;
+
+		/*if (timeline.graph) {
+			timeline.graph.setCurrentMark(0, false);
+			let currentFrame = this.keyframes[timeline.graph.state.currentMark];
+			this.activeJoint = this.getKeyframe("id", currentFrame.activeJointId);
+			if (this.activeJoint) {
+				this.updateKeyframe(timeline.graph.state.currentFrame, {
+					activeJointId: this.activeJoint.id
+				});
+			}
+		}*/
+	}
+
 	import (keyframes) {
-		this.keyframes = clonedeep(keyframes);
+		this.keyframes = this.clone(keyframes);
 
 		let frames = Object.values(this.keyframes);
 		let headCount = 0;
@@ -458,6 +595,19 @@ class RigModel {
 		}
 
 		this.totalKeyframes = headCount;
+
+		if (timeline.graph) {
+			timeline.graph.setCurrentMark(0, false);
+			let currentFrame = this.keyframes[timeline.graph.state.currentMark];
+			this.activeJoint = this.getKeyframe("id", currentFrame.activeJointId);
+			if (this.activeJoint) {
+				this.updateKeyframe(timeline.graph.state.currentFrame, {
+					activeJointId: this.activeJoint.id
+				});
+			}
+
+			timeline.graph.updateState();
+		}
 	}
 
 	render(renderer) {
@@ -521,5 +671,16 @@ class RigModel {
 
 const rigModel = new RigModel();
 
+events.once("ready:vue", vue => {
+	timeline = vue.timeline;
+
+	rigModel.setKeyframe(timeline.graph.state.currentMark, {
+		position: {
+			x: timeline.graph.hatchMark.spacing / 2,
+			y: config.render.keyframe.y
+		},
+		locked: true
+	});
+})
 
 module.exports = rigModel;
