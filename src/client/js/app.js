@@ -1,4 +1,6 @@
+const download = require("js-file-download");
 const renderer = require("../lib/renderer.js");
+const events = require("../../../lib/events.js");
 const vector = require("../../../lib/vector.js");
 const shape = require("../../../lib/shape.js");
 const mouse = require("../../../lib/mouse.js");
@@ -9,7 +11,11 @@ const config = require("../../../lib/config.js");
 const vue = require("./vue/vue.js");
 const rigModel = require("../lib/rig.model.js");
 const history = require("../lib/history.js");
-const extractKeyframes = require("../lib/video.js");
+const extractKeyframes = require("../lib/extract.keyframes.js");
+
+events.emit("ready:vue", vue);
+
+console.log(events)
 
 window.rigModel = rigModel;
 
@@ -22,11 +28,12 @@ uploadOverlay.addEventListener("change", () => {
 	let fileURL = URL.createObjectURL(file);
 	if (fileURL) {
 		extractKeyframes(fileURL, {
-			frameRate: 120,
-			frameCount: 60,
-			start: 39,
-			end: 54,
+			//frameCount: 60,
+			//frameRate: 30,
+			start: 8,
+			end: 12,
 			progress: function(img, pct) {
+				overlayFrames.push(img);
 				console.log(pct);
 			},
 			done: function(images) {
@@ -75,7 +82,7 @@ actionIcons.pan.src = "assets/svg/quad-arrow.svg";
 
 let action = actions.pan;
 
-let buttons = {
+let actionButtons = {
 	add: document.getElementById("addJoint"),
 	select: document.getElementById("selectJoint"),
 	move: document.getElementById("moveJoint"),
@@ -83,15 +90,19 @@ let buttons = {
 	pan: document.getElementById("panCamera")
 };
 
+let importButton = document.getElementById("import");
+let exportButton = document.getElementById("export");
+let clearButton = document.getElementById("clear");
+
 let appDock = document.getElementById("appDock");
 let frameCountInput = document.getElementById("frameCount");
 let animationSpeedInput = document.getElementById("animationSpeed");
-let _buttons = Object.keys(buttons);
-let __buttons = Object.values(buttons);
+let _actionButtons = Object.keys(actionButtons);
+let __actionButtons = Object.values(actionButtons);
 
 function removeActives() {
-	for (let btn of _buttons) {
-		buttons[btn].classList.remove("active-tool");
+	for (let btn of _actionButtons) {
+		actionButtons[btn].classList.remove("active-tool");
 	}
 }
 
@@ -129,13 +140,44 @@ function redo() {
 	}
 }
 
-for (let btn of _buttons) {
-	buttons[btn].addEventListener("click", function() {
+//Autosave
+events.on("historyChange", () => {
+	if (history.eventCount % config.autosave.threshold == 0) {
+		let model = rigModel.toJSON();
+		localStorage.setItem(config.autosave.label, JSON.stringify(model));
+	}
+});
+
+let autosavedData = localStorage.getItem(config.autosave.label);
+
+if (autosavedData) {
+	let json = JSON.parse(autosavedData);
+	rigModel.import(rigModel.fromJSON(json));
+}
+
+exportButton.addEventListener("click", function() {
+	let json = rigModel.toJSON();
+	let str = JSON.stringify(json);
+	console.log(json);
+	//download(str, "rigme.model.txt");
+});
+
+importButton.addEventListener("click", function() {
+	let val = rigModel.fromJSON();
+	console.log(val);
+});
+
+clearButton.addEventListener("click", function() {
+	rigModel.reset();
+});
+
+for (let btn of _actionButtons) {
+	actionButtons[btn].addEventListener("click", function() {
 		action = actions[btn];
 		rigModel.action = action;
 
 		removeActives();
-		buttons[btn].classList.add("active-tool");
+		actionButtons[btn].classList.add("active-tool");
 	});
 }
 
@@ -145,9 +187,9 @@ key.on("keydown", function(event) {
 		action = pickedAction;
 		rigModel.action = action;
 
-		if (buttons[action]) {
+		if (actionButtons[action]) {
 			removeActives();
-			buttons[action].classList.add("active-tool");
+			actionButtons[action].classList.add("active-tool");
 		}
 	}
 
@@ -271,7 +313,6 @@ renderer.render(function() {
 key.on("keydown", function() {
 	if (key.code === 16) {
 		console.log(rigModel);
-		console.log(vue.timeline.graph.state);
-		console.log(config);
+		console.log(vue.timeline);
 	}
 });

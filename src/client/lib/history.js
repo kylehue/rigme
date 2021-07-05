@@ -1,17 +1,19 @@
 const utils = require("../../../lib/utils.js");
 const config = require("../../../lib/config.js");
+const events = require("../../../lib/events.js");
 
 class History {
 	constructor() {
 		this.events = [];
 		this.present = null;
 		this.maxStates = 300;
+		this.eventCount = 0;
 	}
 
 	add(options) {
 		options = options || {};
 		
-		//Clear redo/future events
+		//Clear redos/future events
 		if (this.present) {
 			this.events.splice(0, this.events.indexOf(this.present));
 		}
@@ -33,6 +35,9 @@ class History {
 		if (this.events.length > this.maxStates) {
 			this.events.pop();
 		}
+
+		this.eventCount++;
+		events.emit("historyChange");
 	}
 
 	sortByLatest() {

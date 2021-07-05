@@ -48,16 +48,20 @@ const timelineApp = new Vue({
 		},
 		validateMax: function(e) {
 			let value = e.target.value;
-			if (parseInt(value) > config.maxFPS) {
-				e.target.value = config.maxFPS.toString();
+			let max = config.animation.frameCount.max;
+			if(e.target.id == "animationSpeed") max = config.animation.speed.max;
+			if (parseInt(value) > max) {
+				e.target.value = max.toString();
 			}
 
 			this.fixData();
 		},
 		validateMin: function(e) {
 			let value = e.target.value;
-			if (parseInt(value) < config.minFPS) {
-				e.target.value = config.minFPS.toString();
+			let min = config.animation.frameCount.min;
+			if(e.target.id == "animationSpeed") min = config.animation.speed.min;
+			if (parseInt(value) < min) {
+				e.target.value = min.toString();
 			}
 
 			this.fixData();
@@ -515,8 +519,8 @@ class Timeline {
 		let hatchMarkCount = timelineApp.totalFrames;
 		let hatchMarkColor = "rgba(255, 255, 255, 0.25)";
 		this.hatchMark.spacing = this.canvas.width / hatchMarkCount;
+		let gap = Math.floor(utils.clamp(timelineApp.totalFrames, 30, Number.MAX_SAFE_INTEGER) / 30) * 5;
 		for (var i = 0; i < hatchMarkCount; i++) {
-			let gap = Math.floor(utils.clamp(timelineApp.totalFrames, 30, Number.MAX_SAFE_INTEGER) / 30) * 5;
 			let offsetHeight = (i + 1) % gap == 0 ? 2 : 0;
 			let x = this.hatchMark.spacing * i + this.hatchMark.spacing / 2;
 			let y = this.canvas.height - config.render.timeline.height - this.hatchMark.height - offsetHeight;
@@ -535,7 +539,6 @@ class Timeline {
 		let currentFrameMarkerHandleWidth = 10;
 		let currentFrameMarkerHandleHeight = this.canvas.height - config.render.timeline.height - this.hatchMark.height - 5;
 		let currentFrameMarkerText = this.state.currentMark + 1;
-		let currentFrameMarkerTextWidth = this.context.measureText(currentFrameMarkerText).width;
 		/*this.context.beginPath();
 		this.context.moveTo(currentFrameMarkerX, this.canvas.height - currentFrameMarkerHandleHeight);
 		this.context.lineTo(currentFrameMarkerX + currentFrameMarkerHandleWidth / 2, this.canvas.height - currentFrameMarkerHandleHeight + currentFrameMarkerHandleHeight / 4);
@@ -548,9 +551,8 @@ class Timeline {
 		this.context.closePath();
 		this.context.fillStyle = config.accent;
 		this.context.fill();
-		let currentFrameMarkerTextOffsetX = 2;
-		let currentFrameMarkerTextX = (this.state.currentMark + 2) % 5 == 0 || this.state.currentMark >= timelineApp.totalFrames - 1 ? -currentFrameMarkerTextWidth - currentFrameMarkerTextOffsetX - 1 : currentFrameMarkerHandleWidth + currentFrameMarkerTextOffsetX;
-		this.text(currentFrameMarkerText, currentFrameMarkerX + currentFrameMarkerTextX, currentFrameMarkerHandleHeight / 2 + 8, config.accent);
+		let currentFrameMarkerTextX = currentFrameMarkerHandleWidth;
+		this.text(currentFrameMarkerText, currentFrameMarkerX + currentFrameMarkerTextX, currentFrameMarkerHandleHeight / 2 + 8, config.accent, "left");
 
 		//Keyframes
 		let keyframes = Object.keys(rigModel.keyframes);
@@ -564,11 +566,11 @@ class Timeline {
 		}
 	}
 
-	text(text, x, y, color) {
+	text(text, x, y, color, textAlign) {
 		this.context.beginPath();
 		this.context.fillStyle = color;
 		this.context.font = "12px Catamaran";
-		this.context.textAlign = "center";
+		this.context.textAlign = textAlign || "center";
 		this.context.textBaseline = "bottom";
 		this.context.fillText(text, x, y);
 	}
@@ -643,16 +645,6 @@ class Timeline {
 }
 
 timeline = new Timeline();
-
-rigModel.setKeyframe(timeline.state.currentMark, {
-	position: {
-		x: timeline.hatchMark.spacing / 2,
-		y: config.render.keyframe.y
-	},
-	locked: true
-});
-timeline.updateState();
-timeline.redraw();
 
 module.exports = {
 	app: timelineApp,
