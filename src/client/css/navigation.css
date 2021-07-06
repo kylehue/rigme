@@ -1,0 +1,41 @@
+#navigation {
+	position: absolute;
+	z-index: 5;
+	display: flex;
+	flex-flow: row wrap;
+	align-items: center;
+	justify-content: space-between;
+	width: 100vw;
+	height: fit-content;
+	padding: 5px 2px;
+	box-sizing: border-box;
+}
+
+#navigation [class^="wrapper-"] {
+	position: relative;
+	display: flex;
+	flex-flow: row wrap;
+	align-items: center;
+	width: 50%;
+	height: fit-content;
+}
+
+#navigation .wrapper-left {
+	justify-content: flex-start;
+}
+
+#navigation .wrapper-right {
+	justify-content: flex-end;
+}
+
+#navigation button {
+	position: relative;
+	width: 30px;
+	height: 30px;
+	margin: 3px 3px;
+}
+
+#navigation button.fit {
+	width: fit-content;
+	padding: 0px 8px;
+}

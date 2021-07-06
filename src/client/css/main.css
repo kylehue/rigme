@@ -6,6 +6,11 @@
 	--darko-b: #2a2b33;
 	--darko-c: #26272f;
 	--darko-d: #2f3039;
+	--hover: brightness(1.13) hue-rotate(5deg);
+	--active: brightness(1.2) hue-rotate(10deg);
+	--dim-a: rgba(245, 237, 255, 0.8);
+	--dim-b: rgba(245, 237, 255, 0.5);
+	--borders: 1px solid rgba(240, 230, 250, 0.025);
 }
 
 * {
@@ -15,6 +20,10 @@
 	border: none;
 	font-family: "Catamaran", sans-serif;
 	color: var(--black);
+}
+
+::placeholder {
+	color: rgba(245, 238, 255, 0.1);
 }
 
 body {
@@ -41,11 +50,11 @@ button {
 }
 
 button:hover {
-	filter: brightness(1.13) hue-rotate(5deg);
+	filter: var(--hover);
 }
 
 button:active {
-	filter: brightness(1.2) hue-rotate(10deg);
+	filter: var(--active);
 }
 
 button img {
@@ -128,6 +137,37 @@ button div.buttonIcon p {
 	flex-wrap: wrap;
 	flex-direction: column;
 	align-items: flex-end;
+}
+
+.custom-file {
+	position: relative;
+	width: 60px;
+	height: 20px;
+}
+
+.custom-file button {
+	position: absolute;
+	z-index: 1;
+	width: 100%;
+	height: 100%;
+}
+
+.custom-file input {
+	position: absolute;
+	opacity: 0;
+	z-index: 2;
+	width: 100%;
+	height: 100%;
+	padding: 0 !important;
+	margin: 0 !important;
+}
+
+.custom-file:hover button {
+	filter: var(--hover);
+}
+
+.custom-file:active button {
+	filter: var(--active);
 }
 
 #gameContainer {

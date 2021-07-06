@@ -66,7 +66,7 @@ input#frameCount {
 #timelineApp .wrapper .row-b {
 	padding-top: 10px;
 	background: rgba(20, 10, 30, 0.05);
-	border-top: 1px solid rgba(255, 255, 255, 0.03);
+	border-top: var(--borders);
 }
 
 #timelineApp .wrapper .row-b button {
@@ -81,10 +81,6 @@ input#frameCount {
 	width: 30px;
 	height: 30px;
 	margin-right: 3px;
-}
-
-.row-a {
-	
 }
 
 #timelineGraphWrapper {

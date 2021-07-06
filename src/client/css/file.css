@@ -1,0 +1,43 @@
+#fileApp {
+	position: absolute;
+	top: -9999px;
+	z-index: 9999;
+	width: fit-content;
+	height: fit-content;
+	padding: 0px;
+	box-sizing: border-box;
+	border-radius: 3px;
+
+	box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.1);
+}
+
+#fileApp .wrapper {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+#fileApp .wrapper button {
+	position: relative;
+	display: block;
+	width: 90px;
+	height: 30px;
+	border: none !important;
+	color: var(--white);
+	text-align: left;
+	padding-left: 6px;
+}
+
+#fileApp .wrapper button {
+	border-radius: 0px !important;
+}
+
+#fileApp .wrapper button:first-child {
+	border-top-left-radius: 3px !important;
+	border-top-right-radius: 3px !important;
+}
+
+#fileApp .wrapper button:last-child {
+	border-bottom-left-radius: 3px !important;
+	border-bottom-right-radius: 3px !important;
+}
