@@ -73,7 +73,7 @@ class RigModel {
 				timeline.graph.updateState();
 
 				for (var i = end - 1; i >= start + 1; i--) {
-					let subJoints = clone[end].joints;
+					let subJoints = this.clone()[end].joints;
 
 					let subKeyframe = {
 						id: utils.uid(),
@@ -115,10 +115,14 @@ class RigModel {
 			locked: options.locked || false
 		};
 
-		let clone = this.clone()[keyframe.index];
-		let joints = clone ? clone.joints : [];
-		if (options.joints) joints = options.joints;
-		keyframe.joints = joints;
+		if (timeline.graph) {
+			let clone = this.clone()[timeline.graph.state.currentFrame];
+			let joints = clone ? clone.joints : [];
+			if (options.joints) joints = options.joints;
+			keyframe.joints = joints;
+		}
+
+
 
 		keyframe.id = options.id || utils.uid();
 
@@ -599,11 +603,14 @@ class RigModel {
 		if (timeline.graph) {
 			timeline.graph.setCurrentMark(0, false);
 			let currentFrame = this.keyframes[timeline.graph.state.currentMark];
-			this.activeJoint = this.getKeyframe("id", currentFrame.activeJointId);
-			if (this.activeJoint) {
-				this.updateKeyframe(timeline.graph.state.currentFrame, {
-					activeJointId: this.activeJoint.id
-				});
+
+			if (currentFrame) {
+				this.activeJoint = this.getKeyframe("id", currentFrame.activeJointId);
+				if (this.activeJoint) {
+					this.updateKeyframe(timeline.graph.state.currentFrame, {
+						activeJointId: this.activeJoint.id
+					});
+				}
 			}
 
 			timeline.graph.updateState();
@@ -671,7 +678,7 @@ class RigModel {
 
 const rigModel = new RigModel();
 
-events.once("ready:vue", vue => {
+events.once("loadedApps", vue => {
 	timeline = vue.timeline;
 
 	rigModel.setKeyframe(timeline.graph.state.currentMark, {
@@ -681,6 +688,6 @@ events.once("ready:vue", vue => {
 		},
 		locked: true
 	});
-})
+});
 
 module.exports = rigModel;
