@@ -9,13 +9,15 @@
 		<link rel="stylesheet" type="text/css" href="css/main.css">
 		<link rel="stylesheet" type="text/css" href="css/timeline.css">
 		<link rel="stylesheet" type="text/css" href="css/panel.css">
-		<link rel="stylesheet" type="text/css" href="css/tool.css">
+		<link rel="stylesheet" type="text/css" href="css/navigation.css">
+		<link rel="stylesheet" type="text/css" href="css/file.css">
+		<link rel="stylesheet" type="text/css" href="css/save.css">
+		<link rel="stylesheet" type="text/css" href="css/load.css">
+		<link rel="stylesheet" type="text/css" href="css/overlay.css">
 		<link rel="stylesheet" type="text/css" href="css/contextMenu.css">
 	</head>
 	<body>
-		<!-- <iframe src="https://youtu.be/AWEm4tA2hMc"></iframe> -->
 		<div id="gameContainer">
-
 			<!-- Context Menu App -->
 			<div id="contextMenuApp" class="darko-d" v-if="!hidden">
 				<div class="wrapper">
@@ -33,10 +35,109 @@
 					</button>
 				</div>
 			</div>
-			<!-- Tool App -->
-			<div id="toolApp" class="darko-b">
+			<!-- File app -->
+			<div id="fileApp" v-if="!hidden">
 				<div class="wrapper">
-					<input id="uploadOverlay" type="file" accept="video/*" class="darko-a" style="width:70px" />
+					<button id="showSaveApp" class="darko-d" v-on:click="showSaveApp">Save</button>
+					<button id="showLoadApp" class="darko-d" v-on:click="showLoadApp">Load</button>
+					<button id="showExportApp" class="darko-d">Export as...</button>
+					<button id="showOverlayApp" class="darko-d" v-on:click="showOverlayApp">Add Overlay</button>
+				</div>
+			</div>
+			<!-- Overlay app -->
+			<div id="overlayApp" class="darko-b" v-if="!hidden">
+				<div class="row">
+					<p class="title">Add Overlay</p>
+					<button class="darko-a close" v-on:click="hide">x</button>
+				</div>
+				<div class="row section">
+					<div class="title-wrapper">
+						<p class="title">File</p>
+					</div>
+					<div class="custom-file">
+						<button class="darko-a">Upload</button>
+						<input id="overlayInput" type="file" />
+					</div>
+					<div class="filename-wrapper">
+						<p id="filename">Choose a file...</p>
+					</div>
+				</div>
+				<div class="row section">
+					<div class="title-wrapper">
+						<p class="title">Frames</p>
+					</div>
+					<div class="field">
+						<label for="">Frame Count:</label>
+						<input type="text" class="darko-c" placeholder="auto">
+					</div>
+					
+					<div class="field">
+						<label for="">Frame Rate:</label>
+						<input type="text" class="darko-c" placeholder="auto">
+					</div>
+				</div>
+				<div class="row section">
+					<div class="title-wrapper">
+						<p class="title">Trim</p>
+					</div>
+					<div class="field">
+						<label for="">From:</label>
+						<input type="text" class="darko-c" placeholder="auto">
+					</div>
+					<div class="field">
+						<label for="">To:</label>
+						<input type="text" class="darko-c" placeholder="auto">
+					</div>
+				</div>
+				<div class="row">
+					<button id="addOverlay" class="darko-a">Add</button>
+				</div>
+			</div>
+			<!-- Save app -->
+			<div id="saveApp" class="darko-b" v-if="!hidden">
+				<div class="row">
+					<p class="title">Save</p>
+					<button class="darko-a close" v-on:click="hide">x</button>
+				</div>
+				<div class="row">
+					<div class="field">
+						<label for="filename">File name:</label>
+						<input id="filename" type="text" class="darko-c" placeholder="Type here...">
+					</div>
+				</div>
+				<div class="row">
+					<button id="download" class="darko-a">Download</button>
+				</div>
+			</div>
+			<!-- Load app -->
+			<div id="loadApp" class="darko-b" v-if="!hidden">
+				<div class="row">
+					<p class="title">Load</p>
+					<button class="darko-a close" v-on:click="hide">x</button>
+				</div>
+				<div class="row section">
+					<div class="title-wrapper">
+						<p class="title">File</p>
+					</div>
+					<div class="custom-file">
+						<button class="darko-a">Upload</button>
+						<input id="importInput" type="file" />
+					</div>
+					<div class="filename-wrapper">
+						<p id="filename">Choose a file...</p>
+					</div>
+				</div>
+				<div class="row">
+					<button id="import" class="darko-a">Import</button>
+				</div>
+			</div>
+			<!-- Nav -->
+			<div id="navigation" class="darko-b">
+				<div class="wrapper-left">
+					<button id="fileButton" class="darko-a fit">File</button>
+					<button id="settingsButton" class="darko-a fit">Settings</button>
+				</div>
+				<div class="wrapper-right">
 					<button id="panCamera" class="darko-a active-tool">
 					<img src="assets/svg/quad-arrow.svg" class="" />
 					</button>
@@ -99,18 +200,18 @@
 					</div>
 					<!-- Panel -->
 					<!-- <div id="panelApp">
-						<div class="wrapper">
-							<div class="row-a">
-								<div class="wrapper-material">
-									<div class="menu">
-										<button id="fileButton" class="darko-a">File</button>
+									<div class="wrapper">
+													<div class="row-a">
+																	<div class="wrapper-material">
+																					<div class="menu">
+																									<button id="fileButton" class="darko-a">File</button>
+																					</div>
+																	</div>
+																	<div class="wrapper-layer">
+																					
+																	</div>
+													</div>
 									</div>
-								</div>
-								<div class="wrapper-layer">
-									
-								</div>
-							</div>
-						</div>
 					</div> -->
 				</div>
 			</div>
