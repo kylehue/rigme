@@ -33,6 +33,10 @@
 	box-sizing: border-box;
 }
 
+#overlayApp p {
+	color: var(--white);
+}
+
 #overlayApp p.title {
 	position: relative;
 	display: block;
@@ -42,7 +46,6 @@
 	margin-bottom: 10px;
 	padding-top: 8px;
 	line-height: 1;
-	color: var(--white);
 	font-size: 14px;
 }
 
@@ -50,6 +53,13 @@
 	margin-top: 15px;
 	border: var(--borders);
 	padding-bottom: 4px;
+}
+
+#overlayApp .row.section.disabled {
+	pointer-events: none;
+	user-select: none;
+	background: rgba(0, 0, 0, 0.05);
+	opacity: 0.5;
 }
 
 #overlayApp .row.section .title-wrapper {
@@ -77,6 +87,16 @@
 	flex-flow: column nowrap;
 	width: fit-content;
 	margin-right: 13px;
+}
+
+#overlayApp .field.row-field {
+	align-items: center;
+	flex-flow: row nowrap;
+}
+
+#overlayApp .field.row-field p {
+	color: var(--dim-a);
+	font-size: 12px;
 }
 
 #overlayApp .field:last-child {

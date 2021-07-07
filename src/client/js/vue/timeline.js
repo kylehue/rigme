@@ -17,7 +17,14 @@ const timelineApp = new Vue({
 		hidden: false,
 		totalFrames: parseInt(document.getElementById("frameCount").value),
 		animationSpeed: parseInt(document.getElementById("animationSpeed").value),
-		currentFrame: 0
+		currentFrame: 0,
+		lastMsg: "Previous frame",
+		playMsg: "Play/Stop",
+		nextMsg: "Next frame",
+		addKeyMsg: "Add keyframe",
+		removeKeyMsg: "Remove keyframe",
+		frameCountMsg: "Frame count",
+		animationSpeedMsg: "Animation speed"
 	},
 	methods: {
 		fixData: function() {

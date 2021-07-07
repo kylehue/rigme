@@ -15,10 +15,9 @@ const fileApp = new Vue({
 		show: function(x, y) {
 			this.hidden = false;
 			this.$nextTick(() => {
-				this.position.x = x;
-				this.position.y = y;
-				this.$el.style.left = `${this.position.x}px`;
-				this.$el.style.top = `${this.position.y}px`;
+				let fileButtonBounds = document.getElementById("fileButton").getBoundingClientRect();
+				this.$el.style.left = `${fileButtonBounds.x}px`;
+				this.$el.style.top = `${fileButtonBounds.y + fileButtonBounds.height + 3}px`;
 			});
 		},
 		hide: function() {
@@ -26,15 +25,12 @@ const fileApp = new Vue({
 		},
 		showSaveApp: function () {
 			saveApp.show();
-			this.hide();
 		},
 		showLoadApp: function () {
 			loadApp.show();
-			this.hide();
 		},
 		showOverlayApp: function () {
 			overlayApp.show();
-			this.hide();
 		}
 	}
 });
