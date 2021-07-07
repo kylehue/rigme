@@ -1,4 +1,5 @@
 const download = require("js-file-download");
+const fs = require("fs.realpath");
 const renderer = require("../lib/renderer.js");
 const events = require("../../../lib/events.js");
 const vector = require("../../../lib/vector.js");
@@ -13,38 +14,14 @@ const rigModel = require("../lib/rig.model.js");
 const history = require("../lib/history.js");
 const extractKeyframes = require("../lib/extract.keyframes.js");
 
-events.emit("ready:vue", vue);
-
-console.log(events)
-
-window.rigModel = rigModel;
-
-let uploadOverlay = document.getElementById("uploadOverlay");
-let overlayFrames = [];
-
-uploadOverlay.addEventListener("change", () => {
-	let file = uploadOverlay.files[0];
-	if (!file) return;
-	let fileURL = URL.createObjectURL(file);
-	if (fileURL) {
-		extractKeyframes(fileURL, {
-			//frameCount: 60,
-			//frameRate: 30,
-			start: 8,
-			end: 12,
-			progress: function(img, pct) {
-				overlayFrames.push(img);
-				console.log(pct);
-			},
-			done: function(images) {
-				overlayFrames = images;
-			}
-		});
-	}
-})
+events.emit("loadedApps", vue);
 
 //Disable rightclick menu
 document.addEventListener('contextmenu', event => event.preventDefault());
+
+window.rigModel = rigModel;
+
+let block = document.getElementById("block");
 
 let cameraDistance = config.world.zoom;
 let cameraMovement = vector();
@@ -66,6 +43,8 @@ let shortcuts = {
 	KeyR: actions.move,
 	KeyT: actions.remove
 };
+
+let showOverlay = true;
 
 let actionIcons = {};
 
@@ -90,10 +69,10 @@ let actionButtons = {
 	pan: document.getElementById("panCamera")
 };
 
-let importButton = document.getElementById("import");
-let exportButton = document.getElementById("export");
-let clearButton = document.getElementById("clear");
+let fileButton = document.getElementById("fileButton");
+let optionButton = document.getElementById("optionButton");
 
+let navigation = document.getElementById("navigation");
 let appDock = document.getElementById("appDock");
 let frameCountInput = document.getElementById("frameCount");
 let animationSpeedInput = document.getElementById("animationSpeed");
@@ -106,14 +85,8 @@ function removeActives() {
 	}
 }
 
-function mouseInside(el) {
-	el = document.getElementById(el.id);
-	if (el) {
-		let bounds = el.getBoundingClientRect();
-		return mouse.x >= bounds.x && mouse.x <= bounds.x + bounds.width && mouse.y >= bounds.y && mouse.y <= bounds.y + bounds.height;
-	}
-
-	return false;
+function mouseInside() {
+	return mouse.x >= renderer.bounds.x && mouse.x <= renderer.bounds.width && mouse.y >= renderer.bounds.y && mouse.y <= renderer.bounds.height;
 }
 
 function undo() {
@@ -140,6 +113,74 @@ function redo() {
 	}
 }
 
+events.on("downloadModel", filename => {
+	let json = rigModel.toJSON();
+	let str = JSON.stringify(json);
+	download(str, `${filename}.rigme`);
+});
+
+events.on("importModel", json => {
+	let model = rigModel.fromJSON(json);
+	rigModel.import(model);
+
+	history.add({
+		label: "Import",
+		value: rigModel.clone(),
+		group: "keyframe"
+	});
+});
+
+let overlayFrames = [];
+events.on("extractFrames", (url, options) => {
+	overlayFrames = [];
+	let progressBarWrapper = document.getElementById("progressBarWrapper");
+	progressBarWrapper.style.display = "block";
+	let progressBar = document.getElementById("progressBar");
+	let cancelButton = document.querySelector("#progressBarWrapper button");
+
+	let interval, cancelled;
+	let loaded = 0;
+
+	function done() {
+		progressBarWrapper.style.display = "none";
+		progressBar.style.width = "0";
+		clearInterval(interval);
+		interval = undefined;
+		cancelButton.onclick = null;
+	}
+
+	extractKeyframes(url, {
+		frameCount: options.frameCount,
+		frameRate: options.frameRate,
+		start: options.start,
+		end: options.end,
+		quality: options.quality,
+		drop: false,
+		progress: function(img, pct) {
+			if (cancelled) {
+				this.drop = true;
+			} else {
+				overlayFrames.push(img);
+				loaded = pct;
+			}
+		},
+		done: function(images) {
+			overlayFrames = images;
+			done();
+		}
+	});
+
+	cancelButton.onclick = function() {
+		cancelled = true;
+	};
+
+	interval = setInterval(() => {
+		let current = (progressBar.offsetWidth / innerWidth) * 100;
+		let pct = utils.lerp(current, loaded, 0.1);
+		progressBar.style.width = `${pct}%`;
+	}, 1000 / 30);
+});
+
 //Autosave
 events.on("historyChange", () => {
 	if (history.eventCount % config.autosave.threshold == 0) {
@@ -148,27 +189,57 @@ events.on("historyChange", () => {
 	}
 });
 
-let autosavedData = localStorage.getItem(config.autosave.label);
+events.on("clearJoints", () => {
+	rigModel.reset();
+});
 
+events.on("resetCamera", () => {
+	mouseLast.reset();
+	cameraMovement.reset();
+	cameraDistance = config.world.zoom;
+});
+
+events.on("undo", () => {
+	undo();
+});
+
+events.on("redo", () => {
+	redo();
+});
+
+//Loading the autosaved data
+let autosavedData = localStorage.getItem(config.autosave.label);
 if (autosavedData) {
-	let json = JSON.parse(autosavedData);
-	rigModel.import(rigModel.fromJSON(json));
+	let json;
+	let error = false;
+	try {
+		json = JSON.parse(autosavedData);
+	} catch (e) {
+		error = true;
+		console.warn("Couldn't load autosaved data.");
+	}
+
+	if (json && !error) {
+		rigModel.import(rigModel.fromJSON(json));
+	}
 }
 
-exportButton.addEventListener("click", function() {
-	let json = rigModel.toJSON();
-	let str = JSON.stringify(json);
-	console.log(json);
-	//download(str, "rigme.model.txt");
+fileButton.addEventListener("mouseup", function() {
+	let fileApp = vue.fileApp;
+	if (fileApp.hidden) {
+		fileApp.show(mouse.x + 5, mouse.y + 5);
+	} else {
+		fileApp.hide();
+	}
 });
 
-importButton.addEventListener("click", function() {
-	let val = rigModel.fromJSON();
-	console.log(val);
-});
-
-clearButton.addEventListener("click", function() {
-	rigModel.reset();
+optionButton.addEventListener("mouseup", function() {
+	let optionApp = vue.optionApp;
+	if (optionApp.hidden) {
+		optionApp.show(mouse.x + 5, mouse.y + 5);
+	} else {
+		optionApp.hide();
+	}
 });
 
 for (let btn of _actionButtons) {
@@ -214,11 +285,21 @@ mouse.on("mouseup", function() {
 
 		rigModel._moved = false;
 	}
-})
+});
+
+mouse.on("mousedown", function() {
+	vue.fileApp.hide();
+	vue.optionApp.hide();
+});
+
+mouse.on("mousemove", function() {
+	if (!mouse.dragged && mouseInside()) {
+		mouseLast.set(worldMouse);
+	}
+});
 
 renderer.canvas.addEventListener("click", function() {
 	if (action == actions.add) {
-		let worldMouse = renderer.camera.screenToWorld(mouse.x, mouse.y);
 		rigModel.addJoint(worldMouse.x, worldMouse.y);
 	}
 
@@ -243,14 +324,24 @@ renderer.canvas.addEventListener("mousewheel", function() {
 	cameraDistance = cameraDistance > config.world.maxZoom ? config.world.maxZoom : cameraDistance;
 });
 
-renderer.fullscreen();
+function fixRendererSize() {
+	renderer.setSize(innerWidth, innerHeight - navigation.offsetHeight - appDock.offsetHeight);
+}
+
+addEventListener("resize", function() {
+	fixRendererSize();
+	vue.fileApp.hide();
+	vue.optionApp.hide();
+	vue.contextMenuApp.hide();
+});
+
+fixRendererSize();
 renderer.camera.setZoomSpeed(0.2);
 renderer.camera.setMoveSpeed(0.4);
 renderer.render(function() {
-	let onWorld = !mouseInside(vue.toolApp) && !mouseInside(appDock);
-	worldMouse.set(renderer.camera.screenToWorld(mouse.x, mouse.y));
+	worldMouse.set(renderer.camera.screenToWorld(mouse.x - renderer.bounds.x, mouse.y - renderer.bounds.y));
 
-	renderer.rect(0, 0, renderer.width, renderer.height, {
+	renderer.rect(0, 0, renderer.bounds.width, renderer.bounds.height, {
 		fill: config.world.background
 	});
 
@@ -259,11 +350,11 @@ renderer.render(function() {
 		renderer.camera.zoomTo(cameraDistance);
 
 		let overlayFrame = overlayFrames[vue.timeline.graph.state.currentMark];
-		if (overlayFrame && !window.hide) {
+		if (overlayFrame && showOverlay) {
 			renderer.context.drawImage(overlayFrame, -overlayFrame.width / 2, -overlayFrame.height / 2);
 		}
 
-		if (onWorld) {
+		if (mouseInside()) {
 			if (action === actions.add) {
 				let color = "#323439";
 				let currentPart = rigModel.activeJoint;
@@ -286,7 +377,7 @@ renderer.render(function() {
 		rigModel.render(renderer);
 	});
 
-	if (onWorld) {
+	if (mouseInside() && block.style.display != "block") {
 		if (action === actions.pan) {
 			if (mouse.dragged) {
 				cameraMovement.set({
@@ -295,8 +386,6 @@ renderer.render(function() {
 				});
 
 				mouse.dragged = false;
-			} else {
-				mouseLast.set(worldMouse);
 			}
 		}
 
@@ -305,8 +394,6 @@ renderer.render(function() {
 				rigModel.moveJoint(worldMouse.x, worldMouse.y);
 			}
 		}
-
-
 	}
 });
 
