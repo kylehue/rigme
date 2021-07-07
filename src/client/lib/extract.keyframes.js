@@ -4,6 +4,8 @@ let pct;
 
 function extractFrames(url, options) {
 	options = options || {};
+	if (options.drop) return;
+
 	const canvas = document.createElement("canvas");
 	const context = canvas.getContext("2d");
 	const video = document.createElement("video");
@@ -28,11 +30,15 @@ function extractFrames(url, options) {
 		video.currentTime = start;
 
 		video.addEventListener("seeked", () => {
-			if (frames.length < frameCount) {
-				events.emit("extractKeyframeProgress", frameCount);
-				video.currentTime += 1 / frameRate;
-			} else {
+			if (options.drop) {
 				events.emit("extractKeyframeDone", frames);
+			} else {
+				if (frames.length < frameCount) {
+					events.emit("extractKeyframeProgress", frameCount);
+					video.currentTime += 1 / frameRate;
+				} else {
+					events.emit("extractKeyframeDone", frames);
+				}
 			}
 		});
 	});
