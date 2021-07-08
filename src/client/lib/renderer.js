@@ -4,10 +4,7 @@ const engine = require("./engine.js");
 class Renderer {
 	constructor() {
 		this.canvas = document.getElementById("gameCanvas");
-		this.canvas.width = innerWidth;
-		this.canvas.height = innerHeight;
-		this.width = this.canvas.width;
-		this.height = this.canvas.height;
+		this.bounds = this.canvas.getBoundingClientRect();
 		this.context = this.canvas.getContext("2d");
 		this.camera = camera.create(this.context);
 		this.engine = engine.create();
@@ -38,10 +35,11 @@ class Renderer {
 	}
 
 	setSize(width, height) {
-		this.width = width;
-		this.height = height;
-		this.canvas.width = this.width;
-		this.canvas.height = this.height;
+		this.bounds.width = width;
+		this.bounds.height = height;
+		this.canvas.width = this.bounds.width;
+		this.canvas.height = this.bounds.height;
+		this.bounds = this.canvas.getBoundingClientRect();
 
 		for (let context of this.context.offscreens) {
 			context.canvas.width = this.canvas.width;
@@ -217,7 +215,7 @@ class Renderer {
 
 	clear(context) {
 		let ctx = context || this.context;
-		ctx.clearRect(0, 0, this.width, this.height);
+		ctx.clearRect(0, 0, this.bounds.width, this.bounds.height);
 	}
 
 	save(context) {

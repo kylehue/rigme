@@ -221,3 +221,8 @@ canvas#gameCanvas {
 	display: block;
 	/*cursor: none;*/
 }
+
+.ignore{
+	pointer-events: none !important;
+	user-select: none !important;
+}

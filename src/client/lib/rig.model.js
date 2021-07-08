@@ -26,10 +26,10 @@ class RigModel {
 		this.activeJoint = null;
 
 		if (timeline.graph) {
-			this.setKeyframe(timeline.graph.state.currentMark, {
+			this.setKeyframe(0, {
 				position: {
 					x: timeline.graph.hatchMark.spacing / 2,
-					y: config.render.keyframe.y
+					y: 0
 				},
 				locked: true
 			});
@@ -37,6 +37,12 @@ class RigModel {
 			timeline.graph.setCurrentMark(0);
 			timeline.graph.updateState();
 		}
+
+		history.add({
+			label: "Clear",
+			value: this.clone(),
+			group: "keyframe"
+		});
 	}
 
 	clone(keyframes) {
@@ -84,7 +90,7 @@ class RigModel {
 						render: {
 							size: 12,
 							color: "red",
-							position: vector(i * timeline.graph.hatchMark.spacing + timeline.graph.hatchMark.spacing / 2, config.render.keyframe.y)
+							position: vector(i * timeline.graph.hatchMark.spacing + timeline.graph.hatchMark.spacing / 2, 0)
 						}
 					};
 
@@ -110,7 +116,7 @@ class RigModel {
 			render: {
 				size: config.render.keyframe.size,
 				color: config.render.keyframe.color.default,
-				position: options.position || vector(index * timeline.graph.hatchMark.spacing + timeline.graph.hatchMark.spacing / 2, config.render.keyframe.y)
+				position: options.position || vector(index * timeline.graph.hatchMark.spacing + timeline.graph.hatchMark.spacing / 2, 0)
 			},
 			locked: options.locked || false
 		};
@@ -575,17 +581,6 @@ class RigModel {
 		}
 
 		return result;
-
-		/*if (timeline.graph) {
-			timeline.graph.setCurrentMark(0, false);
-			let currentFrame = this.keyframes[timeline.graph.state.currentMark];
-			this.activeJoint = this.getKeyframe("id", currentFrame.activeJointId);
-			if (this.activeJoint) {
-				this.updateKeyframe(timeline.graph.state.currentFrame, {
-					activeJointId: this.activeJoint.id
-				});
-			}
-		}*/
 	}
 
 	import (keyframes) {
@@ -684,7 +679,7 @@ events.once("loadedApps", vue => {
 	rigModel.setKeyframe(timeline.graph.state.currentMark, {
 		position: {
 			x: timeline.graph.hatchMark.spacing / 2,
-			y: config.render.keyframe.y
+			y: 0
 		},
 		locked: true
 	});

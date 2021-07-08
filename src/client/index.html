@@ -41,7 +41,7 @@
 			<div id="optionApp" v-if="!hidden">
 				<div class="wrapper">
 					<button id="showOverlayApp" class="darko-d" v-on:mousedown="showOverlayApp">Add Overlay...</button>
-					<button id="" class="darko-d" v-on:mousedown="clearJoints">Clear joints</button>
+					<button id="" class="darko-d" v-on:mousedown="clearJoints">Clear</button>
 					<button id="" class="darko-d" v-on:mousedown="resetView">Reset view</button>
 					<button id="" class="darko-d" v-on:mousedown="undo">Undo<span class="shortcut">Ctrl + Z</span></button>
 					<button id="" class="darko-d" v-on:mousedown="redo">Redo<span class="shortcut">Ctrl + Y</span></button>
@@ -190,6 +190,9 @@
 							<!-- Timeline -->
 							<div class="row-a">
 								<div id="timelineGraphWrapper">
+									<!-- <div id="timelineScrollWrapper">
+										<button id="timelineScrollbar"></button>
+									</div> -->
 									<canvas id="timelineGraph"></canvas>
 								</div>
 							</div>
@@ -227,18 +230,18 @@
 					</div>
 					<!-- Panel -->
 					<!-- <div id="panelApp">
-									<div class="wrapper">
-													<div class="row-a">
-																	<div class="wrapper-material">
-																					<div class="menu">
-																									<button id="fileButton" class="darko-a">File</button>
-																					</div>
-																	</div>
-																	<div class="wrapper-layer">
-																					
-																	</div>
-													</div>
-									</div>
+										<div class="wrapper">
+															<div class="row-a">
+																				<div class="wrapper-material">
+																									<div class="menu">
+																														<button id="fileButton" class="darko-a">File</button>
+																									</div>
+																				</div>
+																				<div class="wrapper-layer">
+																									
+																				</div>
+															</div>
+										</div>
 					</div> -->
 				</div>
 			</div>

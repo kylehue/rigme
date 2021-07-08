@@ -44,6 +44,7 @@ let shortcuts = {
 	KeyT: actions.remove
 };
 
+let sleep = false;
 let showOverlay = true;
 
 let actionIcons = {};
@@ -191,6 +192,12 @@ events.on("historyChange", () => {
 
 events.on("clearJoints", () => {
 	rigModel.reset();
+
+	history.add({
+		label: "Clear",
+		value: rigModel.clone(),
+		group: "keyframe"
+	});
 });
 
 events.on("resetCamera", () => {
@@ -205,6 +212,26 @@ events.on("undo", () => {
 
 events.on("redo", () => {
 	redo();
+});
+
+events.on("renderSleep", () => {
+	let components = document.querySelectorAll("input");
+	for (let comp of components) {
+		comp.classList.add("ignore");
+		comp.setAttribute("disabled", "");
+	}
+
+	sleep = true;
+});
+
+events.on("renderFocus", () => {
+	let components = document.querySelectorAll("input");
+	for (let comp of components) {
+		comp.classList.remove("ignore");
+		comp.removeAttribute("disabled");
+	}
+	
+	sleep = false;
 });
 
 //Loading the autosaved data
@@ -228,8 +255,6 @@ fileButton.addEventListener("mouseup", function() {
 	let fileApp = vue.fileApp;
 	if (fileApp.hidden) {
 		fileApp.show(mouse.x + 5, mouse.y + 5);
-	} else {
-		fileApp.hide();
 	}
 });
 
@@ -237,8 +262,6 @@ optionButton.addEventListener("mouseup", function() {
 	let optionApp = vue.optionApp;
 	if (optionApp.hidden) {
 		optionApp.show(mouse.x + 5, mouse.y + 5);
-	} else {
-		optionApp.hide();
 	}
 });
 
@@ -293,23 +316,25 @@ mouse.on("mousedown", function() {
 });
 
 mouse.on("mousemove", function() {
-	if (!mouse.dragged && mouseInside()) {
+	if (!mouse.dragged && mouseInside() && !sleep) {
 		mouseLast.set(worldMouse);
 	}
 });
 
 renderer.canvas.addEventListener("click", function() {
-	if (action == actions.add) {
-		rigModel.addJoint(worldMouse.x, worldMouse.y);
-	}
+	if (!sleep) {
+		if (action == actions.add) {
+			rigModel.addJoint(worldMouse.x, worldMouse.y);
+		}
 
-	if (action === actions.remove) {
-		rigModel.selectJoint(worldMouse.x, worldMouse.y);
-		rigModel.removeJoint(worldMouse.x, worldMouse.y);
-	}
+		if (action === actions.remove) {
+			rigModel.selectJoint(worldMouse.x, worldMouse.y);
+			rigModel.removeJoint(worldMouse.x, worldMouse.y);
+		}
 
-	if (action === actions.select) {
-		rigModel.selectJoint(worldMouse.x, worldMouse.y);
+		if (action === actions.select) {
+			rigModel.selectJoint(worldMouse.x, worldMouse.y);
+		}
 	}
 });
 
@@ -355,7 +380,7 @@ renderer.render(function() {
 		}
 
 		if (mouseInside()) {
-			if (action === actions.add) {
+			if (action === actions.add && !sleep) {
 				let color = "#323439";
 				let currentPart = rigModel.activeJoint;
 				if (currentPart) {
@@ -378,7 +403,7 @@ renderer.render(function() {
 	});
 
 	if (mouseInside() && block.style.display != "block") {
-		if (action === actions.pan) {
+		if (action === actions.pan && !sleep) {
 			if (mouse.dragged) {
 				cameraMovement.set({
 					x: mouseLast.x - worldMouse.x + renderer.camera.movement.x,
@@ -389,7 +414,7 @@ renderer.render(function() {
 			}
 		}
 
-		if (action === actions.move) {
+		if (action === actions.move && !sleep) {
 			if (mouse.pressed) {
 				rigModel.moveJoint(worldMouse.x, worldMouse.y);
 			}
