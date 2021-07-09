@@ -1,5 +1,4 @@
-const download = require("js-file-download");
-const fs = require("fs.realpath");
+const streamSaver = require("streamsaver");
 const renderer = require("../lib/renderer.js");
 const events = require("../../../lib/events.js");
 const vector = require("../../../lib/vector.js");
@@ -114,18 +113,96 @@ function redo() {
 	}
 }
 
-events.on("downloadModel", filename => {
-	let json = rigModel.toJSON();
-	let str = JSON.stringify(json);
-	download(str, `${filename}.rigme`);
+events.on("saveProject", filename => {
+	let model = rigModel.toJSON();
+	let config = {
+		frameCount: vue.timeline.app.totalFrames,
+		animationSpeed: vue.timeline.app.animationSpeed,
+		start: vue.timeline.app.start,
+		end: vue.timeline.app.end,
+		overlay: {
+			opacity: vue.overlayConfigApp.opacity,
+			scale: vue.overlayConfigApp.scale,
+			angle: vue.overlayConfigApp.angle
+		}
+	};
+
+	let overlay = [];
+
+	for (var i = 0; i < overlayFrames.length; i++) {
+		let img = overlayFrames[i];
+		overlay.push(img.src);
+	}
+
+	let data = {
+		model: model,
+		config: config,
+		overlay: overlay
+	};
+
+	let str = JSON.stringify(data);
+
+	try {
+		const uInt8 = new TextEncoder().encode(str);
+		const fileStream = streamSaver.createWriteStream(`${filename}.rigme`);
+
+		new Response(str).body
+			.pipeTo(fileStream)
+			.then(success => {
+
+			}, error => {
+				console.warn(error);
+			});
+	} catch (e) {
+		console.warn(e);
+	}
 });
 
-events.on("importModel", json => {
-	let model = rigModel.fromJSON(json);
-	rigModel.import(model);
+window.onunload = () => {
+	writableStream.abort();
+}
+
+events.on("loadProject", data => {
+	if (data.model) {
+		let model = rigModel.fromJSON(data.model);
+		rigModel.import(model);
+	} else {
+		console.warn("Couldn't load model.");
+	}
+
+	if (data.config) {
+		document.getElementById("frameCount").value = data.config.frameCount;
+		document.getElementById("animationSpeed").value = data.config.animationSpeed;
+		document.getElementById("playbackStart").value = data.config.start;
+		document.getElementById("playbackEnd").value = data.config.end;
+
+		vue.timeline.app.fixData();
+
+		vue.overlayConfigApp.opacity = data.config.overlay.opacity;
+		vue.overlayConfigApp.scale = data.config.overlay.scale;
+		vue.overlayConfigApp.angle = data.config.overlay.angle;
+		vue.overlayConfigApp.updateSliders();
+	} else {
+		console.warn("Couldn't load configurations.");
+	}
+
+	if (data.overlay) {
+		if (data.overlay.length > 0) {
+			overlayFrames = [];
+			vue.optionApp.overlayConfigHidden = false;
+			for (var i = 0; i < data.overlay.length; i++) {
+				let src = data.overlay[i];
+				let img = new Image();
+				img.src = src;
+				overlayFrames.push(img);
+			}
+		}
+	} else {
+		console.warn("Couldn't load overlay.");
+	}
 
 	history.add({
-		label: "Import",
+		label: "Load",
 		value: rigModel.clone(),
 		group: "keyframe"
 	});
@@ -148,6 +225,7 @@ events.on("extractFrames", (url, options) => {
 		clearInterval(interval);
 		interval = undefined;
 		cancelButton.onclick = null;
+		vue.optionApp.overlayConfigHidden = false;
 	}
 
 	extractKeyframes(url, {
@@ -182,6 +260,11 @@ events.on("extractFrames", (url, options) => {
 	}, 1000 / 30);
 });
 
+events.on("removeOverlay", () => {
+	overlayFrames = [];
+	vue.optionApp.overlayConfigHidden = true;
+});
+
 //Autosave
 events.on("historyChange", () => {
 	if (history.eventCount % config.autosave.threshold == 0) {
@@ -190,14 +273,25 @@ events.on("historyChange", () => {
 	}
 });
 
+//Loading the autosaved data
+let autosavedData = localStorage.getItem(config.autosave.label);
+if (autosavedData) {
+	let data;
+	let error = false;
+	try {
+		data = JSON.parse(autosavedData);
+	} catch (e) {
+		error = true;
+		console.warn("Couldn't load autosaved data.");
+	}
+
+	if (data && !error) {
+		rigModel.import(rigModel.fromJSON(data));
+	}
+}
+
 events.on("clearJoints", () => {
 	rigModel.reset();
-
-	history.add({
-		label: "Clear",
-		value: rigModel.clone(),
-		group: "keyframe"
-	});
 });
 
 events.on("resetCamera", () => {
@@ -208,10 +302,14 @@ events.on("resetCamera", () => {
 
 events.on("undo", () => {
 	undo();
+
+	events.emit("historyChange");
 });
 
 events.on("redo", () => {
 	redo();
+
+	events.emit("historyChange");
 });
 
 events.on("renderSleep", () => {
@@ -230,26 +328,9 @@ events.on("renderFocus", () => {
 		comp.classList.remove("ignore");
 		comp.removeAttribute("disabled");
 	}
-	
+
 	sleep = false;
 });
-
-//Loading the autosaved data
-let autosavedData = localStorage.getItem(config.autosave.label);
-if (autosavedData) {
-	let json;
-	let error = false;
-	try {
-		json = JSON.parse(autosavedData);
-	} catch (e) {
-		error = true;
-		console.warn("Couldn't load autosaved data.");
-	}
-
-	if (json && !error) {
-		rigModel.import(rigModel.fromJSON(json));
-	}
-}
 
 fileButton.addEventListener("mouseup", function() {
 	let fileApp = vue.fileApp;
@@ -289,11 +370,11 @@ key.on("keydown", function(event) {
 
 	if (event.ctrlKey) {
 		if (event.keyCode == 90) {
-			undo();
+			events.emit("undo");
 		}
 
 		if (event.keyCode == 89) {
-			redo();
+			events.emit("redo");
 		}
 	}
 });
@@ -376,7 +457,12 @@ renderer.render(function() {
 
 		let overlayFrame = overlayFrames[vue.timeline.graph.state.currentMark];
 		if (overlayFrame && showOverlay) {
+			renderer.save();
+			renderer.context.globalAlpha = vue.overlayConfigApp.opacity;
+			renderer.context.scale(vue.overlayConfigApp.scale, vue.overlayConfigApp.scale);
+			renderer.context.rotate(vue.overlayConfigApp.angle);
 			renderer.context.drawImage(overlayFrame, -overlayFrame.width / 2, -overlayFrame.height / 2);
+			renderer.restore();
 		}
 
 		if (mouseInside()) {
@@ -409,8 +495,6 @@ renderer.render(function() {
 					x: mouseLast.x - worldMouse.x + renderer.camera.movement.x,
 					y: mouseLast.y - worldMouse.y + renderer.camera.movement.y
 				});
-
-				mouse.dragged = false;
 			}
 		}
 
