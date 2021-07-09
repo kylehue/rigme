@@ -79,13 +79,14 @@ class RigModel {
 				timeline.graph.updateState();
 
 				for (var i = end - 1; i >= start + 1; i--) {
-					let subJoints = this.clone()[end].joints;
+					let clone = this.clone();
+					let subJoints = clone[end].joints;
 
 					let subKeyframe = {
 						id: utils.uid(),
 						type: "sub",
 						index: i,
-						activeJointId: null,
+						activeJointId: clone.activeJointId,
 						joints: subJoints,
 						render: {
 							size: 12,
@@ -260,6 +261,7 @@ class RigModel {
 				}
 			}
 
+
 			let lerpWeight = utils.map(frame.index, front, back, 0, 1);
 
 			let frontFrame = this.keyframes[front];
@@ -279,6 +281,10 @@ class RigModel {
 							let child = joint.children[k];
 							child.angle = child.position.heading(joint.position);
 						}
+					}
+
+					if (joint.id == backFrame.activeJointId) {
+						frame.activeJointId = joint.id;
 					}
 				}
 			}
@@ -383,6 +389,7 @@ class RigModel {
 
 		if (timeline.graph) {
 			timeline.graph.setCurrentMark(timeline.graph.state.currentFrame, false);
+			timeline.graph.updateState();
 			if (this.activeJoint) this.updateKeyframe(timeline.graph.state.currentFrame, {
 				activeJointId: this.activeJoint.id
 			});
@@ -408,54 +415,23 @@ class RigModel {
 				});
 			}
 		}
-
-		/*let doforward = [];
-		let doinverse = [];
-
-		for (var i = 0; i < jointChain.length; i++) {
-			let joint = jointChain[i];
-			if (joint.hierarchy <= this.activeJoint.hierarchy) {
-				doinverse.push(joint);
-			} 
-
-			if (joint.hierarchy >= this.activeJoint.hierarchy) {
-				doforward.push(joint);
-			}
-		}
-
-		doforward.sort((a, b) => a.hierarchy - b.hierarchy);
-		for (var i = 0; i < doforward.length; i++) {
-			let joint = doforward[i];
-			for (var j = 0; j < joint.children.length; j++) {
-				let child = joint.children[j];
-				child.angle = child.position.heading(joint.position);
-				child.position.set({
-					x: joint.position.x - Math.cos(child.angle) * child.length,
-					y: joint.position.y - Math.sin(child.angle) * child.length
-				});
-			}
-		}
-
-		doinverse.sort((a, b) => b.hierarchy - a.hierarchy);
-		for (var i = doinverse.length - 1; i >= 0; i--) {
-			let joint = doinverse[i];
-			if (joint.parent !== this.activeJoint) {
-				if (joint.parent) {
-					joint.parent.angle = joint.position.heading(joint.parent.position);
-					joint.parent.position.set({
-						x: joint.position.x + Math.cos(joint.parent.angle) * joint.length,
-						y: joint.position.y + Math.sin(joint.parent.angle) * joint.length
-					});
-				}
-			}
-		}*/
-
 	}
 
 	moveJoint(x, y, jointChain) {
 		jointChain = jointChain || this.joints;
 
 		if (!this.activeJoint) return;
+		if (timeline.graph) {
+			if (config.animation.autoAddKeyframe) {
+				this.setKeyframe(timeline.graph.state.currentMark);
+			} else {
+				timeline.graph.setCurrentMark(timeline.graph.state.currentFrame, false);
+				timeline.graph.updateState();
+			}
+
+			this.updateSubKeyframes();
+		}
+
 		if (x && y) {
 			if (this.activeJoint.position.dist(this.activeJoint.positionPrev) > 1) {
 				this._moved = true;
@@ -467,10 +443,6 @@ class RigModel {
 
 		if (!config.animation.linear) this.computeKinematics(this.joints);
 
-		if (timeline.graph) {
-			timeline.graph.setCurrentMark(timeline.graph.state.currentFrame, false);
-			this.updateSubKeyframes();
-		}
 	}
 
 	getJoint(id) {
