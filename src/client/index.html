@@ -15,6 +15,7 @@
 		<link rel="stylesheet" type="text/css" href="css/load.css">
 		<link rel="stylesheet" type="text/css" href="css/option.css">
 		<link rel="stylesheet" type="text/css" href="css/overlay.css">
+		<link rel="stylesheet" type="text/css" href="css/overlay.config.css">
 		<link rel="stylesheet" type="text/css" href="css/contextMenu.css">
 	</head>
 	<body>
@@ -41,7 +42,8 @@
 			<div id="optionApp" v-if="!hidden">
 				<div class="wrapper">
 					<button id="showOverlayApp" class="darko-d" v-on:mousedown="showOverlayApp">Add Overlay...</button>
-					<button id="" class="darko-d" v-on:mousedown="clearJoints">Clear</button>
+					<button id="showOverlayConfigApp" class="darko-d" v-on:mousedown="showOverlayConfigApp" v-if="!overlayConfigHidden">Overlay Settings...</button>
+					<button id="" class="darko-d" v-on:mousedown="clearJoints">Reset keyframes</button>
 					<button id="" class="darko-d" v-on:mousedown="resetView">Reset view</button>
 					<button id="" class="darko-d" v-on:mousedown="undo">Undo<span class="shortcut">Ctrl + Z</span></button>
 					<button id="" class="darko-d" v-on:mousedown="redo">Redo<span class="shortcut">Ctrl + Y</span></button>
@@ -50,15 +52,15 @@
 			<!-- File app -->
 			<div id="fileApp" v-if="!hidden">
 				<div class="wrapper">
-					<button id="showSaveApp" class="darko-d" v-on:mousedown="showSaveApp">Save...</button>
-					<button id="showLoadApp" class="darko-d" v-on:mousedown="showLoadApp">Load...</button>
+					<button id="showSaveApp" class="darko-d" v-on:mousedown="showSaveApp">Save Project</button>
+					<button id="showLoadApp" class="darko-d" v-on:mousedown="showLoadApp">Load Project</button>
 					<button id="showExportApp" class="darko-d">Export as...</button>
 				</div>
 			</div>
 			<!-- Save app -->
 			<div id="saveApp" class="darko-b" v-if="!hidden">
 				<div class="row">
-					<p class="title">Save</p>
+					<p class="title">Save Project</p>
 					<button class="darko-a close" v-on:click="hide" v-bind:title="closeMsg">x</button>
 				</div>
 				<div class="row">
@@ -68,13 +70,13 @@
 					</div>
 				</div>
 				<div class="row">
-					<button id="download" class="darko-a" v-on:click="validate">Download</button>
+					<button id="download" class="darko-a" v-on:click="validate">Save</button>
 				</div>
 			</div>
 			<!-- Load app -->
 			<div id="loadApp" class="darko-b" v-if="!hidden">
 				<div class="row">
-					<p class="title">Load</p>
+					<p class="title">Load Project</p>
 					<button class="darko-a close" v-on:click="hide" v-bind:title="closeMsg">x</button>
 				</div>
 				<div class="row section">
@@ -91,7 +93,7 @@
 					<p class="error-text" v-if="fileError">{{errorMessage}}</p>
 				</div>
 				<div class="row">
-					<button id="import" class="darko-a disabled" v-on:click="validate">Import</button>
+					<button id="import" class="darko-a disabled" v-on:click="validate">Load</button>
 				</div>
 			</div>
 			<!-- Overlay app -->
@@ -152,6 +154,44 @@
 					<button id="addOverlay" class="darko-a disabled" v-on:click="validate">Add</button>
 				</div>
 			</div>
+			<!-- Overlay config app -->
+			<div id="overlayConfigApp" class="darko-b" v-if="!hidden">
+				<div class="row">
+					<p class="title">Overlay Settings</p>
+					<button class="darko-a close" v-on:click="hide" v-bind:title="closeMsg">x</button>
+				</div>
+				<div class="row section">
+					<div class="title-wrapper">
+						<p class="title">Appearance</p>
+					</div>
+					<div class="field max-width-field">
+						<label for="overlayFrameCount">Opacity:</label>
+						<div id="scaleSlider" class="slider-wrapper" data-label="opacity">
+							<div class="handle darko-e"></div>
+							<div class="track darko-d"></div>
+						</div>
+					</div>
+					<div class="field max-width-field">
+						<label for="overlayFrameCount">Scale:</label>
+						<div id="opacitySlider" class="slider-wrapper" data-label="scale">
+							<div class="handle darko-e"></div>
+							<div class="track darko-d"></div>
+						</div>
+					</div>
+					
+					<div class="field max-width-field">
+						<label for="overlayFrameRate">Rotate:</label>
+						<div id="rotateSlider" class="slider-wrapper" data-label="rotate">
+							<div class="handle darko-e"></div>
+							<div class="track darko-d"></div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<button id="removeOverlay" class="darko-a fit" v-on:click="removeOverlay">Delete Overlay</button>
+					<button id="resetOverlayConfig" class="darko-a fit" v-on:click="reset">Reset</button>
+				</div>
+			</div>
 			<!-- Nav -->
 			<div id="navigation" class="darko-b">
 				<div class="wrapper-left">
@@ -191,37 +231,52 @@
 							<div class="row-a">
 								<div id="timelineGraphWrapper">
 									<!-- <div id="timelineScrollWrapper">
-										<button id="timelineScrollbar"></button>
+													<button id="timelineScrollbar"></button>
 									</div> -->
 									<canvas id="timelineGraph"></canvas>
 								</div>
 							</div>
 							<!-- Timeline control -->
 							<div class="row-b">
-								<button id="lastFrame" class="darko-a" v-bind:title="lastMsg">
-								<img src="assets/svg/previous.svg" class="" />
-								</button>
-								<button id="playStop" class="darko-a" v-bind:title="playMsg">
-								<img src="assets/svg/play.svg" class="" />
-								</button>
-								<button id="nextFrame" class="darko-a" v-bind:title="nextMsg">
-								<img src="assets/svg/next.svg" class="" />
-								</button>
-								<button id="addKeyframe" class="darko-a" v-bind:title="addKeyMsg">
-								<img src="assets/svg/key-plus.svg" class="" />
-								</button>
-								<button id="deleteKeyframe" class="darko-a" v-bind:title="removeKeyMsg">
-								<img src="assets/svg/key-minus.svg" class="" />
-								</button>
-								<div class="input-wrapper left-auto" v-bind:title="frameCountMsg">
-									<img src="assets/svg/fr.svg">
-									<input id="frameCount" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="30" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
+								<div class="left-wrapper">
+									<button id="lastFrame" class="darko-a" v-bind:title="lastMsg">
+									<img src="assets/svg/previous.svg" class="" />
+									</button>
+									<button id="playStop" class="darko-a" v-bind:title="playMsg">
+									<img src="assets/svg/play.svg" class="" />
+									</button>
+									<button id="nextFrame" class="darko-a" v-bind:title="nextMsg">
+									<img src="assets/svg/next.svg" class="" />
+									</button>
+									<button id="addKeyframe" class="darko-a" v-bind:title="addKeyMsg">
+									<img src="assets/svg/key-plus.svg" class="" />
+									</button>
+									<button id="deleteKeyframe" class="darko-a" v-bind:title="removeKeyMsg">
+									<img src="assets/svg/key-minus.svg" class="" />
+									</button>
+								</div>
+								<div class="right-wrapper">
+									<div class="input-wrapper" v-bind:title="startMsg">
+										<label for="playbackStart">from</label>
+										<input id="playbackStart" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
+									</div>
+
+									<div class="input-wrapper" v-bind:title="endMsg">
+										<label for="playbackEnd">to</label>
+										<input id="playbackEnd" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
+									</div>
+
+									<div class="input-wrapper" v-bind:title="frameCountMsg">
+										<img src="assets/svg/fr.svg">
+										<input id="frameCount" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
+									</div>
+									
+									<div class="input-wrapper" v-bind:title="animationSpeedMsg">
+										<img src="assets/svg/rabbit.svg">
+										<input id="animationSpeed" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="30" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
+									</div>
 								</div>
 								
-								<div class="input-wrapper" v-bind:title="animationSpeedMsg">
-									<img src="assets/svg/rabbit.svg">
-									<input id="animationSpeed" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="30" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
-								</div>
 								<button id="minimize" class="">
 								<img src="assets/svg/triangle.svg" class="" />
 								</button>
@@ -230,18 +285,18 @@
 					</div>
 					<!-- Panel -->
 					<!-- <div id="panelApp">
-										<div class="wrapper">
-															<div class="row-a">
-																				<div class="wrapper-material">
-																									<div class="menu">
-																														<button id="fileButton" class="darko-a">File</button>
-																									</div>
-																				</div>
-																				<div class="wrapper-layer">
-																									
-																				</div>
-															</div>
-										</div>
+													<div class="wrapper">
+																					<div class="row-a">
+																													<div class="wrapper-material">
+																																					<div class="menu">
+																																													<button id="fileButton" class="darko-a">File</button>
+																																					</div>
+																													</div>
+																													<div class="wrapper-layer">
+																																					
+																													</div>
+																					</div>
+													</div>
 					</div> -->
 				</div>
 			</div>
