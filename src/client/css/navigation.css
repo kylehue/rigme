@@ -35,11 +35,6 @@
 	margin: 3px 3px;
 }
 
-#navigation button.fit {
-	width: fit-content;
-	padding: 0px 8px;
-}
-
 #progressBarWrapper {
 	position: absolute;
 	display: none;

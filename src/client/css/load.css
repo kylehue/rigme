@@ -44,6 +44,7 @@
 	line-height: 1;
 	color: var(--white);
 	font-size: 14px;
+	cursor: default;
 }
 
 #loadApp .row.section {

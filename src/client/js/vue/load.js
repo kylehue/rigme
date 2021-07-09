@@ -70,7 +70,7 @@ const loadApp = new Vue({
 				return;
 			}
 
-			events.emit("importModel", currentJSON);
+			events.emit("loadProject", currentJSON);
 			this.hide();
 		}
 	}

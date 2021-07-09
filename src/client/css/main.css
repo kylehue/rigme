@@ -6,6 +6,7 @@
 	--darko-b: #2a2b33;
 	--darko-c: #26272f;
 	--darko-d: #2f3039;
+	--darko-e: #3a3b47;
 	--hover: brightness(1.13) hue-rotate(5deg);
 	--active: brightness(1.2) hue-rotate(10deg);
 	--dim-a: rgba(245, 237, 255, 0.8);
@@ -95,6 +96,18 @@ button.disabled {
 	opacity: 0.5;
 }
 
+button.fit {
+	width: fit-content !important;
+	padding: 0px 8px !important;
+	min-width: 60px;
+}
+
+button:disabled {
+	pointer-events: none;
+	user-select: none;
+	filter: brightness(0.9);
+}
+
 span.shortcut {
 	font-size: 10px;
 	color: var(--dim-c);
@@ -130,6 +143,17 @@ span.shortcut {
 	color: var(--white);
 	border: 1px solid rgba(255, 255, 255, 0.02);
 	border-radius: 3px;
+}
+
+.darko-e {
+	background: var(--darko-e);
+	color: var(--white);
+	border: 1px solid rgba(255, 255, 255, 0.02);
+	border-radius: 2px;
+}
+
+.darko-e:hover {
+	filter: brightness(1.1);
 }
 
 .wrapper {
@@ -201,6 +225,35 @@ span.shortcut {
 .error-text {
 	font-size: 12px;
 	color: red;
+}
+
+.slider-wrapper{
+	position: relative;
+	user-select: none;
+	cursor: default;
+	display: flex;
+	flex-flow: row nowrap;
+	align-items: center;
+	align-content: center;
+	justify-content: center;
+}
+
+.slider-wrapper .track {
+	position: absolute;
+	width: 100%;
+	height: 20%;
+	z-index: 0;
+	border-radius: 2px;
+}
+
+.slider-wrapper .handle {
+	position: absolute;
+	left: 0;
+	width: 10px;
+	height: 80%;
+	z-index: 1;
+	border-radius: 2px;
+	cursor: pointer;
 }
 
 div#block {

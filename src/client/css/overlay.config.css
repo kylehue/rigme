@@ -1,4 +1,4 @@
-#overlayApp {
+#overlayConfigApp {
 	position: absolute;
 	margin: auto;
 	top: 0;
@@ -20,7 +20,7 @@
 	opacity: 0;
 }
 
-#overlayApp .row {
+#overlayConfigApp .row {
 	position: relative;
 	display: flex;
 	flex-flow: row wrap;
@@ -33,11 +33,11 @@
 	box-sizing: border-box;
 }
 
-#overlayApp p {
+#overlayConfigApp p {
 	color: var(--white);
 }
 
-#overlayApp p.title {
+#overlayConfigApp p.title {
 	position: relative;
 	display: block;
 	width: 100%;
@@ -50,20 +50,20 @@
 	cursor: default;
 }
 
-#overlayApp .row.section {
+#overlayConfigApp .row.section {
 	margin-top: 15px;
 	border: var(--borders);
 	padding-bottom: 4px;
 }
 
-#overlayApp .row.section.disabled {
+#overlayConfigApp .row.section.disabled {
 	pointer-events: none;
 	user-select: none;
 	background: rgba(0, 0, 0, 0.05);
 	opacity: 0.5;
 }
 
-#overlayApp .row.section .title-wrapper {
+#overlayConfigApp .row.section .title-wrapper {
 	display: flex;
 	align-items: center;
 	align-content: center;
@@ -71,7 +71,7 @@
 	transform: translateY(calc(-50% - 2px));
 }
 
-#overlayApp .row.section p {
+#overlayConfigApp .row.section p {
 	background: var(--darko-b);
 	margin: 0;
 	padding: 0;
@@ -79,7 +79,7 @@
 	padding: 0 4px;
 }
 
-#overlayApp .field {
+#overlayConfigApp .field {
 	position: relative;
 	display: flex;
 	align-content: center;
@@ -88,24 +88,26 @@
 	flex-flow: column nowrap;
 	width: fit-content;
 	margin-right: 13px;
-	margin-top: 5px;
+	margin-bottom: 5px;
 }
 
-#overlayApp .field.row-field {
+#overlayConfigApp .field.max-width-field {
+	width: 100%;
+	margin-left: 7px;
+	margin-right: 13px;
+}
+
+#overlayConfigApp .field.row-field {
 	align-items: center;
 	flex-flow: row nowrap;
 }
 
-#overlayApp .field.row-field p {
+#overlayConfigApp .field.row-field p {
 	color: var(--dim-a);
 	font-size: 12px;
 }
 
-#overlayApp .field:last-child {
-	margin-right: 0;
-}
-
-#overlayApp .field label {
+#overlayConfigApp .field label {
 	position: relative;
 	display: block;
 	line-height: 1;
@@ -116,38 +118,39 @@
 	color: var(--dim-b);
 }
 
-#overlayApp .field input {
+#overlayConfigApp .field input {
 	position: relative;
 	display: block;
 	width: 70px;
 	height: fit-content;
 }
 
-#overlayApp .row:last-child {
+#overlayConfigApp .row:last-child {
 	align-items: center;
 	align-content: center;
-	justify-content: center;
+	justify-content: space-between;
 	margin-top: 15px;
 }
 
-#overlayApp .row:last-child button {
+#overlayConfigApp .row:last-child button {
+	width: 80px;
+	height: 30px;
+	margin: 0 5px;
+}
+
+#overlayConfigApp .custom-file {
 	width: 80px;
 	height: 30px;
 }
 
-#overlayApp .custom-file {
-	width: 80px;
-	height: 30px;
-}
-
-#overlayApp .filename-wrapper p {
+#overlayConfigApp .filename-wrapper p {
 	font-size: 12px;
 	font-weight: 400;
 	text-overflow: ellipsis;
 	color: var(--dim-b);
 }
 
-#overlayApp .row:first-child {
+#overlayConfigApp .row:first-child {
 	margin-bottom: 6px;
 	padding-bottom: 6px;
 	margin-top: 1px;
@@ -155,17 +158,23 @@
 	border-bottom: var(--borders);
 }
 
-#overlayApp .row:first-child p {
+#overlayConfigApp .row:first-child p {
 	margin: 0;
 	padding: 0;
 	font-weight: 700;
 	font-size: 16px;
 }
 
-#overlayApp button.close {
+#overlayConfigApp button.close {
 	position: absolute;
 	right: 6px;
 	color: var(--dim-b);
 	width: 15px;
 	height: 15px;
+}
+
+#overlayConfigApp .slider-wrapper {
+	position: relative;
+	width: 100%;
+	height: 20px;
 }

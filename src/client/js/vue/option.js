@@ -1,10 +1,12 @@
 const events = require("../../../../lib/events.js");
 const overlayApp = require("./overlay.js");
+const overlayConfig = require("./overlay.config.js");
 
 const optionApp = new Vue({
 	el: "#optionApp",
 	data: {
 		hidden: true,
+		overlayConfigHidden: true,
 		position: {
 			x: 0,
 			y: 0
@@ -25,8 +27,15 @@ const optionApp = new Vue({
 		showOverlayApp: function () {
 			overlayApp.show();
 		},
+		showOverlayConfigApp: function () {
+			overlayConfig.show();
+		},
 		clearJoints: function () {
-			events.emit("clearJoints");
+			let con = confirm("Are you sure you want to delete all of the keyframes?");
+
+			if (con) {
+				events.emit("clearJoints");
+			}
 		},
 		resetView: function () {
 			events.emit("resetCamera");

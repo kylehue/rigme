@@ -1,6 +1,7 @@
 const timeline = require("./timeline.js");
 const contextMenu = require("./contextMenu.js");
 const overlayApp = require("./overlay.js");
+const overlayConfigApp = require("./overlay.config.js");
 const fileApp = require("./file.js");
 const saveApp = require("./save.js");
 const loadApp = require("./load.js");
@@ -13,7 +14,8 @@ const apps = {
 	saveApp: saveApp,
 	loadApp: loadApp,
 	optionApp: optionApp,
-	overlayApp: overlayApp
+	overlayApp: overlayApp,
+	overlayConfigApp: overlayConfigApp
 };
 
 module.exports = apps;

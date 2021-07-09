@@ -41,7 +41,7 @@ const saveApp = new Vue({
 				return;
 			}
 
-			events.emit("downloadModel", filename);
+			events.emit("saveProject", filename);
 			this.hide();
 		}
 	}
