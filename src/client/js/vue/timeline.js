@@ -17,6 +17,8 @@ const timelineApp = new Vue({
 		hidden: false,
 		totalFrames: parseInt(document.getElementById("frameCount").value),
 		animationSpeed: parseInt(document.getElementById("animationSpeed").value),
+		start: parseInt(document.getElementById("playbackStart").value),
+		end: parseInt(document.getElementById("playbackEnd").value),
 		currentFrame: 0,
 		lastMsg: "Previous frame",
 		playMsg: "Play/Stop",
@@ -24,15 +26,28 @@ const timelineApp = new Vue({
 		addKeyMsg: "Add keyframe",
 		removeKeyMsg: "Remove keyframe",
 		frameCountMsg: "Frame count",
-		animationSpeedMsg: "Animation speed"
+		animationSpeedMsg: "Animation speed",
+		startMsg: "Playback start",
+		endMsg: "Playback end"
 	},
 	methods: {
 		fixData: function() {
 			this.animationSpeed = parseInt(document.getElementById("animationSpeed").value);
 			this.totalFrames = parseInt(document.getElementById("frameCount").value);
+			this.start = parseInt(document.getElementById("playbackStart").value);
+			this.end = parseInt(document.getElementById("playbackEnd").value);
 			timeline.hatchMark.spacing = timeline.canvas.width / this.totalFrames;
 			timeline.snap();
 			timeline.redraw();
+
+			let configData = {
+				frameCount: this.totalFrames,
+				animationSpeed: this.animationSpeed,
+				start: this.start,
+				end: this.end
+			};
+
+			localStorage.setItem(config.autosave.label + ".config", JSON.stringify(configData));
 		},
 		validateFormat: function(e) {
 			timeline.redraw();
@@ -57,6 +72,8 @@ const timelineApp = new Vue({
 			let value = e.target.value;
 			let max = config.animation.frameCount.max;
 			if (e.target.id == "animationSpeed") max = config.animation.speed.max;
+			if (e.target.id == "playbackStart") max = parseInt(document.getElementById("playbackEnd").value);
+			if (e.target.id == "playbackEnd") max = this.totalFrames;
 			if (parseInt(value) > max) {
 				e.target.value = max.toString();
 			}
@@ -67,6 +84,8 @@ const timelineApp = new Vue({
 			let value = e.target.value;
 			let min = config.animation.frameCount.min;
 			if (e.target.id == "animationSpeed") min = config.animation.speed.min;
+			if (e.target.id == "playbackStart") min = 1;
+			if (e.target.id == "playbackEnd") min = parseInt(document.getElementById("playbackStart").value);
 			if (parseInt(value) < min) {
 				e.target.value = min.toString();
 			}
@@ -92,7 +111,6 @@ const timelineApp = new Vue({
 
 			this._previousTotalFrames = this.totalFrames;
 			this._previousAnimationSpeed = this.animationSpeed;
-			console.log(history)
 		},
 		toggleAmount: function(e) {
 			let isDown = e.wheelDeltaY < 0;
@@ -220,6 +238,9 @@ class Timeline {
 
 		addEventListener("resize", () => {
 			this.updateSize();
+			this.scrollbar.left = utils.clamp(this.scrollbar.left, 0, this.canvas.width - this.scrollbar.minWidth);
+			this.scrollbar.right = utils.clamp(this.scrollbar.right, this.scrollbar.minWidth, this.canvas.width);
+			this.scrollbar.width = this.scrollbar.right - this.scrollbar.left;
 			this.redraw();
 		});
 
@@ -233,7 +254,7 @@ class Timeline {
 			y: 0,
 			width: this.canvas.width,
 			height: undefined,
-			color: config.render.timeline.scrollbar.color,
+			color: config.render.timeline.scrollbar.color.default,
 			left: 0,
 			right: this.canvas.width,
 			minWidth: 50
@@ -315,37 +336,35 @@ class Timeline {
 		const dragStart = () => {
 			dragging = true;
 
-			if (onTimeline) {
+			if (onTimeline || onKeyframe) {
+				this.state.isDragging = true;
 				this.state._x = utils.clamp(mouseX, this.hatchMark.spacing / 2, this.canvas.width - this.hatchMark.spacing / 2);
-				let scrollbarIndex = Math.round(this.scrollbar.positionState / this.hatchMark.spacing);
-				let pos = Math.round((mouseX + this.hatchMark.spacing / 2) / this.hatchMark.spacing) - 1 + scrollbarIndex;
+				let pos = Math.round((mouseX + handleSnapX + this.hatchMark.spacing / 2) / this.hatchMark.spacing) - 1 + scrollbarIndex;
 				if (pos >= 0 && pos <= timelineApp.totalFrames) this.setCurrentMark(pos);
 			}
+
+			contextMenuApp.hide();
 		}
 
 		const dragEnd = () => {
 			dragging = false;
 			activeDrag = null;
 
-			//Fix sub keyframes
+			//Fix sub keyframes by resetting the head keyframe
 			if (activeKeyframe) {
-				activeKeyframe.dragged = false;
+				let index = Math.round((this.state._x + this.hatchMark.spacing / 2) / this.hatchMark.spacing) - 1 + scrollbarIndex;
+
+				this.setCurrentMark(index);
 				rigModel.deleteKeyframe(activeKeyframe.id);
 
-				let index = Math.round((this.state._x + this.hatchMark.spacing / 2) / this.hatchMark.spacing) - 1;
-				let scrollbarIndex = Math.round((this.scrollbar.positionState - this.hatchMark.spacing / 2) / this.hatchMark.spacing);
-				let handleSnapX = this.scrollbar.positionState % this.hatchMark.spacing;
-				let keyframeMarkX = Math.round((index + scrollbarIndex) * this.hatchMark.spacing + this.hatchMark.spacing / 2) - handleSnapX;
 				let newFrame = rigModel.setKeyframe(index, {
-					position: {
-						x: activeKeyframe.render.position.x,
-						y: activeKeyframe.render.position.y
-					},
-					joints: activeKeyframe.joints
+					position: activeKeyframe.position,
+					joints: activeKeyframe.joints,
+					locked: index == 0 ? true : false
 				});
-
-				activeKeyframe = newFrame;
 			}
+
+			this.scrollbar.color = config.render.timeline.scrollbar.color.default;
 
 			this.snap();
 			this.state.isDragging = false;
@@ -365,40 +384,45 @@ class Timeline {
 			scrollbarIndex = Math.round((this.scrollbar.positionState - this.hatchMark.spacing / 2) / this.hatchMark.spacing);
 			handleSnapX = this.scrollbar.positionState % this.hatchMark.spacing;
 
+			let resizeAreaSize = 10;
+			let onLeft = mouseX <= this.scrollbar.left + resizeAreaSize;
+			let onRight = mouseX >= this.scrollbar.right - resizeAreaSize;
+
+			//Scrollbar cursor
+			if (onScrollbar) {
+				if (mouseX >= this.scrollbar.left && mouseX <= this.scrollbar.right && (onLeft || onRight)) {
+					this.canvas.style.cursor = "ew-resize";
+				} else {
+					this.canvas.style.cursor = "default";
+				}
+			} else {
+				this.canvas.style.cursor = "default";
+			}
+
 			//Check if head keyframes are getting hovered
 			let keys = Object.keys(rigModel.keyframes);
 			for (var i = 0; i < keys.length; i++) {
-				let key = keys[i];
-				let frame = rigModel.keyframes[key];
-
-				if (frame.type == "sub") continue;
-
-				let frameX = frame.render.position.x;
-				let frameY = frame.render.position.y;
-				let frameSize = frame.render.size;
-				if (mouseX <= frameX + frameSize && mouseX >= frameX - frameSize && mouseY <= frameY + frameSize && mouseY && mouseY >= frameY - frameSize) {
-					if (!frame.hovered) {
+				let frame = rigModel.keyframes[keys[i]];
+				if (frame.type == "head") {
+					let frameX = frame.render.position.x;
+					let frameY = frame.render.position.y;
+					let frameSize = frame.render.size;
+					if (mouseX <= frameX + frameSize && mouseX >= frameX - frameSize && mouseY <= frameY + frameSize && mouseY && mouseY >= frameY - frameSize) {
 						frame.hovered = true;
 						frame.render.color = config.render.keyframe.color.hovered;
-						if (!frame.locked) this.canvas.style.cursor = "pointer";
+						this.canvas.style.cursor = "pointer";
 						this.redraw();
-					}
-				} else {
-					if (frame.hovered) {
+					} else {
 						frame.hovered = false;
 						frame.render.color = config.render.keyframe.color.default;
-						this.canvas.style.cursor = "default";
 						this.redraw();
 					}
 				}
 			}
 
-
+			//Which area is getting dragged?
 			if (dragging && !activeDrag) {
 				if (onScrollbar) {
-					let resizeAreaSize = 10;
-					let onLeft = mouseX <= this.scrollbar.left + resizeAreaSize;
-					let onRight = mouseX >= this.scrollbar.right - resizeAreaSize;
 					scrollbarResizeLeft = onLeft;
 					scrollbarResizeRight = onRight;
 					scrollbarDragStartX = this.scrollbar.left - mouseX;
@@ -409,6 +433,21 @@ class Timeline {
 					activeDrag = "keyframe";
 				}
 			}
+
+			//Change scrollbar color when hovered
+			if (onScrollbar) {
+				if (mouseX >= this.scrollbar.left && mouseX <= this.scrollbar.right) {
+					this.scrollbar.color = config.render.timeline.scrollbar.color.hovered;
+					this.redraw();
+				} else {
+					this.scrollbar.color = config.render.timeline.scrollbar.color.default;
+					this.redraw();
+				}
+			} else {
+				this.scrollbar.color = config.render.timeline.scrollbar.color.default;
+				this.redraw();
+			}
+
 
 			if (dragging) {
 				//Scrollbar drag
@@ -426,10 +465,12 @@ class Timeline {
 						this.scrollbar.left = utils.clamp(mouseX + scrollbarDragStartX, 0, this.canvas.width - this.scrollbar.width);
 						this.scrollbar.right = this.scrollbar.left + this.scrollbar.width;
 					}
+
+					this.snap();
 				}
 
 				//Timeline drag
-				if (activeDrag == "timeline") {
+				if (activeDrag == "timeline" || activeDrag == "keyframe") {
 					this.ignoreRenderer();
 					this.state.isDragging = true;
 					this.state._x = utils.clamp(mouseX, this.hatchMark.spacing / 2, this.canvas.width - this.hatchMark.spacing / 2);
@@ -440,22 +481,20 @@ class Timeline {
 				//Keyframe drag
 				if (activeDrag == "keyframe") {
 					this.ignoreRenderer();
-					for (var i = 0; i < keys.length; i++) {
-						let key = keys[i];
-						let frame = rigModel.keyframes[key];
 
-						if (!frame) continue;
-						if (frame.type == "sub") continue;
-						if (frame.locked) continue;
-						if (activeKeyframe) continue;
-						if (frame.hovered) activeKeyframe = frame;
-					}
+					if (!activeKeyframe) {
+						for (var i = 0; i < keys.length; i++) {
+							let frame = rigModel.keyframes[keys[i]];
 
-					if (activeKeyframe) {
+							if (!frame) continue;
+							if (frame.locked) continue;
+							if (frame.hovered) activeKeyframe = frame;
+						}
+					} else {
 						this.state._x = utils.clamp(mouseX, this.hatchMark.spacing / 2, this.canvas.width - this.hatchMark.spacing / 2);
+						activeKeyframe.render.position.x = this.state._x;
 						activeKeyframe.dragged = true;
 						activeKeyframe.render.color = config.render.keyframe.color.active;
-						this.canvas.style.cursor = "pointer";
 					}
 				}
 
@@ -498,17 +537,26 @@ class Timeline {
 
 		//Add keyframe button
 		this.buttons.add.addEventListener("click", () => {
-			console.log(this.state.currentMark)
-			rigModel.setKeyframe(this.state.currentMark);
+			let clone = rigModel.clone();
+			let keyframe = clone[this.state.currentMark];
+			let joints;
+
+			if (keyframe) {
+				joints = keyframe.joints;
+			}
+
+			rigModel.setKeyframe(this.state.currentMark, {
+				locked: this.state.currentMark == 0 ? true : false,
+				joints: joints
+			});
 		});
 
 		//Delete keyframe button
 		this.buttons.delete.addEventListener("click", () => {
 			let frame = rigModel.getKeyframe("index", this.state.currentMark);
 			if (frame) {
-				rigModel.deleteKeyframe(frame.id);
-
 				if (frame.type == "head" && !frame.locked) {
+					rigModel.deleteKeyframe(frame.id);
 					history.add({
 						label: "Delete keyframe",
 						value: rigModel.clone(),
@@ -534,12 +582,10 @@ class Timeline {
 		let handleSnapX = this.scrollbar.positionState % this.hatchMark.spacing;
 		let keys = Object.keys(rigModel.keyframes);
 		for (var i = 0; i < keys.length; i++) {
-			/*let key = keys[i];
+			let key = keys[i];
 			let frame = rigModel.keyframes[key];
-			let pos = Math.round((mouse.x - this.bounds.x + handleSnapX + this.hatchMark.spacing / 2) / this.hatchMark.spacing) - 1 + scrollbarIndex;
-			frame.index = pos;
 			let keyframeMarkX = Math.round((frame.index - scrollbarIndex) * this.hatchMark.spacing + this.hatchMark.spacing / 2) - handleSnapX;
-			frame.render.position.x = keyframeMarkX;*/
+			frame.render.position.x = keyframeMarkX;
 		}
 
 		let handleMarkX = Math.round((this.state.currentMark - scrollbarIndex) * this.hatchMark.spacing + this.hatchMark.spacing / 2) - handleSnapX;
@@ -605,6 +651,7 @@ class Timeline {
 		let hatchMarkGap = Math.floor(utils.clamp(timelineApp.totalFrames, (this.scrollbar.zoomState / 15), Number.MAX_SAFE_INTEGER) / (this.scrollbar.zoomState / 15)) * 5;
 
 		let scrollbarIndex = Math.round((this.scrollbar.positionState - this.hatchMark.spacing / 2) / this.hatchMark.spacing);
+		let scrollbarIndexRight = Math.round((utils.map(this.scrollbar.right, 0, this.canvas.width, 0, this.canvas.width * this.scrollbar.zoomSensitivity) - this.hatchMark.spacing / 2) / this.hatchMark.spacing);
 		let handleSnapX = this.scrollbar.positionState % this.hatchMark.spacing;
 		let handleMarkX = Math.round((this.state.currentMark - scrollbarIndex) * this.hatchMark.spacing + this.hatchMark.spacing / 2) - handleSnapX;
 		let handleX = this.state.isDragging ? this.state._x : handleMarkX;
@@ -615,6 +662,7 @@ class Timeline {
 		//Scrollbar
 		this.createRect(this.scrollbar.left, this.scrollbar.y, this.scrollbar.right - this.scrollbar.left, this.scrollbar.height - 5, this.scrollbar.color, chamfer);
 
+
 		//Background
 		this.createRect(0, this.scrollbar.height, this.canvas.width, this._timelineHeight, timelineColor, chamfer);
 
@@ -624,12 +672,16 @@ class Timeline {
 		this.scrollbar.zoomState = this.canvas.width + utils.map(this.scrollbar.width, 0, this.canvas.width, this.canvas.width * this.scrollbar.zoomSensitivity, 0);
 		this.hatchMark.spacing = this.scrollbar.zoomState / hatchMarkCount;
 		for (var i = 0; i < hatchMarkCount; i++) {
+			if (i < scrollbarIndex || i > scrollbarIndexRight) continue;
+
 			let offsetHeight = (i + 1) % hatchMarkGap == 0 ? 2 : 0;
 			let x = this.hatchMark.spacing * i + this.hatchMark.spacing / 2 - this.scrollbar.positionState;
 			let y = this.scrollbar.height + this._timelineHeight - this.hatchMark.height - offsetHeight;
 			let width = 1;
 			let height = this.scrollbar.height + this._timelineHeight - y;
+
 			this.createRect(x - width / 2, y, width, height, hatchMarkColor);
+
 			if (offsetHeight) {
 				let onHandle = x >= handleX - handleWidth / 2 && x <= handleX + handleWidth / 2;
 				//Only draw the numbers if it's not on top of the handle
@@ -654,7 +706,7 @@ class Timeline {
 			if (frame.type == "head") {
 				this.createKeyframe(frame.render.position.x, frame.render.position.y, frame.render.size, frame.render.color);
 			} else {
-				this.createKeyframe(frame.render.position.x, frame.render.position.y, frame.render.size, "blue");
+				//this.createKeyframe(frame.render.position.x, frame.render.position.y, frame.render.size, "blue");
 			}
 		}
 	}
@@ -713,8 +765,12 @@ class Timeline {
 
 	play() {
 		//Animation
+		if (this.state.currentMark + 1 < timelineApp.start) {
+			this.setCurrentMark(timelineApp.start - 1);
+		}
+
 		this.loop = setInterval(() => {
-			let pos = this.state.currentMark < timelineApp.totalFrames - 1 ? this.state.currentMark + 1 : 0;
+			let pos = this.state.currentMark < timelineApp.end - 1 ? this.state.currentMark + 1 : timelineApp.start - 1;
 			this.setCurrentMark(pos);
 		}, 1000 / timelineApp.animationSpeed);
 		this.state.isPlaying = true;
@@ -755,6 +811,34 @@ class Timeline {
 }
 
 timeline = new Timeline();
+
+//Autosave config
+let autosavedData = localStorage.getItem(config.autosave.label + ".config");
+
+if (autosavedData) {
+	let data;
+	let error = false;
+	try {
+		data = JSON.parse(autosavedData);
+	} catch (e) {
+		error = true;
+		console.warn("Couldn't load autosaved timeline config.");
+	}
+
+	if (data && !error) {
+		if (data.frameCount) document.getElementById("frameCount").value = data.frameCount;
+		if (data.animationSpeed) document.getElementById("animationSpeed").value = data.animationSpeed;
+
+		if (data.start) document.getElementById("playbackStart").value = data.start;
+		if (data.end) document.getElementById("playbackEnd").value = data.end;
+
+		timelineApp.fixData();
+	}
+}else{
+	document.getElementById("frameCount").value = 30;
+	document.getElementById("playbackEnd").value = document.getElementById("frameCount").value;
+	timelineApp.fixData();
+}
 
 module.exports = {
 	app: timelineApp,
