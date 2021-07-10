@@ -273,25 +273,34 @@ events.on("historyChange", () => {
 	}
 });
 
-//Loading the autosaved data
-let autosavedData = localStorage.getItem(config.autosave.label);
-if (autosavedData) {
-	let data;
-	let error = false;
-	try {
-		data = JSON.parse(autosavedData);
-	} catch (e) {
-		error = true;
-		console.warn("Couldn't load autosaved data.");
-	}
-
-	if (data && !error) {
-		rigModel.import(rigModel.fromJSON(data));
-	}
-}
+//Loading autosaved data
+utils.loadJSONData(config.autosave.label, data => {
+	rigModel.import(rigModel.fromJSON(data));
+});
 
 events.on("clearJoints", () => {
 	rigModel.reset();
+});
+
+events.on("resetTimeline", () => {
+	//Config
+	document.getElementById("frameCount").value = 30;
+	document.getElementById("animationSpeed").value = 30;
+	vue.timeline.app.fixData();
+
+	//Scrollbar
+	vue.timeline.graph.scrollbar.left = 0;
+	vue.timeline.graph.scrollbar.right = vue.timeline.graph.canvas.width;
+	vue.timeline.graph.scrollbar.width = vue.timeline.graph.canvas.width;
+
+	//Timeline
+	vue.timeline.graph.setCurrentMark(0);
+	vue.timeline.graph.playbackHandle.start.mark = 0;
+	vue.timeline.graph.playbackHandle.start._x = vue.timeline.graph.markToX(vue.timeline.graph.playbackHandle.start.mark);
+	vue.timeline.graph.playbackHandle.end.mark = vue.timeline.app.totalFrames - 1;
+	vue.timeline.graph.playbackHandle.end._x = vue.timeline.graph.markToX(vue.timeline.graph.playbackHandle.end.mark);
+
+	vue.timeline.graph.redraw();
 });
 
 events.on("resetCamera", () => {
@@ -302,14 +311,10 @@ events.on("resetCamera", () => {
 
 events.on("undo", () => {
 	undo();
-
-	events.emit("historyChange");
 });
 
 events.on("redo", () => {
 	redo();
-
-	events.emit("historyChange");
 });
 
 events.on("renderSleep", () => {
@@ -447,6 +452,7 @@ renderer.camera.setMoveSpeed(0.4);
 renderer.render(function() {
 	worldMouse.set(renderer.camera.screenToWorld(mouse.x - renderer.bounds.x, mouse.y - renderer.bounds.y));
 
+	//Background
 	renderer.rect(0, 0, renderer.bounds.width, renderer.bounds.height, {
 		fill: config.world.background
 	});
@@ -455,6 +461,7 @@ renderer.render(function() {
 		renderer.camera.moveTo(cameraMovement.x, cameraMovement.y);
 		renderer.camera.zoomTo(cameraDistance);
 
+		//Draw overlay
 		let overlayFrame = overlayFrames[vue.timeline.graph.state.currentMark];
 		if (overlayFrame && showOverlay) {
 			renderer.save();
@@ -465,8 +472,8 @@ renderer.render(function() {
 			renderer.restore();
 		}
 
-		if (mouseInside()) {
-			if (action === actions.add && !sleep) {
+		if (mouseInside() && block.style.display != "block" && !sleep) {
+			if (action === actions.add) {
 				let color = "#323439";
 				let currentPart = rigModel.activeJoint;
 				if (currentPart) {
@@ -486,6 +493,11 @@ renderer.render(function() {
 		}
 
 		rigModel.render(renderer);
+
+		//Draw the model's bounds
+		/*renderer.rect(rigModel.bounds.min.x, rigModel.bounds.min.y, rigModel.bounds.max.x - rigModel.bounds.min.x, rigModel.bounds.max.y - rigModel.bounds.min.y, {
+			stroke: "red"
+		});*/
 	});
 
 	if (mouseInside() && block.style.display != "block") {

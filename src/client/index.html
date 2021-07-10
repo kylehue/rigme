@@ -44,6 +44,7 @@
 					<button id="showOverlayApp" class="darko-d" v-on:mousedown="showOverlayApp">Add Overlay...</button>
 					<button id="showOverlayConfigApp" class="darko-d" v-on:mousedown="showOverlayConfigApp" v-if="!overlayConfigHidden">Overlay Settings...</button>
 					<button id="" class="darko-d" v-on:mousedown="clearJoints">Reset keyframes</button>
+					<button id="" class="darko-d" v-on:mousedown="resetTimeline">Reset timeline</button>
 					<button id="" class="darko-d" v-on:mousedown="resetView">Reset view</button>
 					<button id="" class="darko-d" v-on:mousedown="undo">Undo<span class="shortcut">Ctrl + Z</span></button>
 					<button id="" class="darko-d" v-on:mousedown="redo">Redo<span class="shortcut">Ctrl + Y</span></button>
@@ -239,39 +240,35 @@
 							<!-- Timeline control -->
 							<div class="row-b">
 								<div class="left-wrapper">
-									<button id="lastFrame" class="darko-a" v-bind:title="lastMsg">
+									<button id="zoomInTimeline" class="darko-a" v-bind:title="'Zoom in'">
+									<img src="assets/svg/magnifying-glass-plus.svg" class="" />
+									</button>
+									<button id="zoomOutTimeline" class="darko-a" v-bind:title="'Zoom out'">
+									<img src="assets/svg/magnifying-glass-minus.svg" class="" />
+									</button>
+									<button id="lastFrame" class="darko-a" v-bind:title="'Previous frame'">
 									<img src="assets/svg/previous.svg" class="" />
 									</button>
-									<button id="playStop" class="darko-a" v-bind:title="playMsg">
+									<button id="playStop" class="darko-a" v-bind:title="'Play / Stop'">
 									<img src="assets/svg/play.svg" class="" />
 									</button>
-									<button id="nextFrame" class="darko-a" v-bind:title="nextMsg">
+									<button id="nextFrame" class="darko-a" v-bind:title="'Next frame'">
 									<img src="assets/svg/next.svg" class="" />
 									</button>
-									<button id="addKeyframe" class="darko-a" v-bind:title="addKeyMsg">
+									<button id="addKeyframe" class="darko-a" v-bind:title="'Add keyframe'">
 									<img src="assets/svg/key-plus.svg" class="" />
 									</button>
-									<button id="deleteKeyframe" class="darko-a" v-bind:title="removeKeyMsg">
+									<button id="deleteKeyframe" class="darko-a" v-bind:title="'Delete keyframe'">
 									<img src="assets/svg/key-minus.svg" class="" />
 									</button>
 								</div>
 								<div class="right-wrapper">
-									<div class="input-wrapper" v-bind:title="startMsg">
-										<label for="playbackStart">from</label>
-										<input id="playbackStart" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
-									</div>
-
-									<div class="input-wrapper" v-bind:title="endMsg">
-										<label for="playbackEnd">to</label>
-										<input id="playbackEnd" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
-									</div>
-
-									<div class="input-wrapper" v-bind:title="frameCountMsg">
-										<img src="assets/svg/fr.svg">
+									<div class="input-wrapper" v-bind:title="'Frame Count'">
+										<img src="assets/svg/f.svg">
 										<input id="frameCount" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
 									</div>
 									
-									<div class="input-wrapper" v-bind:title="animationSpeedMsg">
+									<div class="input-wrapper" v-bind:title="'Animation Speed'">
 										<img src="assets/svg/rabbit.svg">
 										<input id="animationSpeed" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="30" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
 									</div>

@@ -16,7 +16,36 @@ class RigModel {
 		this.mouseBuffer = 10;
 		this.activeJoint = null;
 
+		this.bounds = {
+			min: vector(),
+			max: vector()
+		};
+
 		this._moved = false;
+	}
+
+	updateBounds() {
+		let keys = Object.keys(this.keyframes);
+		let xAxes = [];
+		let yAxes = [];
+		for (var i = 0; i < keys.length; i++) {
+			let frame = this.keyframes[keys[i]];
+			for (var j = 0; j < frame.joints.length; j++) {
+				let joint = frame.joints[j];
+				xAxes.push(joint.position.x);
+				yAxes.push(joint.position.y);
+			}
+		}
+
+		this.bounds.min.set({
+			x: Math.min(...xAxes),
+			y: Math.min(...yAxes)
+		});
+
+		this.bounds.max.set({
+			x: Math.max(...xAxes),
+			y: Math.max(...yAxes)
+		});
 	}
 
 	reset() {
@@ -31,12 +60,15 @@ class RigModel {
 					x: timeline.graph.hatchMark.spacing / 2,
 					y: 0
 				},
-				locked: true
+				locked: true,
+				ignoreHistory: true
 			});
 
 			timeline.graph.setCurrentMark(0);
 			timeline.graph.updateState();
 		}
+
+		this.updateBounds();
 
 		history.add({
 			label: "Clear",
@@ -129,8 +161,6 @@ class RigModel {
 			keyframe.joints = joints;
 		}
 
-
-
 		keyframe.id = options.id || utils.uid();
 
 		this.keyframes[index] = keyframe;
@@ -144,26 +174,30 @@ class RigModel {
 		}
 
 		//History
-		let frames = Object.values(this.keyframes);
-		let headCount = 0;
-		for (var i = 0; i < frames.length; i++) {
-			let frame = frames[i];
-			if (frame.type == "head") headCount++;
+		if (options.ignoreHistory) {
+			let frames = Object.values(this.keyframes);
+			let headCount = 0;
+			for (var i = 0; i < frames.length; i++) {
+				let frame = frames[i];
+				if (frame.type == "head") headCount++;
+			}
+
+			let historyLabel = "Add keyframe";
+			if (headCount == this.totalKeyframes) {
+				historyLabel = "Move keyframe";
+			}
+
+			this.updateBounds();
+
+			history.add({
+				label: historyLabel,
+				value: this.clone(),
+				group: "keyframe"
+			});
+
+			this.totalKeyframes = headCount;
+			return keyframe;
 		}
-
-		let historyLabel = "Add keyframe";
-		if (headCount == this.totalKeyframes) {
-			historyLabel = "Move keyframe";
-		}
-
-		history.add({
-			label: historyLabel,
-			value: this.clone(),
-			group: "keyframe"
-		});
-
-		this.totalKeyframes = headCount;
-		return keyframe;
 	}
 
 	deleteKeyframe(id) {
@@ -220,6 +254,8 @@ class RigModel {
 			timeline.graph.updateState();
 			timeline.graph.redraw();
 		}
+
+		this.updateBounds();
 	}
 
 	updateKeyframe(index, data) {
@@ -332,6 +368,8 @@ class RigModel {
 			});
 		}
 
+		this.updateBounds();
+
 		history.add({
 			label: "Add joint",
 			value: this.clone(),
@@ -395,6 +433,8 @@ class RigModel {
 			});
 		}
 
+		this.updateBounds();
+
 		history.add({
 			label: "Remove joint",
 			value: this.clone(),
@@ -439,6 +479,8 @@ class RigModel {
 			}
 
 			this.activeJoint.position.set(x, y);
+
+			this.updateBounds();
 		}
 
 		if (!config.animation.linear) this.computeKinematics(this.joints);
@@ -582,17 +624,20 @@ class RigModel {
 
 			timeline.graph.updateState();
 		}
+
+		this.updateBounds();
 	}
 
 	render(renderer) {
 		let _render = (jointChain, isPrev) => {
+			let translucent = "rgba(240, 230, 255, 0.3)";
 			//Render the line that connects the joints
 			for (var i = 0; i < jointChain.length; i++) {
 				let joint = jointChain[i];
 				if (joint.parent) {
 					renderer.line(joint.position.x, joint.position.y, joint.parent.position.x, joint.parent.position.y, {
 						lineWidth: config.render.segment.width,
-						stroke: isPrev ? "#242629" : config.render.segment.color
+						stroke: isPrev ? translucent : config.render.segment.color
 					});
 				}
 			}
@@ -614,7 +659,7 @@ class RigModel {
 				}
 
 				renderer.circle(joint.position.x, joint.position.y, config.render.joint.radius, {
-					fill: isPrev ? "#242629" : jointColor
+					fill: isPrev ? translucent : jointColor
 				});
 			}
 		}
@@ -625,6 +670,8 @@ class RigModel {
 			let currentFrame = this.keyframes[timeline.graph.state.currentFrame];
 			let nextFrame = this.keyframes[timeline.graph.state.nextFrame];
 
+			renderer.save();
+			renderer.context.globalCompositeOperation = "overlay";
 			if (currentFrame && !timeline.graph.state.isPlaying) {
 				_render(currentFrame.joints, true);
 			}
@@ -636,6 +683,7 @@ class RigModel {
 			if (nextFrame && !timeline.graph.state.isPlaying) {
 				_render(nextFrame.joints, true);
 			}
+			renderer.restore();
 		}
 
 		//Render current frame

@@ -37,6 +37,13 @@ const optionApp = new Vue({
 				events.emit("clearJoints");
 			}
 		},
+		resetTimeline: function () {
+			let con = confirm("Are you sure you want to reset the timeline? (This won't reset the keyframes)");
+
+			if (con) {
+				events.emit("resetTimeline");
+			}
+		},
 		resetView: function () {
 			events.emit("resetCamera");
 		},
