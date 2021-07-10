@@ -105,10 +105,10 @@
 				</div>
 				<div class="row section">
 					<div class="title-wrapper">
-						<p class="title">File</p>
+						<p class="title">Upload a Video</p>
 					</div>
 					<div class="custom-file">
-						<button class="darko-a">Upload</button>
+						<button class="darko-a">Choose</button>
 						<input id="overlayInput" type="file" accept="video/*" v-on:change="checkFile" />
 					</div>
 					<div class="filename-wrapper">
@@ -117,7 +117,7 @@
 				</div>
 				<div class="row section disabled">
 					<div class="title-wrapper">
-						<p class="title">Quality</p>
+						<p class="title">Video Quality</p>
 					</div>
 					<div class="field row-field">
 						<input id="overlayQuality" type="text" class="darko-c" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-min="10" data-max="100" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
@@ -140,14 +140,14 @@
 				</div>
 				<div class="row section disabled">
 					<div class="title-wrapper">
-						<p class="title">Trim</p>
+						<p class="title">Trim Video</p>
 					</div>
 					<div class="field">
-						<label for="overlayStart">From:</label>
+						<label for="overlayStart">Start:</label>
 						<input id="overlayStart" type="text" class="darko-c" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-min="1" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
 					</div>
 					<div class="field">
-						<label for="overlayEnd">To:</label>
+						<label for="overlayEnd">End:</label>
 						<input id="overlayEnd" type="text" class="darko-c" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
 					</div>
 				</div>
@@ -187,6 +187,31 @@
 							<div class="track darko-d"></div>
 						</div>
 					</div>
+				</div>
+
+				<div class="row section">
+					<div class="title-wrapper">
+						<p class="title">Trim Frames</p>
+					</div>
+					<div class="field">
+						<label for="overlayConfigTrimStart">Start:</label>
+						<input id="overlayConfigTrimStart" type="text" class="darko-c" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-min="1" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
+					</div>
+					<div class="field">
+						<label for="overlayConfigTrimEnd">End:</label>
+						<input id="overlayConfigTrimEnd" type="text" class="darko-c" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
+					</div>
+				</div>
+
+				<div class="row section">
+					<div class="title-wrapper">
+						<p class="title">Frame Start</p>
+					</div>
+					<div class="field row-field">
+						<input id="overlayConfigStart" type="text" class="darko-c" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-min="1" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
+						<p>F</p>
+					</div>
+					
 				</div>
 				<div class="row">
 					<button id="removeOverlay" class="darko-a fit" v-on:click="removeOverlay">Delete Overlay</button>

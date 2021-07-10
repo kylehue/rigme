@@ -2,6 +2,7 @@ const events = require("../../../../lib/events.js");
 const mouse = require("../../../../lib/mouse.js");
 const config = require("../../../../lib/config.js");
 const utils = require("../../../../lib/utils.js");
+const timeline = require("./timeline.js");
 const block = document.getElementById("block");
 
 let minOpacity = 0;
@@ -12,6 +13,7 @@ let minAngle = -Math.PI;
 let maxAngle = Math.PI;
 
 let activeSliderDrag;
+let overlayFrames = [];
 
 const overlayConfigApp = new Vue({
 	el: "#overlayConfigApp",
@@ -20,9 +22,95 @@ const overlayConfigApp = new Vue({
 		closeMsg: "Close",
 		opacity: maxOpacity,
 		scale: 1,
-		angle: 0
+		angle: 0,
+		trimStart: 1,
+		trimEnd: timeline.app.totalFrames,
+		start: 1
 	},
 	methods: {
+		fixData: function() {
+			let fromEl = document.getElementById("overlayConfigTrimStart");
+			let toEl = document.getElementById("overlayConfigTrimEnd");
+			let startEl = document.getElementById("overlayConfigStart");
+
+			let from = parseInt(fromEl.value);
+			let to = parseInt(toEl.value);
+			let start = parseInt(startEl.value);
+			this.trimStart = from ? from : 1;
+			this.trimEnd = to ? to : overlayFrames.length;
+			this.start = start ? start : 1;
+		},
+		validateFormat: function(e) {
+			//Only allow numbers & backspace/delete
+			if (e.keyCode != 8 & e.keyCode != 46) {
+				let nums = new RegExp("[0-9]");
+				if (!nums.test(e.key)) {
+					e.preventDefault();
+					return;
+				}
+			}
+
+			this.fixData();
+		},
+		validateAmount: function(e) {
+			this.validateMin(e);
+			this.validateMax(e);
+		},
+		validateMax: function(e) {
+			let value = e.target.value;
+			let max = e.target.dataset.max;
+
+			if (e.target.id == "overlayConfigTrimStart") {
+				max = this.trimEnd;
+			}
+
+			if (e.target.id == "overlayConfigTrimEnd") {
+				max = overlayFrames.length;
+			}
+
+			if (e.target.id == "overlayConfigStart") {
+				max = timeline.app.totalFrames;
+			}
+
+			if (parseInt(value) > max) {
+				e.target.value = max.toString();
+			}
+
+			this.fixData();
+		},
+		validateMin: function(e) {
+			let value = e.target.value;
+			let min = e.target.dataset.min;
+
+			if (e.target.id == "overlayConfigTrimEnd") {
+
+				min = this.trimStart;
+			}
+
+			if (parseInt(value) < min) {
+				e.target.value = min.toString();
+			}
+
+			this.fixData();
+		},
+		toggleAmount: function(e) {
+			if (!e.target.value.length) {
+				e.target.value = 1;
+			}
+
+			let isDown = e.wheelDeltaY < 0;
+			let value = parseInt(e.target.value);
+			if (isDown) {
+				value--;
+			} else {
+				value++;
+			}
+
+			e.target.value = value.toString();
+			this.validateAmount(e);
+
+			this.fixData();
+		},
 		updateSliders: function() {
 			let sliders = document.querySelectorAll(".slider-wrapper");
 
@@ -77,7 +165,17 @@ const overlayConfigApp = new Vue({
 			this.$nextTick(() => {
 				this.$el.style.opacity = "1";
 				block.style.display = "block";
+
+				let fromEl = document.getElementById("overlayConfigTrimStart");
+				let toEl = document.getElementById("overlayConfigTrimEnd");
+				let startEl = document.getElementById("overlayConfigStart");
+
+				fromEl.value = this.trimStart;
+				toEl.value = this.trimEnd;
+				startEl.value = this.start;
+
 				this.updateSliders();
+				this.fixData();
 			});
 		},
 		hide: function() {
@@ -88,6 +186,16 @@ const overlayConfigApp = new Vue({
 			this.opacity = maxOpacity;
 			this.scale = 1;
 			this.angle = 0;
+
+			let fromEl = document.getElementById("overlayConfigTrimStart");
+			let toEl = document.getElementById("overlayConfigTrimEnd");
+			let startEl = document.getElementById("overlayConfigStart");
+
+			fromEl.value = "";
+			toEl.value = "";
+			startEl.value = "";
+
+			this.fixData();
 			this.updateSliders();
 		},
 		removeOverlay: function() {
@@ -98,6 +206,11 @@ const overlayConfigApp = new Vue({
 			}
 		}
 	}
+});
+
+events.on("overlayFrames", _overlayFrames => {
+	overlayFrames = _overlayFrames;
+	overlayConfigApp.trimEnd = overlayFrames.length;
 });
 
 function handleSliders() {
@@ -141,24 +254,13 @@ function handleSliders() {
 }
 
 //Autosave config
-let autosavedData = localStorage.getItem(config.autosave.label + ".overlay.config");
+utils.loadJSONData(config.autosave.label + ".overlay.config", data => {
+	if (typeof data.opacity == "number") overlayConfigApp.opacity = data.opacity;
+	if (typeof data.scale == "number") overlayConfigApp.scale = data.scale;
+	if (typeof data.angle == "number") overlayConfigApp.angle = data.angle;
 
-if (autosavedData) {
-	let data;
-	let error = false;
-	try {
-		data = JSON.parse(autosavedData);
-	} catch (e) {
-		error = true;
-		console.warn("Couldn't load autosaved overlay config.");
-	}
-
-	if (data && !error) {
-		overlayConfigApp.opacity = data.opacity;
-		overlayConfigApp.scale = data.scale;
-		overlayConfigApp.angle = data.angle;
-	}
-}
+	overlayConfigApp.updateSliders();
+});
 
 mouse.on("mouseup", function(event) {
 	activeSliderDrag = null;

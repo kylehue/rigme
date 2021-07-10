@@ -88,7 +88,8 @@
 	flex-flow: column nowrap;
 	width: fit-content;
 	margin-right: 13px;
-	margin-top: 5px;
+	margin-bottom: 5px;
+	margin-left: 4px;
 }
 
 #overlayApp .field.row-field {

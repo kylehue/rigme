@@ -118,12 +118,15 @@ events.on("saveProject", filename => {
 	let config = {
 		frameCount: vue.timeline.app.totalFrames,
 		animationSpeed: vue.timeline.app.animationSpeed,
-		start: vue.timeline.app.start,
-		end: vue.timeline.app.end,
+		start: vue.timeline.graph.playbackHandle.start.mark,
+		end: vue.timeline.graph.playbackHandle.end.mark,
 		overlay: {
 			opacity: vue.overlayConfigApp.opacity,
 			scale: vue.overlayConfigApp.scale,
-			angle: vue.overlayConfigApp.angle
+			angle: vue.overlayConfigApp.angle,
+			trimStart: vue.overlayConfigApp.trimStart,
+			trimEnd: vue.overlayConfigApp.trimEnd,
+			start: vue.overlayConfigApp.start
 		}
 	};
 
@@ -171,17 +174,51 @@ events.on("loadProject", data => {
 	}
 
 	if (data.config) {
-		document.getElementById("frameCount").value = data.config.frameCount;
-		document.getElementById("animationSpeed").value = data.config.animationSpeed;
-		document.getElementById("playbackStart").value = data.config.start;
-		document.getElementById("playbackEnd").value = data.config.end;
+		if (typeof data.config.frameCount == "number") {
+			document.getElementById("frameCount").value = data.config.frameCount;
+		}
 
+		if (typeof data.config.animationSpeed == "number") {
+			document.getElementById("animationSpeed").value = data.config.animationSpeed;
+		}
+		
 		vue.timeline.app.fixData();
 
-		vue.overlayConfigApp.opacity = data.config.overlay.opacity;
-		vue.overlayConfigApp.scale = data.config.overlay.scale;
-		vue.overlayConfigApp.angle = data.config.overlay.angle;
+		if (typeof data.config.start == "number") {
+			vue.timeline.graph.playbackHandle.start.mark = data.config.start;
+		}
+
+		if (typeof data.config.end == "number") {
+			vue.timeline.graph.playbackHandle.end.mark = data.config.end;
+		}
+		
+		vue.timeline.graph.redraw();
+
+		if (typeof data.config.overlay.opacity == "number") {
+			vue.overlayConfigApp.opacity = data.config.overlay.opacity;
+		}
+
+		if (typeof data.config.overlay.scale == "number") {
+			vue.overlayConfigApp.scale = data.config.overlay.scale;
+		}
+
+		if (typeof data.config.overlay.angle == "number") {
+			vue.overlayConfigApp.angle = data.config.overlay.angle;
+		}
+		
 		vue.overlayConfigApp.updateSliders();
+
+		if (typeof data.config.overlay.trimStart == "number") {
+			vue.overlayConfigApp.trimStart = data.config.overlay.trimStart;
+		}
+
+		if (typeof data.config.overlay.trimEnd == "number") {
+			vue.overlayConfigApp.trimEnd = data.config.overlay.trimEnd;
+		}
+
+		if (typeof data.config.overlay.start == "number") {
+			vue.overlayConfigApp.start = data.config.overlay.start;
+		}
 	} else {
 		console.warn("Couldn't load configurations.");
 	}
@@ -226,6 +263,8 @@ events.on("extractFrames", (url, options) => {
 		interval = undefined;
 		cancelButton.onclick = null;
 		vue.optionApp.overlayConfigHidden = false;
+
+		events.emit("overlayFrames", overlayFrames);
 	}
 
 	extractKeyframes(url, {
@@ -462,7 +501,14 @@ renderer.render(function() {
 		renderer.camera.zoomTo(cameraDistance);
 
 		//Draw overlay
-		let overlayFrame = overlayFrames[vue.timeline.graph.state.currentMark];
+		let overlayFramesOffset = new Array(vue.overlayConfigApp.start - 1);
+		let trimStart = vue.overlayConfigApp.trimStart - 1;
+		let trimEnd = vue.overlayConfigApp.trimEnd - 1
+		let trimmedOverlayFrames = overlayFrames.slice(0).splice(trimStart, trimEnd - trimStart);
+		let modifiedOverlayFrames = overlayFramesOffset.concat(trimmedOverlayFrames);
+
+		let overlayIndex = vue.timeline.graph.state.currentMark;
+		let overlayFrame = modifiedOverlayFrames[overlayIndex];
 		if (overlayFrame && showOverlay) {
 			renderer.save();
 			renderer.context.globalAlpha = vue.overlayConfigApp.opacity;
@@ -522,5 +568,6 @@ key.on("keydown", function() {
 	if (key.code === 16) {
 		console.log(rigModel);
 		console.log(vue.timeline);
+		console.log(vue.overlayConfigApp)
 	}
 });
