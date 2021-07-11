@@ -20,7 +20,6 @@
 	</head>
 	<body>
 		<div id="gameContainer">
-			<div id="block"></div>
 			<!-- Context Menu App -->
 			<div id="contextMenuApp" class="darko-d" v-if="!hidden">
 				<div class="wrapper">
@@ -43,11 +42,11 @@
 				<div class="wrapper">
 					<button id="showOverlayApp" class="darko-d" v-on:mousedown="showOverlayApp">Add Overlay...</button>
 					<button id="showOverlayConfigApp" class="darko-d" v-on:mousedown="showOverlayConfigApp" v-if="!overlayConfigHidden">Overlay Settings...</button>
+					<button id="" class="darko-d" v-on:mousedown="undo">Undo<span class="shortcut">Ctrl + Z</span></button>
+					<button id="" class="darko-d" v-on:mousedown="redo">Redo<span class="shortcut">Ctrl + Y</span></button>
 					<button id="" class="darko-d" v-on:mousedown="clearJoints">Reset keyframes</button>
 					<button id="" class="darko-d" v-on:mousedown="resetTimeline">Reset timeline</button>
 					<button id="" class="darko-d" v-on:mousedown="resetView">Reset view</button>
-					<button id="" class="darko-d" v-on:mousedown="undo">Undo<span class="shortcut">Ctrl + Z</span></button>
-					<button id="" class="darko-d" v-on:mousedown="redo">Redo<span class="shortcut">Ctrl + Y</span></button>
 				</div>
 			</div>
 			<!-- File app -->
@@ -61,6 +60,7 @@
 			<!-- Save app -->
 			<div id="saveApp" class="darko-b" v-if="!hidden">
 				<div class="row">
+					<div class="drag"></div>
 					<p class="title">Save Project</p>
 					<button class="darko-a close" v-on:click="hide" v-bind:title="closeMsg">x</button>
 				</div>
@@ -77,6 +77,7 @@
 			<!-- Load app -->
 			<div id="loadApp" class="darko-b" v-if="!hidden">
 				<div class="row">
+					<div class="drag"></div>
 					<p class="title">Load Project</p>
 					<button class="darko-a close" v-on:click="hide" v-bind:title="closeMsg">x</button>
 				</div>
@@ -100,6 +101,7 @@
 			<!-- Overlay app -->
 			<div id="overlayApp" class="darko-b" v-if="!hidden">
 				<div class="row">
+					<div class="drag"></div>
 					<p class="title">Add Overlay</p>
 					<button class="darko-a close" v-on:click="hide" v-bind:title="closeMsg">x</button>
 				</div>
@@ -158,6 +160,7 @@
 			<!-- Overlay config app -->
 			<div id="overlayConfigApp" class="darko-b" v-if="!hidden">
 				<div class="row">
+					<div class="drag"></div>
 					<p class="title">Overlay Settings</p>
 					<button class="darko-a close" v-on:click="hide" v-bind:title="closeMsg">x</button>
 				</div>
@@ -188,7 +191,6 @@
 						</div>
 					</div>
 				</div>
-
 				<div class="row section">
 					<div class="title-wrapper">
 						<p class="title">Trim Frames</p>
@@ -202,7 +204,6 @@
 						<input id="overlayConfigTrimEnd" type="text" class="darko-c" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
 					</div>
 				</div>
-
 				<div class="row section">
 					<div class="title-wrapper">
 						<p class="title">Frame Start</p>
@@ -257,7 +258,7 @@
 							<div class="row-a">
 								<div id="timelineGraphWrapper">
 									<!-- <div id="timelineScrollWrapper">
-													<button id="timelineScrollbar"></button>
+														<button id="timelineScrollbar"></button>
 									</div> -->
 									<canvas id="timelineGraph"></canvas>
 								</div>
@@ -290,7 +291,7 @@
 								<div class="right-wrapper">
 									<div class="input-wrapper" v-bind:title="'Frame Count'">
 										<img src="assets/svg/f.svg">
-										<input id="frameCount" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
+										<input id="frameCount" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="30" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
 									</div>
 									
 									<div class="input-wrapper" v-bind:title="'Animation Speed'">
@@ -307,18 +308,18 @@
 					</div>
 					<!-- Panel -->
 					<!-- <div id="panelApp">
-													<div class="wrapper">
-																					<div class="row-a">
-																													<div class="wrapper-material">
-																																					<div class="menu">
-																																													<button id="fileButton" class="darko-a">File</button>
-																																					</div>
-																													</div>
-																													<div class="wrapper-layer">
-																																					
-																													</div>
-																					</div>
-													</div>
+														<div class="wrapper">
+																							<div class="row-a">
+																																<div class="wrapper-material">
+																																									<div class="menu">
+																																																		<button id="fileButton" class="darko-a">File</button>
+																																									</div>
+																																</div>
+																																<div class="wrapper-layer">
+																																									
+																																</div>
+																							</div>
+														</div>
 					</div> -->
 				</div>
 			</div>

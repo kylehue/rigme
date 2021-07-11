@@ -174,7 +174,7 @@ class RigModel {
 		}
 
 		//History
-		if (options.ignoreHistory) {
+		if (!options.ignoreHistory) {
 			let frames = Object.values(this.keyframes);
 			let headCount = 0;
 			for (var i = 0; i < frames.length; i++) {
@@ -463,7 +463,9 @@ class RigModel {
 		if (!this.activeJoint) return;
 		if (timeline.graph) {
 			if (config.animation.autoAddKeyframe) {
-				this.setKeyframe(timeline.graph.state.currentMark);
+				this.setKeyframe(timeline.graph.state.currentMark, {
+					ignoreHistory: true
+				});
 			} else {
 				timeline.graph.setCurrentMark(timeline.graph.state.currentFrame, false);
 				timeline.graph.updateState();
@@ -610,7 +612,7 @@ class RigModel {
 		this.totalKeyframes = headCount;
 
 		if (timeline.graph) {
-			timeline.graph.setCurrentMark(0, false);
+			//timeline.graph.setCurrentMark(0, false);
 			let currentFrame = this.keyframes[timeline.graph.state.currentMark];
 
 			if (currentFrame) {
@@ -701,7 +703,8 @@ events.once("loadedApps", vue => {
 			x: timeline.graph.hatchMark.spacing / 2,
 			y: 0
 		},
-		locked: true
+		locked: true,
+		ignoreHistory: true
 	});
 });
 

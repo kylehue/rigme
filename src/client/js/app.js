@@ -16,11 +16,9 @@ const extractKeyframes = require("../lib/extract.keyframes.js");
 events.emit("loadedApps", vue);
 
 //Disable rightclick menu
-document.addEventListener('contextmenu', event => event.preventDefault());
+document.addEventListener("contextmenu", event => event.preventDefault());
 
 window.rigModel = rigModel;
-
-let block = document.getElementById("block");
 
 let cameraDistance = config.world.zoom;
 let cameraMovement = vector();
@@ -181,7 +179,7 @@ events.on("loadProject", data => {
 		if (typeof data.config.animationSpeed == "number") {
 			document.getElementById("animationSpeed").value = data.config.animationSpeed;
 		}
-		
+
 		vue.timeline.app.fixData();
 
 		if (typeof data.config.start == "number") {
@@ -191,7 +189,7 @@ events.on("loadProject", data => {
 		if (typeof data.config.end == "number") {
 			vue.timeline.graph.playbackHandle.end.mark = data.config.end;
 		}
-		
+
 		vue.timeline.graph.redraw();
 
 		if (typeof data.config.overlay.opacity == "number") {
@@ -205,7 +203,7 @@ events.on("loadProject", data => {
 		if (typeof data.config.overlay.angle == "number") {
 			vue.overlayConfigApp.angle = data.config.overlay.angle;
 		}
-		
+
 		vue.overlayConfigApp.updateSliders();
 
 		if (typeof data.config.overlay.trimStart == "number") {
@@ -357,22 +355,10 @@ events.on("redo", () => {
 });
 
 events.on("renderSleep", () => {
-	let components = document.querySelectorAll("input");
-	for (let comp of components) {
-		comp.classList.add("ignore");
-		comp.setAttribute("disabled", "");
-	}
-
 	sleep = true;
 });
 
 events.on("renderFocus", () => {
-	let components = document.querySelectorAll("input");
-	for (let comp of components) {
-		comp.classList.remove("ignore");
-		comp.removeAttribute("disabled");
-	}
-
 	sleep = false;
 });
 
@@ -518,21 +504,24 @@ renderer.render(function() {
 			renderer.restore();
 		}
 
-		if (mouseInside() && block.style.display != "block" && !sleep) {
+		if (mouseInside() && !sleep) {
 			if (action === actions.add) {
-				let color = "#323439";
+				let translucent = "rgba(240, 230, 255, 0.3)";
+				renderer.save();
+				renderer.context.globalCompositeOperation = "overlay";
 				let currentPart = rigModel.activeJoint;
 				if (currentPart) {
 					renderer.line(worldMouse.x, worldMouse.y, currentPart.position.x, currentPart.position.y, {
 						lineWidth: config.render.segment.width,
 						lineCap: "round",
-						stroke: color
+						stroke: translucent
 					});
 				}
 
 				renderer.circle(worldMouse.x, worldMouse.y, config.render.joint.radius, {
-					fill: color
+					fill: translucent
 				});
+				renderer.restore();
 			}
 
 			renderer.context.drawImage(actionIcons[action], worldMouse.x + 12, worldMouse.y - 8, 14, 14);
@@ -546,8 +535,10 @@ renderer.render(function() {
 		});*/
 	});
 
-	if (mouseInside() && block.style.display != "block") {
-		if (action === actions.pan && !sleep) {
+
+
+	if (mouseInside() && !sleep) {
+		if (action === actions.pan) {
 			if (mouse.dragged) {
 				cameraMovement.set({
 					x: mouseLast.x - worldMouse.x + renderer.camera.movement.x,
@@ -556,7 +547,7 @@ renderer.render(function() {
 			}
 		}
 
-		if (action === actions.move && !sleep) {
+		if (action === actions.move) {
 			if (mouse.pressed) {
 				rigModel.moveJoint(worldMouse.x, worldMouse.y);
 			}
@@ -566,8 +557,6 @@ renderer.render(function() {
 
 key.on("keydown", function() {
 	if (key.code === 16) {
-		console.log(rigModel);
-		console.log(vue.timeline);
-		console.log(vue.overlayConfigApp)
+		console.log(history.events)
 	}
 });

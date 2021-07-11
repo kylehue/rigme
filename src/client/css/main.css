@@ -256,15 +256,23 @@ span.shortcut {
 	cursor: pointer;
 }
 
-div#block {
-	background: rgba(10, 5, 15, 0.5);
-	display: none;
+.drag {
 	position: absolute;
-	z-index: 9998;
-	width: 100vw;
-	height: 100vh;
+	z-index: 2 !important;
 	pointer-events: all;
-	user-select: none;
+	user-select: all;
+	top: -5px;
+	left: -5px;
+	width: calc(100% + 10px);
+	height: 30px;
+}
+
+.drag ~ p {
+	z-index: 1 !important;
+}
+
+.drag ~ button {
+	z-index: 3 !important;
 }
 
 canvas#gameCanvas {

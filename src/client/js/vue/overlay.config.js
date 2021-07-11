@@ -3,7 +3,7 @@ const mouse = require("../../../../lib/mouse.js");
 const config = require("../../../../lib/config.js");
 const utils = require("../../../../lib/utils.js");
 const timeline = require("./timeline.js");
-const block = document.getElementById("block");
+const dom = require("../../../../lib/dom.js");
 
 let minOpacity = 0;
 let maxOpacity = 1;
@@ -164,7 +164,13 @@ const overlayConfigApp = new Vue({
 			this.hidden = false;
 			this.$nextTick(() => {
 				this.$el.style.opacity = "1";
-				block.style.display = "block";
+
+				dom.query("#overlayConfigApp .drag").draggable({
+					restrict: true,
+					root: this.$el
+				});
+
+				events.emit("renderSleep");
 
 				let fromEl = document.getElementById("overlayConfigTrimStart");
 				let toEl = document.getElementById("overlayConfigTrimEnd");
@@ -179,7 +185,7 @@ const overlayConfigApp = new Vue({
 			});
 		},
 		hide: function() {
-			block.style.display = "none";
+			events.emit("renderFocus");
 			this.hidden = true;
 		},
 		reset: function() {
@@ -191,9 +197,9 @@ const overlayConfigApp = new Vue({
 			let toEl = document.getElementById("overlayConfigTrimEnd");
 			let startEl = document.getElementById("overlayConfigStart");
 
-			fromEl.value = "";
-			toEl.value = "";
-			startEl.value = "";
+			fromEl.value = 1;
+			toEl.value = overlayFrames.length;
+			startEl.value = 1;
 
 			this.fixData();
 			this.updateSliders();

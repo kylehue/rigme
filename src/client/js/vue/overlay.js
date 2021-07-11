@@ -1,5 +1,6 @@
 const events = require("../../../../lib/events.js");
-const block = document.getElementById("block");
+const utils = require("../../../../lib/utils.js");
+const dom = require("../../../../lib/dom.js");
 var currentFileURL, videoDuration;
 const overlayApp = new Vue({
 	el: "#overlayApp",
@@ -12,7 +13,12 @@ const overlayApp = new Vue({
 			this.hidden = false;
 			this.$nextTick(() => {
 				this.$el.style.opacity = "1";
-				block.style.display = "block";
+				dom.query("#overlayApp .drag").draggable({
+					restrict: true,
+					root: this.$el
+				});
+
+				events.emit("renderSleep");
 			});
 		},
 		hide: function() {
@@ -31,8 +37,8 @@ const overlayApp = new Vue({
 			let addButton = document.getElementById("addOverlay");
 			addButton.classList.add("disabled");
 
-			block.style.display = "none";
 			this.hidden = true;
+			events.emit("renderFocus");
 		},
 		validateFormat: function(e) {
 			//Only allow numbers & backspace/delete

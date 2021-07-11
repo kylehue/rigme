@@ -1,6 +1,6 @@
 const events = require("../../../../lib/events.js");
 const randomTitle = require("../../lib/random.title.js");
-const block = document.getElementById("block");
+const dom = require("../../../../lib/dom.js");
 
 const saveApp = new Vue({
 	el: "#saveApp",
@@ -17,7 +17,13 @@ const saveApp = new Vue({
 
 			this.$nextTick(() => {
 				this.$el.style.opacity = "1";
-				block.style.display = "block";
+
+				dom.query("#saveApp .drag").draggable({
+					restrict: true,
+					root: this.$el
+				});
+
+				events.emit("renderSleep");
 
 				let filenameInput = document.getElementById("saveFilename");
 				filenameInput.focus();
@@ -25,7 +31,7 @@ const saveApp = new Vue({
 		},
 		hide: function() {
 			this.hidden = true;
-			block.style.display = "none";
+			events.emit("renderFocus");
 		},
 		checkFilename: function(e) {
 			let downloadButton = document.getElementById("download");

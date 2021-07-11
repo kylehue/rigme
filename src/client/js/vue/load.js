@@ -1,5 +1,6 @@
 const events = require("../../../../lib/events.js");
-const block = document.getElementById("block");
+const dom = require("../../../../lib/dom.js");
+
 var currentJSON;
 const loadApp = new Vue({
 	el: "#loadApp",
@@ -14,12 +15,17 @@ const loadApp = new Vue({
 			this.hidden = false;
 			this.$nextTick(() => {
 				this.$el.style.opacity = "1";
-				block.style.display = "block";
+				dom.query("#loadApp .drag").draggable({
+					restrict: true,
+					root: this.$el
+				});
+
+				events.emit("renderSleep");
 			});
 		},
 		hide: function() {
 			currentJSON = undefined;
-			block.style.display = "none";
+			events.emit("renderFocus");
 
 			let importButton = document.getElementById("import");
 			importButton.classList.add("disabled");

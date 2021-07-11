@@ -212,11 +212,11 @@ class Timeline {
 
 		this.playbackHandle = {
 			start: {
-				mark: 5,
+				mark: 0,
 				_x: 0
 			},
 			end: {
-				mark: 20,
+				mark: timelineApp.totalFrames - 1,
 				_x: 0
 			},
 			width: 2,
@@ -258,14 +258,6 @@ class Timeline {
 		};
 
 		this._timelineHeight = undefined;
-	}
-
-	ignoreRenderer() {
-		events.emit("renderSleep");
-	}
-
-	focusRenderer() {
-		events.emit("renderFocus");
 	}
 
 	storeSelectedKeyframe() {
@@ -316,7 +308,8 @@ class Timeline {
 							position: vector(this.state.currentMark * this.hatchMark.spacing + this.hatchMark.spacing / 2, 0),
 							locked: this.state.currentMark == 0 ? true : false,
 							id: utils.uid(),
-							joints: copiedKeyframe.joints
+							joints: copiedKeyframe.joints,
+							ignoreHistory: true
 						});
 					}
 				}
@@ -413,7 +406,6 @@ class Timeline {
 			this.playbackHandle.end.isDragging = false;
 			activeKeyframe = null;
 			this.canvas.style.cursor = "default";
-			this.focusRenderer();
 			this.redraw();
 		}
 
@@ -481,7 +473,6 @@ class Timeline {
 			if (dragging) {
 				//Scrollbar drag
 				if (activeDrag == "scrollbar") {
-					this.ignoreRenderer();
 					if (onScrollbarLeft) {
 						this.scrollbar.left = utils.clamp(mouseX, 0, this.scrollbar.right - this.scrollbar.minWidth);
 						this.scrollbar.width = this.scrollbar.right - this.scrollbar.left;
@@ -503,7 +494,6 @@ class Timeline {
 
 				//Timeline drag
 				if (activeDrag == "timeline" || activeDrag == "keyframe") {
-					this.ignoreRenderer();
 					this.state.isDragging = true;
 					this.state._x = utils.clamp(mouseX, this.hatchMark.spacing / 2, this.canvas.width - this.hatchMark.spacing / 2);
 					let mark = this.xToMark(mouseX);
@@ -511,7 +501,6 @@ class Timeline {
 				}
 
 				if (activeDrag == "playbackHandleStart") {
-					this.ignoreRenderer();
 					this.playbackHandle.start.isDragging = true;
 					this.playbackHandle.start._x = utils.clamp(mouseX, this.hatchMark.spacing / 2, this.playbackHandle.end._x - this.playbackHandle.width / 2 - this.hatchMark.spacing);
 					let mark = this.xToMark(mouseX);
@@ -523,7 +512,6 @@ class Timeline {
 				}
 
 				if (activeDrag == "playbackHandleEnd") {
-					this.ignoreRenderer();
 					this.playbackHandle.end.isDragging = true;
 					this.playbackHandle.end._x = utils.clamp(mouseX, this.playbackHandle.start._x + this.playbackHandle.width / 2 + this.hatchMark.spacing, this.canvas.width - this.hatchMark.spacing / 2);
 					let mark = this.xToMark(mouseX);
@@ -536,7 +524,6 @@ class Timeline {
 
 				//Keyframe drag
 				if (activeDrag == "keyframe") {
-					this.ignoreRenderer();
 
 					if (!activeKeyframe) {
 						for (var i = 0; i < keys.length; i++) {
@@ -927,15 +914,27 @@ class Timeline {
 timeline = new Timeline();
 
 utils.loadJSONData(config.autosave.label + ".frames.config", data => {
-	if (typeof data.frameCount == "number") document.getElementById("frameCount").value = data.frameCount;
-	if (typeof data.animationSpeed == "number") document.getElementById("animationSpeed").value = data.animationSpeed;
+	let frameCountEl = document.getElementById("frameCount");
+	let animationSpeedEl = document.getElementById("animationSpeed");
+	if (typeof data.frameCount == "number") {
+		frameCountEl.value = data.frameCount;
+	}
+
+	if (typeof data.animationSpeed == "number") {
+		animationSpeedEl.value = data.animationSpeed;
+	}
 
 	timelineApp.fixData();
 });
 
 utils.loadJSONData(config.autosave.label + ".playback.config", data => {
-	if (typeof data.start == "number") timeline.playbackHandle.start.mark = data.start;
-	if (typeof data.end == "number") timeline.playbackHandle.end.mark = data.end;
+	if (typeof data.start == "number") {
+		timeline.playbackHandle.start.mark = data.start;
+	}
+
+	if (typeof data.end == "number") {
+		timeline.playbackHandle.end.mark = data.end;
+	}
 
 	timeline.redraw();
 });
