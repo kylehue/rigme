@@ -1,5 +1,6 @@
 const streamSaver = require("streamsaver");
 const renderer = require("../lib/renderer.js");
+const dom = require("../../../lib/dom.js");
 const events = require("../../../lib/events.js");
 const vector = require("../../../lib/vector.js");
 const shape = require("../../../lib/shape.js");
@@ -59,7 +60,7 @@ actionIcons.pan.src = "assets/svg/quad-arrow.svg";
 
 let action = actions.pan;
 
-let actionButtons = {
+const actionButtons = {
 	add: document.getElementById("addJoint"),
 	select: document.getElementById("selectJoint"),
 	move: document.getElementById("moveJoint"),
@@ -67,24 +68,104 @@ let actionButtons = {
 	pan: document.getElementById("panCamera")
 };
 
-let fileButton = document.getElementById("fileButton");
-let optionButton = document.getElementById("optionButton");
+const fileButton = document.getElementById("fileButton");
+const optionButton = document.getElementById("optionButton");
+const materialPane = document.querySelector("#materialApp .material-pane");
+const addMaterialButton = document.getElementById("addMaterial");
 
-let navigation = document.getElementById("navigation");
-let appDock = document.getElementById("appDock");
-let frameCountInput = document.getElementById("frameCount");
-let animationSpeedInput = document.getElementById("animationSpeed");
-let _actionButtons = Object.keys(actionButtons);
-let __actionButtons = Object.values(actionButtons);
+const canvasContainer = document.querySelector(".canvas-container");
+const navigation = document.getElementById("navigation");
+const frameCountInput = document.getElementById("frameCount");
+const animationSpeedInput = document.getElementById("animationSpeed");
+const _actionButtons = Object.keys(actionButtons);
+const __actionButtons = Object.values(actionButtons);
+
+
+
+let materials = [];
+
+function configMaterial(id) {
+	let mat = materials.find(m => m.id === id);
+	if (mat) {
+	}
+}
+
+function createMaterial(file) {
+	const id = utils.uid();
+	let fileURL = URL.createObjectURL(file);
+	let parent = dom.query("#materialApp .material-pane", true);
+	let button = dom.create("button");
+	let img = button.create("img");
+	let p = button.create("p");
+
+	button.node.classList.add("material", "darko-a");
+	img.prop("src", fileURL)
+	p.prop("innerText", file.name);
+	button.css("order", parent.node.children.length);
+
+	button.node.addEventListener("click", () => {
+		configMaterial(id);
+	});
+
+	parent.append(button);
+	return {
+		id: id,
+		file: file,
+		src: fileURL,
+		el: button
+	};
+}
+
+function handleMaterialFiles(files) {
+	const validImageTypes = ["image/gif", "image/jpeg", "image/png"];
+	for (var i = 0; i < files.length; i++) {
+		let file = files[i];
+		let exists;
+		for (var j = 0; j < materials.length; j++) {
+			let mat = materials[j];
+			if (mat.file.name == file.name && mat.file.lastModified == file.lastModified && mat.file.size == file.size && mat.file.type == file.type) {
+				exists = mat;
+				break;
+			}
+		}
+
+		if (!exists) {
+			if (validImageTypes.includes(file.type)) {
+				let material = createMaterial(file);
+				materials.push(material);
+			}
+		} else {
+			exists.el.node.classList.add("selected");
+		}
+	}
+}
+
+materialPane.addEventListener("drop", event => {
+	event.preventDefault();
+	let files = event.dataTransfer.files;
+	handleMaterialFiles(files);
+});
+
+addMaterialButton.addEventListener("change", () => {
+	let files = addMaterialButton.files;
+	handleMaterialFiles(files);
+});
+
+materialPane.addEventListener("dragover", event => {
+	event.preventDefault();
+});
+
+materialPane.addEventListener("mousedown", event => {
+	for (var i = 0; i < materialPane.children.length; i++) {
+		let child = materialPane.children[i];
+		child.classList.remove("selected");
+	}
+});
 
 function removeActives() {
 	for (let btn of _actionButtons) {
 		actionButtons[btn].classList.remove("active-tool");
 	}
-}
-
-function mouseInside() {
-	return mouse.x >= renderer.bounds.x && mouse.x <= renderer.bounds.width && mouse.y >= renderer.bounds.y && mouse.y <= renderer.bounds.height;
 }
 
 function undo() {
@@ -427,13 +508,30 @@ mouse.on("mousedown", function() {
 });
 
 mouse.on("mousemove", function() {
-	if (!mouse.dragged && mouseInside() && !sleep) {
+	if (!mouse.dragged) {
 		mouseLast.set(worldMouse);
 	}
 });
 
+renderer.canvas.addEventListener("mousemove", function(e) {
+	if (mouse.dragged) {
+		if (action === actions.pan) {
+			cameraMovement.set({
+				x: mouseLast.x - worldMouse.x + renderer.camera.movement.x,
+				y: mouseLast.y - worldMouse.y + renderer.camera.movement.y
+			});
+		}
+	}
+
+	if (action === actions.move) {
+		if (mouse.pressed) {
+			rigModel.moveJoint(worldMouse.x, worldMouse.y);
+		}
+	}
+})
+
 renderer.canvas.addEventListener("click", function() {
-	if (!sleep) {
+	if (vue.overlayApp.hidden && vue.overlayConfigApp.hidden && vue.fileApp.hidden && vue.loadApp.hidden && vue.saveApp.hidden && vue.optionApp.hidden) {
 		if (action == actions.add) {
 			rigModel.addJoint(worldMouse.x, worldMouse.y);
 		}
@@ -461,7 +559,7 @@ renderer.canvas.addEventListener("mousewheel", function() {
 });
 
 function fixRendererSize() {
-	renderer.setSize(innerWidth, innerHeight - navigation.offsetHeight - appDock.offsetHeight);
+	renderer.setSize(canvasContainer.offsetWidth - 1, innerHeight - navigation.offsetHeight - vue.timeline.app.$el.offsetHeight);
 }
 
 addEventListener("resize", function() {
@@ -475,6 +573,9 @@ fixRendererSize();
 renderer.camera.setZoomSpeed(0.2);
 renderer.camera.setMoveSpeed(0.4);
 renderer.render(function() {
+	let focused = vue.overlayApp.hidden && vue.overlayConfigApp.hidden && vue.fileApp.hidden && vue.loadApp.hidden && vue.saveApp.hidden && vue.optionApp.hidden;
+
+
 	worldMouse.set(renderer.camera.screenToWorld(mouse.x - renderer.bounds.x, mouse.y - renderer.bounds.y));
 
 	//Background
@@ -504,7 +605,7 @@ renderer.render(function() {
 			renderer.restore();
 		}
 
-		if (mouseInside() && !sleep) {
+		if (focused) {
 			if (action === actions.add) {
 				let translucent = "rgba(240, 230, 255, 0.3)";
 				renderer.save();
@@ -523,9 +624,9 @@ renderer.render(function() {
 				});
 				renderer.restore();
 			}
-
-			renderer.context.drawImage(actionIcons[action], worldMouse.x + 12, worldMouse.y - 8, 14, 14);
 		}
+
+		renderer.context.drawImage(actionIcons[action], worldMouse.x + 12, worldMouse.y - 8, 14, 14);
 
 		rigModel.render(renderer);
 
@@ -534,25 +635,6 @@ renderer.render(function() {
 			stroke: "red"
 		});*/
 	});
-
-
-
-	if (mouseInside() && !sleep) {
-		if (action === actions.pan) {
-			if (mouse.dragged) {
-				cameraMovement.set({
-					x: mouseLast.x - worldMouse.x + renderer.camera.movement.x,
-					y: mouseLast.y - worldMouse.y + renderer.camera.movement.y
-				});
-			}
-		}
-
-		if (action === actions.move) {
-			if (mouse.pressed) {
-				rigModel.moveJoint(worldMouse.x, worldMouse.y);
-			}
-		}
-	}
 });
 
 key.on("keydown", function() {

@@ -17,9 +17,10 @@
 		<link rel="stylesheet" type="text/css" href="css/overlay.css">
 		<link rel="stylesheet" type="text/css" href="css/overlay.config.css">
 		<link rel="stylesheet" type="text/css" href="css/contextMenu.css">
+		<link rel="stylesheet" type="text/css" href="css/material.css">
 	</head>
 	<body>
-		<div id="gameContainer">
+		<div class="main-container">
 			<!-- Context Menu App -->
 			<div id="contextMenuApp" class="darko-d" v-if="!hidden">
 				<div class="wrapper">
@@ -219,111 +220,115 @@
 					<button id="resetOverlayConfig" class="darko-a fit" v-on:click="reset">Reset</button>
 				</div>
 			</div>
-			<!-- Nav -->
-			<div id="navigation" class="darko-b">
-				<div class="wrapper-left">
-					<button id="fileButton" class="darko-a fit">File</button>
-					<button id="optionButton" class="darko-a fit">Options</button>
+			<div class="work-container">
+				<!-- Nav -->
+				<div id="navigation" class="darko-b">
+					<div class="wrapper-left">
+						<button id="fileButton" class="darko-a fit">File</button>
+						<button id="optionButton" class="darko-a fit">Options</button>
+					</div>
+					<div class="wrapper-right">
+						<button id="panCamera" class="darko-a active-tool" v-bind:title="moveMsg">
+						<img src="assets/svg/quad-arrow.svg" class="" />
+						</button>
+						<button id="addJoint" class="darko-a" v-bind:title="addJointMsg">
+						<img src="assets/svg/joint-plus.svg" class="" />
+						</button>
+						<button id="selectJoint" class="darko-a" v-bind:title="selectJointMsg">
+						<img src="assets/svg/joint-click.svg" class="" />
+						</button>
+						<button id="moveJoint" class="darko-a" v-bind:title="moveJointMsg">
+						<img src="assets/svg/joint-arrow.svg" class="" />
+						</button>
+						<button id="removeJoint" class="darko-a" v-bind:title="removeJointMsg">
+						<img src="assets/svg/joint-trash.svg" class="" />
+						</button>
+					</div>
+					<div id="progressBarWrapper">
+						<div id="progressBar"></div>
+						<p>Converting to frames...</p>
+						<button class="darko-a">Cancel</button>
+					</div>
 				</div>
-				<div class="wrapper-right">
-					<button id="panCamera" class="darko-a active-tool" v-bind:title="moveMsg">
-					<img src="assets/svg/quad-arrow.svg" class="" />
-					</button>
-					<button id="addJoint" class="darko-a" v-bind:title="addJointMsg">
-					<img src="assets/svg/joint-plus.svg" class="" />
-					</button>
-					<button id="selectJoint" class="darko-a" v-bind:title="selectJointMsg">
-					<img src="assets/svg/joint-click.svg" class="" />
-					</button>
-					<button id="moveJoint" class="darko-a" v-bind:title="moveJointMsg">
-					<img src="assets/svg/joint-arrow.svg" class="" />
-					</button>
-					<button id="removeJoint" class="darko-a" v-bind:title="removeJointMsg">
-					<img src="assets/svg/joint-trash.svg" class="" />
-					</button>
+				<div class="canvas-container">
+					<canvas id="gameCanvas"></canvas>
 				</div>
-				<div id="progressBarWrapper">
-					<div id="progressBar"></div>
-					<p>Converting to frames...</p>
-					<button class="darko-a">Cancel</button>
-				</div>
-			</div>
-			<canvas id="gameCanvas"></canvas>
-			<div id="appDock" class="">
-				<div class="flex-row">
-					<!-- Timeline App -->
-					<div id="timelineApp" class="darko-b">
-						<div class="wrapper">
-							<!-- Timeline -->
-							<div class="row-a">
-								<div id="timelineGraphWrapper">
-									<!-- <div id="timelineScrollWrapper">
-														<button id="timelineScrollbar"></button>
-									</div> -->
-									<canvas id="timelineGraph"></canvas>
-								</div>
+				<!-- Timeline App -->
+				<div id="timelineApp" class="darko-b">
+					<div class="wrapper">
+						<!-- Timeline -->
+						<div class="row-a">
+							<div id="timelineGraphWrapper">
+								<canvas id="timelineGraph"></canvas>
 							</div>
-							<!-- Timeline control -->
-							<div class="row-b">
-								<div class="left-wrapper">
-									<button id="zoomInTimeline" class="darko-a" v-bind:title="'Zoom in'">
-									<img src="assets/svg/magnifying-glass-plus.svg" class="" />
-									</button>
-									<button id="zoomOutTimeline" class="darko-a" v-bind:title="'Zoom out'">
-									<img src="assets/svg/magnifying-glass-minus.svg" class="" />
-									</button>
-									<button id="lastFrame" class="darko-a" v-bind:title="'Previous frame'">
-									<img src="assets/svg/previous.svg" class="" />
-									</button>
-									<button id="playStop" class="darko-a" v-bind:title="'Play / Stop'">
-									<img src="assets/svg/play.svg" class="" />
-									</button>
-									<button id="nextFrame" class="darko-a" v-bind:title="'Next frame'">
-									<img src="assets/svg/next.svg" class="" />
-									</button>
-									<button id="addKeyframe" class="darko-a" v-bind:title="'Add keyframe'">
-									<img src="assets/svg/key-plus.svg" class="" />
-									</button>
-									<button id="deleteKeyframe" class="darko-a" v-bind:title="'Delete keyframe'">
-									<img src="assets/svg/key-minus.svg" class="" />
-									</button>
-								</div>
-								<div class="right-wrapper">
-									<div class="input-wrapper" v-bind:title="'Frame Count'">
-										<img src="assets/svg/f.svg">
-										<input id="frameCount" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="30" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
-									</div>
-									
-									<div class="input-wrapper" v-bind:title="'Animation Speed'">
-										<img src="assets/svg/rabbit.svg">
-										<input id="animationSpeed" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="30" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
-									</div>
+						</div>
+						<!-- Timeline control -->
+						<div class="row-b">
+							<div class="left-wrapper">
+								<button id="zoomInTimeline" class="darko-a" v-bind:title="'Zoom in'">
+								<img src="assets/svg/magnifying-glass-plus.svg" class="" />
+								</button>
+								<button id="zoomOutTimeline" class="darko-a" v-bind:title="'Zoom out'">
+								<img src="assets/svg/magnifying-glass-minus.svg" class="" />
+								</button>
+								<button id="lastFrame" class="darko-a" v-bind:title="'Previous frame'">
+								<img src="assets/svg/previous.svg" class="" />
+								</button>
+								<button id="playStop" class="darko-a" v-bind:title="'Play / Stop'">
+								<img src="assets/svg/play.svg" class="" />
+								</button>
+								<button id="nextFrame" class="darko-a" v-bind:title="'Next frame'">
+								<img src="assets/svg/next.svg" class="" />
+								</button>
+								<button id="addKeyframe" class="darko-a" v-bind:title="'Add keyframe'">
+								<img src="assets/svg/key-plus.svg" class="" />
+								</button>
+								<button id="deleteKeyframe" class="darko-a" v-bind:title="'Delete keyframe'">
+								<img src="assets/svg/key-minus.svg" class="" />
+								</button>
+							</div>
+							<div class="right-wrapper">
+								<div class="input-wrapper" v-bind:title="'Frame Count'">
+									<img src="assets/svg/f.svg">
+									<input id="frameCount" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="30" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
 								</div>
 								
-								<button id="minimize" class="">
-								<img src="assets/svg/triangle.svg" class="" />
-								</button>
+								<div class="input-wrapper" v-bind:title="'Animation Speed'">
+									<img src="assets/svg/rabbit.svg">
+									<input id="animationSpeed" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="30" v-on:keydown="validateFormat" v-on:input="validateMax" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
+								</div>
+							</div>
+							
+							<button id="minimize" class="">
+							<img src="assets/svg/triangle.svg" class="" />
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="panel-container darko-c">
+				<div class="wrapper">
+					<div class="wrapper-top darko-b">
+						<div id="materialApp">
+							<p class="title">Materials</p>
+							<div class="material-pane">
+								<div class="custom-file">
+									<button class="darko-a">Upload</button>
+									<input id="addMaterial" type="file" accept="image/png, image/jpeg, image/gif" multiple />
+								</div>
+							</div>
+						</div>
+						
+					</div>
+					<div class="wrapper-bottom darko-b">
+						<div id="layerApp">
+							<div class="layer-pane">
+								
 							</div>
 						</div>
 					</div>
-					<!-- Panel -->
-					<!-- <div id="panelApp">
-														<div class="wrapper">
-																							<div class="row-a">
-																																<div class="wrapper-material">
-																																									<div class="menu">
-																																																		<button id="fileButton" class="darko-a">File</button>
-																																									</div>
-																																</div>
-																																<div class="wrapper-layer">
-																																									
-																																</div>
-																							</div>
-														</div>
-					</div> -->
 				</div>
 			</div>
-			
 		</div>
 		<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
 		<script src="js/app.js"></script>

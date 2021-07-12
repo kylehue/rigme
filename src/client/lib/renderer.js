@@ -35,10 +35,8 @@ class Renderer {
 	}
 
 	setSize(width, height) {
-		this.bounds.width = width;
-		this.bounds.height = height;
-		this.canvas.width = this.bounds.width;
-		this.canvas.height = this.bounds.height;
+		this.canvas.width = width;
+		this.canvas.height = height;
 		this.bounds = this.canvas.getBoundingClientRect();
 
 		for (let context of this.context.offscreens) {
@@ -215,7 +213,7 @@ class Renderer {
 
 	clear(context) {
 		let ctx = context || this.context;
-		ctx.clearRect(0, 0, this.bounds.width, this.bounds.height);
+		ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 	}
 
 	save(context) {

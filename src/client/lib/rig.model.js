@@ -463,9 +463,7 @@ class RigModel {
 		if (!this.activeJoint) return;
 		if (timeline.graph) {
 			if (config.animation.autoAddKeyframe) {
-				this.setKeyframe(timeline.graph.state.currentMark, {
-					ignoreHistory: true
-				});
+				this.setKeyframe(timeline.graph.state.currentMark);
 			} else {
 				timeline.graph.setCurrentMark(timeline.graph.state.currentFrame, false);
 				timeline.graph.updateState();
