@@ -1,4 +1,4 @@
-#materialApp {
+/*#materialApp {
 	position: relative;
 	display: flex;
 	flex-flow: column nowrap;
@@ -90,5 +90,5 @@
 
 
 #materialApp .material-pane button.material.selected {
-	filter: brightness(1.25);
-}
+	background: var(--accent);
+}*/

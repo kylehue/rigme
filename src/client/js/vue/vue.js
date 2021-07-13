@@ -7,6 +7,7 @@ const saveApp = require("./save.js");
 const loadApp = require("./load.js");
 const nav = require("./navigation.js");
 const optionApp = require("./option.js");
+const paneApp = require("./pane.js");
 const apps = {
 	timeline: timeline,
 	contextMenuApp: contextMenu,
@@ -15,7 +16,8 @@ const apps = {
 	loadApp: loadApp,
 	optionApp: optionApp,
 	overlayApp: overlayApp,
-	overlayConfigApp: overlayConfigApp
+	overlayConfigApp: overlayConfigApp,
+	paneApp: paneApp
 };
 
 module.exports = apps;

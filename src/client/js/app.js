@@ -70,7 +70,7 @@ const actionButtons = {
 
 const fileButton = document.getElementById("fileButton");
 const optionButton = document.getElementById("optionButton");
-const materialPane = document.querySelector("#materialApp .material-pane");
+const materialApp = document.getElementById("materialApp");
 const addMaterialButton = document.getElementById("addMaterial");
 
 const canvasContainer = document.querySelector(".canvas-container");
@@ -86,22 +86,18 @@ let materials = [];
 
 function configMaterial(id) {
 	let mat = materials.find(m => m.id === id);
-	if (mat) {
-	}
+	if (mat) {}
 }
 
 function createMaterial(file) {
 	const id = utils.uid();
 	let fileURL = URL.createObjectURL(file);
-	let parent = dom.query("#materialApp .material-pane", true);
+	let parent = dom.query("#materialApp", true);
 	let button = dom.create("button");
 	let img = button.create("img");
-	let p = button.create("p");
 
-	button.node.classList.add("material", "darko-a");
-	img.prop("src", fileURL)
-	p.prop("innerText", file.name);
-	button.css("order", parent.node.children.length);
+	button.addClass("item");
+	img.prop("src", fileURL);
 
 	button.node.addEventListener("click", () => {
 		configMaterial(id);
@@ -129,18 +125,18 @@ function handleMaterialFiles(files) {
 			}
 		}
 
-		if (!exists) {
-			if (validImageTypes.includes(file.type)) {
-				let material = createMaterial(file);
-				materials.push(material);
-			}
-		} else {
-			exists.el.node.classList.add("selected");
+		if (validImageTypes.includes(file.type)) {
+			let material = createMaterial(file);
+			materials.push(material);
+		}
+		
+		if (exists) {
+			exists.el.remove();
 		}
 	}
 }
 
-materialPane.addEventListener("drop", event => {
+materialApp.addEventListener("drop", event => {
 	event.preventDefault();
 	let files = event.dataTransfer.files;
 	handleMaterialFiles(files);
@@ -151,13 +147,13 @@ addMaterialButton.addEventListener("change", () => {
 	handleMaterialFiles(files);
 });
 
-materialPane.addEventListener("dragover", event => {
+materialApp.addEventListener("dragover", event => {
 	event.preventDefault();
 });
 
-materialPane.addEventListener("mousedown", event => {
-	for (var i = 0; i < materialPane.children.length; i++) {
-		let child = materialPane.children[i];
+materialApp.addEventListener("mousedown", event => {
+	for (var i = 0; i < materialApp.children.length; i++) {
+		let child = materialApp.children[i];
 		child.classList.remove("selected");
 	}
 });

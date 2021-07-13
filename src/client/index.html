@@ -8,7 +8,7 @@
 		<link href="https://fonts.googleapis.com/css2?family=Catamaran:wght@400;700;800&display=swap" rel="stylesheet">
 		<link rel="stylesheet" type="text/css" href="css/main.css">
 		<link rel="stylesheet" type="text/css" href="css/timeline.css">
-		<link rel="stylesheet" type="text/css" href="css/panel.css">
+		<link rel="stylesheet" type="text/css" href="css/pane.css">
 		<link rel="stylesheet" type="text/css" href="css/navigation.css">
 		<link rel="stylesheet" type="text/css" href="css/file.css">
 		<link rel="stylesheet" type="text/css" href="css/save.css">
@@ -306,10 +306,23 @@
 					</div>
 				</div>
 			</div>
-			<div class="panel-container darko-c">
+			<div id="paneApp" class="panel-container darko-c">
 				<div class="wrapper">
 					<div class="wrapper-top darko-b">
-						<div id="materialApp">
+						<div class="tab-wrapper">
+							<button id="materialsTab" class="tab active">Materials</button>
+						</div>
+						<div class="body-wrapper">
+							<div id="materialApp" class="app">
+								<div class="custom-file item">
+									<button class="darko-a">
+										<img src="assets/svg/quad-arrow.svg">
+									</button>
+									<input id="addMaterial" type="file" accept="image/png, image/jpeg, image/gif" multiple />
+								</div>
+							</div>
+						</div>
+						<!-- <div id="materialApp">
 							<p class="title">Materials</p>
 							<div class="material-pane">
 								<div class="custom-file">
@@ -317,12 +330,23 @@
 									<input id="addMaterial" type="file" accept="image/png, image/jpeg, image/gif" multiple />
 								</div>
 							</div>
-						</div>
+						</div> -->
 						
 					</div>
 					<div class="wrapper-bottom darko-b">
-						<div id="layerApp">
-							<div class="layer-pane">
+						<div class="tab-wrapper">
+							<button id="jointsTab" class="tab active" v-on:click="showJoints">Joints</button>
+							<button id="propertiesTab" class="tab" v-on:click="showProperties">Properties</button>
+							<button id="historyTab" class="tab" v-on:click="showHistory">History</button>
+						</div>
+						<div class="body-wrapper">
+							<div id="jointApp" class="app" v-if="!hideJoints">
+								
+							</div>
+							<div id="propertyApp" class="app" v-if="!hideProperties">
+								
+							</div>
+							<div id="historyApp" class="app" v-if="!hideHistory">
 								
 							</div>
 						</div>
