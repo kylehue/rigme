@@ -3,6 +3,7 @@ const nodemon = require("gulp-nodemon");
 const jshint = require("gulp-jshint");
 const jsuglify = require("gulp-uglify");
 const cssuglify = require("gulp-uglifycss")
+const autoprefixer = require("gulp-autoprefixer")
 const htmlminify = require("gulp-minify-html");
 const imgminify = require("gulp-imagemin");
 const babel = require("gulp-babel");
@@ -53,6 +54,7 @@ gulp.task("client:js", function() {
 
 gulp.task("client:css", function() {
 	return gulp.src([paths.client.css])
+		.pipe(autoprefixer())
 		//.pipe(cssuglify())
 		.pipe(gulp.dest("dist/client/"));
 });
