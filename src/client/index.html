@@ -312,26 +312,19 @@
 						<div class="tab-wrapper">
 							<button id="materialsTab" class="tab active">Materials</button>
 						</div>
+						<div id="dropIcon">
+							<img src="assets/svg/drop.svg">
+						</div>
 						<div class="body-wrapper">
 							<div id="materialApp" class="app">
 								<div class="custom-file item">
 									<button class="darko-a">
-										<img src="assets/svg/quad-arrow.svg">
+									<img src="assets/svg/upload.svg">
 									</button>
 									<input id="addMaterial" type="file" accept="image/png, image/jpeg, image/gif" multiple />
 								</div>
 							</div>
 						</div>
-						<!-- <div id="materialApp">
-							<p class="title">Materials</p>
-							<div class="material-pane">
-								<div class="custom-file">
-									<button class="darko-a">Upload</button>
-									<input id="addMaterial" type="file" accept="image/png, image/jpeg, image/gif" multiple />
-								</div>
-							</div>
-						</div> -->
-						
 					</div>
 					<div class="wrapper-bottom darko-b">
 						<div class="tab-wrapper">
@@ -340,14 +333,14 @@
 							<button id="historyTab" class="tab" v-on:click="showHistory">History</button>
 						</div>
 						<div class="body-wrapper">
-							<div id="jointApp" class="app" v-if="!hideJoints">
-								
+							<div id="jointApp" class="app ">
+							
 							</div>
-							<div id="propertyApp" class="app" v-if="!hideProperties">
-								
+							<div id="propertyApp" class="app hidden">
+							
 							</div>
-							<div id="historyApp" class="app" v-if="!hideHistory">
-								
+							<div id="historyApp" class="app hidden">
+							
 							</div>
 						</div>
 					</div>

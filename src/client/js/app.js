@@ -97,7 +97,7 @@ function createMaterial(file) {
 	let img = button.create("img");
 
 	button.addClass("item");
-	img.prop("src", fileURL);
+	img.attr("src", fileURL);
 
 	button.node.addEventListener("click", () => {
 		configMaterial(id);
@@ -129,7 +129,7 @@ function handleMaterialFiles(files) {
 			let material = createMaterial(file);
 			materials.push(material);
 		}
-		
+
 		if (exists) {
 			exists.el.remove();
 		}
@@ -140,11 +140,20 @@ materialApp.addEventListener("drop", event => {
 	event.preventDefault();
 	let files = event.dataTransfer.files;
 	handleMaterialFiles(files);
+	dom.query("#dropIcon").css("visibility", "hidden");
 });
 
 addMaterialButton.addEventListener("change", () => {
 	let files = addMaterialButton.files;
 	handleMaterialFiles(files);
+});
+
+materialApp.addEventListener("dragenter", event => {
+	dom.query("#dropIcon").css("visibility", "visible");
+});
+
+materialApp.addEventListener("dragleave", event => {
+	dom.query("#dropIcon").css("visibility", "hidden");
 });
 
 materialApp.addEventListener("dragover", event => {
@@ -379,8 +388,61 @@ events.on("removeOverlay", () => {
 	vue.optionApp.overlayConfigHidden = true;
 });
 
-//Autosave
+function createJointElement(id, name) {
+	let jointEl = dom.create("div");
+	jointEl.addClass("joint");
+	let jointBtn = jointEl.create("button");
+	jointBtn.addClass("name", "darko-d");
+	let jointImg = jointBtn.create("img");
+	jointImg.attr("src", "assets/svg/joint.svg");
+	let jointText = jointBtn.create("p");
+	jointText.text(name);
+	let childWrapper = jointEl.create("div");
+	childWrapper.addClass("children");
+
+	jointEl.attr("id", id);
+
+	jointBtn.on("click", () => {
+		let prev = dom.query("#jointApp button.name.active");
+		prev.removeClass("active");
+		jointBtn.addClass("active");
+	});
+
+	return jointEl;
+}
+
+events.on("updatePaneJoints", joints => {
+	joints = joints || rigModel.joints;
+	//Make an element for each joint
+	let jointApp = dom.query("#jointApp", true);
+
+	for (var i = 0; i < joints.length; i++) {
+		let joint = joints[i];
+		//Check if it exists
+		let fefe = jointApp.query("#" + joint.id, true);
+		if (!fefe.node) {
+			let el = createJointElement(joint.id, joint.name);
+			jointApp.append(el);
+		}
+	}
+
+	//Fix each element hierarchy
+	let jointAppChildren = dom.query("#jointApp > *");
+	for (var i = 0; i < jointAppChildren.elements.length; i++) {
+		let el = jointAppChildren.elements[i];
+		let joint = joints.find(j => j.id === el.node.id);
+		//Search for parent
+		if (joint) {
+			if (joint.parent) {
+				let parentEl = dom.query("#" + joint.parent.id + " > .children", true);
+				parentEl.append(el);
+			}
+		}
+	}
+});
+
 events.on("historyChange", () => {
+	//Autosave
 	if (history.eventCount % config.autosave.threshold == 0) {
 		let model = rigModel.toJSON();
 		localStorage.setItem(config.autosave.label, JSON.stringify(model));
@@ -394,6 +456,7 @@ utils.loadJSONData(config.autosave.label, data => {
 
 events.on("clearJoints", () => {
 	rigModel.reset();
+	dom.query("#jointApp *").remove();
 });
 
 events.on("resetTimeline", () => {

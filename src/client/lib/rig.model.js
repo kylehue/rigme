@@ -346,7 +346,8 @@ class RigModel {
 
 		let before = this.activeJoint;
 		let joint = {
-			id: utils.uid(),
+			id: "J" + utils.uid(),
+			name: `Joint ${this.joints.length + 1}`,
 			position: vector(x, y),
 			positionPrev: vector(x, y),
 			angle: before ? before.position.heading(x, y) : 0,
@@ -375,6 +376,8 @@ class RigModel {
 			value: this.clone(),
 			group: "keyframe"
 		});
+		
+		events.emit("updatePaneJoints", this.joints);
 	}
 
 	selectJoint(x, y) {
@@ -440,6 +443,8 @@ class RigModel {
 			value: this.clone(),
 			group: "keyframe"
 		});
+		
+		events.emit("updatePaneJoints", this.joints);
 	}
 
 	computeKinematics(jointChain) {
@@ -516,6 +521,7 @@ class RigModel {
 
 				let jointData = {
 					id: joint.id,
+					name: joint.name,
 					angle: joint.angle,
 					position: joint.position,
 					positionPrev: joint.positionPrev,
@@ -556,6 +562,7 @@ class RigModel {
 				let joint = frame.joints[j];
 				let data = {
 					id: joint.id,
+					name: joint.name,
 					angle: joint.angle,
 					position: vector(joint.position),
 					positionPrev: vector(joint.positionPrev),
@@ -626,6 +633,7 @@ class RigModel {
 		}
 
 		this.updateBounds();
+		events.emit("updatePaneJoints", this.joints);
 	}
 
 	render(renderer) {

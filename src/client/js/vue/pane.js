@@ -18,24 +18,36 @@ const paneApp = new Vue({
 			dom.query("#jointsTab").addClass("active");
 			dom.query("#propertiesTab").removeClass("active");
 			dom.query("#historyTab").removeClass("active");
+
+			dom.query("#jointApp").removeClass("hidden");
+			dom.query("#propertyApp").addClass("hidden");
+			dom.query("#historyApp").addClass("hidden");
 		},
 		showProperties: function() {
-			this.hideJoints = true;
 			this.hideProperties = false;
+			this.hideJoints = true;
 			this.hideHistory = true;
 
 			dom.query("#jointsTab").removeClass("active");
 			dom.query("#propertiesTab").addClass("active");
 			dom.query("#historyTab").removeClass("active");
+
+			dom.query("#jointApp").addClass("hidden");
+			dom.query("#propertyApp").removeClass("hidden");
+			dom.query("#historyApp").addClass("hidden");
 		},
 		showHistory: function() {
+			this.hideHistory = false;
 			this.hideJoints = true;
 			this.hideProperties = true;
-			this.hideHistory = false;
 
 			dom.query("#jointsTab").removeClass("active");
 			dom.query("#propertiesTab").removeClass("active");
 			dom.query("#historyTab").addClass("active");
+
+			dom.query("#jointApp").addClass("hidden");
+			dom.query("#propertyApp").addClass("hidden");
+			dom.query("#historyApp").removeClass("hidden");
 		}
 	}
 });
