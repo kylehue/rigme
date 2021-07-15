@@ -34,6 +34,11 @@
 
 ::-webkit-scrollbar {
   width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-corner {
+  background: none;
 }
 
 ::-webkit-scrollbar-track {
@@ -60,6 +65,15 @@ input {
 	padding: 2px 3px;
 	font-size: 12px;
 	box-sizing: border-box;
+}
+
+select {
+	width: 140px;
+	cursor: pointer;
+}
+
+option {
+	color: var(--white);
 }
 
 button {

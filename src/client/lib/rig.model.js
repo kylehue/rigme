@@ -350,7 +350,7 @@ class RigModel {
 			name: `Joint ${this.joints.length + 1}`,
 			position: vector(x, y),
 			positionPrev: vector(x, y),
-			angle: before ? before.position.heading(x, y) : 0,
+			angle: before ? vector(x, y).heading(before.position) : 0,
 			parent: before || null,
 			children: [],
 			length: before ? before.position.dist(x, y) : 0,
@@ -377,7 +377,7 @@ class RigModel {
 			group: "keyframe"
 		});
 		
-		events.emit("updatePaneJoints", this.joints);
+		events.emit("jointChange", this.joints);
 	}
 
 	selectJoint(x, y) {
@@ -389,6 +389,8 @@ class RigModel {
 		});
 
 		this.activeJoint = this.joints.find(j => j.id === joints[0].id);
+
+		events.emit("jointChange", this.joints);
 
 		if (timeline.graph) {
 			this.updateKeyframe(timeline.graph.state.currentFrame, {
@@ -444,7 +446,7 @@ class RigModel {
 			group: "keyframe"
 		});
 		
-		events.emit("updatePaneJoints", this.joints);
+		events.emit("jointChange", this.joints);
 	}
 
 	computeKinematics(jointChain) {
@@ -484,6 +486,13 @@ class RigModel {
 			}
 
 			this.activeJoint.position.set(x, y);
+
+			if (config.animation.linear) {
+				if (this.activeJoint.parent) {
+					this.activeJoint.angle = this.activeJoint.position.heading(this.activeJoint.parent.position);
+					this.activeJoint.length = this.activeJoint.position.dist(this.activeJoint.parent.position);
+				}
+			}
 
 			this.updateBounds();
 		}
@@ -525,6 +534,7 @@ class RigModel {
 					angle: joint.angle,
 					position: joint.position,
 					positionPrev: joint.positionPrev,
+					length: joint.length,
 					parent: joint.parent ? joint.parent.id : null,
 					hierarchy: joint.hierarchy,
 					children: []
@@ -633,7 +643,7 @@ class RigModel {
 		}
 
 		this.updateBounds();
-		events.emit("updatePaneJoints", this.joints);
+		events.emit("jointChange", this.joints);
 	}
 
 	render(renderer) {

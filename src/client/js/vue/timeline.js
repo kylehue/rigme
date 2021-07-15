@@ -36,20 +36,14 @@ const timelineApp = new Vue({
 		},
 		validateFormat: function(e) {
 			timeline.redraw();
-			//Only allow numbers & backspace/delete
-			if (e.keyCode != 8 & e.keyCode != 46) {
-				let nums = new RegExp("[0-9]");
-				if (!nums.test(e.key)) {
-					e.preventDefault();
-					return;
-				}
-			}
+			e.target.value = e.target.value.replace(/[^0-9.-]/g, "").replace(/(\..*)\./g, "$1").replace(/^0+/g, "").replace(/(?<!^)-/g, "");
 
+			this.validateMax(e);
 			this.fixData();
 		},
 		validateAmount: function(e) {
-			timelineApp.validateMin(e);
-			timelineApp.validateMax(e);
+			this.validateMin(e);
+			this.validateMax(e);
 
 			this.fixData();
 		},
@@ -94,6 +88,7 @@ const timelineApp = new Vue({
 			this._previousAnimationSpeed = this.animationSpeed;
 		},
 		toggleAmount: function(e) {
+			if (e.target != document.activeElement) return;
 			let isDown = e.wheelDeltaY < 0;
 			let value = parseInt(e.target.value);
 			if (isDown) {
@@ -308,8 +303,7 @@ class Timeline {
 							position: vector(this.state.currentMark * this.hatchMark.spacing + this.hatchMark.spacing / 2, 0),
 							locked: this.state.currentMark == 0 ? true : false,
 							id: utils.uid(),
-							joints: copiedKeyframe.joints,
-							ignoreHistory: true
+							joints: copiedKeyframe.joints
 						});
 					}
 				}

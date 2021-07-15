@@ -41,14 +41,8 @@ const overlayApp = new Vue({
 			events.emit("renderFocus");
 		},
 		validateFormat: function(e) {
-			//Only allow numbers & backspace/delete
-			if (e.keyCode != 8 & e.keyCode != 46) {
-				let nums = new RegExp("[0-9]");
-				if (!nums.test(e.key)) {
-					e.preventDefault();
-					return;
-				}
-			}
+			e.target.value = e.target.value.replace(/[^0-9.-]/g, "").replace(/(\..*)\./g, "$1").replace(/^0+/g, "").replace(/(?<!^)-/g, "");
+			this.validateMax(e);
 		},
 		validateAmount: function(e) {
 			this.validateMin(e);
@@ -87,6 +81,7 @@ const overlayApp = new Vue({
 			}
 		},
 		toggleAmount: function(e) {
+			if (e.target != document.activeElement) return;
 			if (!e.target.value.length) {
 				e.target.value = 1;
 			}

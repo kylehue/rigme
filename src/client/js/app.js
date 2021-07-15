@@ -402,25 +402,61 @@ function createJointElement(id, name) {
 
 	jointEl.attr("id", id);
 
+	dom.query("#jointApp button.name.active").removeClass("active");
+
+	let joint = rigModel.joints.find(j => j.id === id);
+	if (joint) {
+		if (rigModel.activeJoint == joint) {
+			jointBtn.addClass("active");
+		}
+	}
+
 	jointBtn.on("click", () => {
 		let prev = dom.query("#jointApp button.name.active");
 		prev.removeClass("active");
 		jointBtn.addClass("active");
+
+		let joint = rigModel.joints.find(j => j.id === id);
+		if (joint) {
+			rigModel.selectJoint(joint.position.x, joint.position.y);
+		}
 	});
 
 	return jointEl;
 }
 
-events.on("updatePaneJoints", joints => {
-	joints = joints || rigModel.joints;
-	//Make an element for each joint
-	let jointApp = dom.query("#jointApp", true);
+function setJointProperties(joint) {
+	let propertyPane = dom.query("#propertyPane", true);
+	if (joint) {
+		propertyPane.query("#mainSection").removeClass("disabled");
 
+		let nameEl = propertyPane.query("#jointName");
+		let xEl = propertyPane.query("#jointX");
+		let yEl = propertyPane.query("#jointY");
+		let angleEl = propertyPane.query("#jointAngle");
+		let lengthEl = propertyPane.query("#jointLength");
+
+		nameEl.value(joint.name);
+		xEl.value(joint.position.x);
+		yEl.value(joint.position.y);
+		let jointAngle = utils.degrees(utils.map(joint.angle, -Math.PI, Math.PI, 0, Math.PI * 2));
+		angleEl.value(jointAngle);
+		lengthEl.value(joint.length);
+	} else {
+		propertyPane.query("#mainSection").addClass("disabled");
+	}
+}
+
+events.on("jointChange", joints => {
+	joints = joints || rigModel.joints;
+	//Joint Pane >
+	//Adding elements
+	let jointApp = dom.query("#jointApp", true);
 	for (var i = 0; i < joints.length; i++) {
 		let joint = joints[i];
-		//Check if it exists
-		let fefe = jointApp.query("#" + joint.id, true);
-		if (!fefe.node) {
+		//Check if it exists in dom
+		let check = jointApp.query("#" + joint.id, true);
+		if (!check.node) {
 			let el = createJointElement(joint.id, joint.name);
 			jointApp.append(el);
 		}
@@ -438,6 +474,85 @@ events.on("updatePaneJoints", joints => {
 				parentEl.append(el);
 			}
 		}
+	}
+
+	//Updating elements
+	let jointAppJoints = dom.query("#jointApp .joint");
+	for (var i = 0; i < jointAppJoints.elements.length; i++) {
+		let el = jointAppJoints.elements[i];
+		let rigJoint = rigModel.joints.find(j => j.id === el.node.id);
+		if (!rigJoint) {
+			el.remove();
+		} else {
+			if (el.node.id === rigModel.activeJoint.id) {
+				el.query("button.name").addClass("active");
+			} else {
+				el.query("button.name.active").removeClass("active");
+			}
+
+			el.query("button.name", true).text(rigJoint.name, true);
+		}
+	}
+
+	//Properties Pane >
+	let activeJoint = rigModel.activeJoint;
+	setJointProperties(activeJoint);
+
+	if (rigModel.activeJoint) {
+		if (!rigModel.activeJoint.parent) {
+			dom.query(dom.query("#jointAngle", true).node.parentNode, true).css("display", "none");
+			dom.query(dom.query("#jointLength", true).node.parentNode, true).css("display", "none");
+		} else {
+			dom.query(dom.query("#jointAngle", true).node.parentNode, true).css("display", "flex");
+			dom.query(dom.query("#jointLength", true).node.parentNode, true).css("display", "flex");
+		}
+	}
+});
+
+events.on("jointNameInputChange", () => {
+	let activeJoint = rigModel.activeJoint;
+	if (activeJoint) {
+		let name = dom.query("#jointName", true).value();
+		activeJoint.name = name;
+
+		events.emit("jointChange");
+
+		history.add({
+			label: "Change joint name",
+			value: rigModel.clone(),
+			group: "keyframe"
+		});
+	}
+});
+
+events.on("jointPositionInputChange", () => {
+	let activeJoint = rigModel.activeJoint;
+	if (activeJoint) {
+		let x = parseFloat(dom.query("#jointX", true).value()) || 0;
+		let y = parseFloat(dom.query("#jointY", true).value()) || 0;
+		rigModel.moveJoint(x, y);
+	}
+});
+
+events.on("jointAngleInputChange", () => {
+	let activeJoint = rigModel.activeJoint;
+	if (activeJoint) {
+		if (activeJoint.parent) {
+			let angle = parseFloat(dom.query("#jointAngle", true).value()) || 0;
+			angle = utils.radians(utils.map(angle, 0, 360, -180, 180));
+			let x = activeJoint.parent.position.x - Math.cos(angle) * activeJoint.length;
+			let y = activeJoint.parent.position.y - Math.sin(angle) * activeJoint.length;
+			rigModel.moveJoint(x, y);
+		}
+	}
+});
+
+events.on("jointLengthInputChange", () => {
+	let activeJoint = rigModel.activeJoint;
+	if (activeJoint) {
+		let length = parseFloat(dom.query("#jointLength", true).value()) || 0;
+		activeJoint.length = length;
+		rigModel.moveJoint(activeJoint.position.x, activeJoint.position.y);
 	}
 });
 
@@ -556,6 +671,10 @@ mouse.on("mouseup", function() {
 			value: rigModel.clone(),
 			group: "keyframe"
 		});
+
+		//Properties Pane >
+		let activeJoint = rigModel.activeJoint;
+		setJointProperties(activeJoint);
 
 		rigModel._moved = false;
 	}
