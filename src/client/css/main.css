@@ -269,8 +269,8 @@ span.shortcut {
 	display: flex;
 	align-content: space-between;
 	flex-flow: column nowrap;
-	width: 70%;
-	min-width: 720px;
+	width: calc(100% - 270px);
+	/*min-width: 720px;*/
 	height: 100%;
 }
 

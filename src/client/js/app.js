@@ -104,6 +104,12 @@ function createMaterial(file) {
 	});
 
 	parent.append(button);
+
+	let comboBox = dom.query("#propertyApp #materials", true);
+	let option = comboBox.create("option");
+	option.value(fileURL);
+	option.text(file.name);
+
 	return {
 		id: id,
 		file: file,
@@ -133,6 +139,13 @@ function handleMaterialFiles(files) {
 		if (exists) {
 			exists.el.remove();
 		}
+	}
+
+	//Enable properties skinning if there are materials
+	if (materials.length) {
+		dom.query("#skinningSection").removeClass("disabled");
+	} else {
+		dom.query("#skinningSection").addClass("disabled");
 	}
 }
 
@@ -388,6 +401,40 @@ events.on("removeOverlay", () => {
 	vue.optionApp.overlayConfigHidden = true;
 });
 
+let comboBox = dom.query("#propertyApp #materials", true);
+comboBox.on("change", e => {
+	let url = comboBox.value();
+	let activeJoint = rigModel.activeJoint;
+	let img = new Image();
+	img.src = url;
+	if (activeJoint) {
+		let imgData = {
+			image: img,
+			crop: {
+				from: {
+					x: 0,
+					y: 0
+				},
+				to: {
+					x: 0,
+					y: 0
+				}
+			},
+			offset: {
+				x: 0,
+				y: 0,
+				scaleX: 0,
+				scaleY: 0,
+				angle: 0
+			}
+		};
+
+		rigModel.editJoint(activeJoint.id, {
+			skin: imgData
+		});
+	}
+});
+
 function createJointElement(id, name) {
 	let jointEl = dom.create("div");
 	jointEl.addClass("joint");
@@ -498,13 +545,23 @@ events.on("jointChange", joints => {
 	let activeJoint = rigModel.activeJoint;
 	setJointProperties(activeJoint);
 
+	//Enable properties skinning if there are materials
+	if (materials.length) {
+		dom.query("#skinningSection").removeClass("disabled");
+	} else {
+		dom.query("#skinningSection").addClass("disabled");
+	}
+
+	//Hide angle, length, & skinning properties if there's no parent
 	if (rigModel.activeJoint) {
 		if (!rigModel.activeJoint.parent) {
 			dom.query(dom.query("#jointAngle", true).node.parentNode, true).css("display", "none");
 			dom.query(dom.query("#jointLength", true).node.parentNode, true).css("display", "none");
+			dom.query("#skinningSection").css("display", "none");
 		} else {
 			dom.query(dom.query("#jointAngle", true).node.parentNode, true).css("display", "flex");
 			dom.query(dom.query("#jointLength", true).node.parentNode, true).css("display", "flex");
+			dom.query("#skinningSection").css("display", "flex");
 		}
 	}
 });

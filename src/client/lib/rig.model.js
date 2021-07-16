@@ -93,6 +93,20 @@ class RigModel {
 		return null;
 	}
 
+	editJoint(id, prop) {
+		let keyframes = Object.values(this.keyframes);
+		for (var i = 0; i < keyframes.length; i++) {
+			let frame = keyframes[i];
+			let joint = frame.joints.find(j => j.id === id);
+			if (joint) {
+				let _props = Object.keys(prop);
+				for (var j = 0; j < _props.length; j++) {
+					joint[_props[j]] = prop[_props[j]];
+				}
+			}
+		}
+	}
+
 	addSubKeyframes(start, end) {
 		if (timeline.graph) {
 			let keys = Object.keys(this.keyframes);
@@ -354,7 +368,8 @@ class RigModel {
 			parent: before || null,
 			children: [],
 			length: before ? before.position.dist(x, y) : 0,
-			hierarchy: before ? before.hierarchy + 1 : 1 /*this.joints.length*/
+			hierarchy: before ? before.hierarchy + 1 : 1,
+			skin: {}
 		};
 
 		if (before) before.children.push(joint);
@@ -376,7 +391,7 @@ class RigModel {
 			value: this.clone(),
 			group: "keyframe"
 		});
-		
+
 		events.emit("jointChange", this.joints);
 	}
 
@@ -445,7 +460,7 @@ class RigModel {
 			value: this.clone(),
 			group: "keyframe"
 		});
-		
+
 		events.emit("jointChange", this.joints);
 	}
 
@@ -537,7 +552,8 @@ class RigModel {
 					length: joint.length,
 					parent: joint.parent ? joint.parent.id : null,
 					hierarchy: joint.hierarchy,
-					children: []
+					children: [],
+					skin: joint.skin
 				};
 
 				for (var k = 0; k < joint.children.length; k++) {
@@ -579,7 +595,8 @@ class RigModel {
 					length: joint.length,
 					hierarchy: joint.hierarchy,
 					parent: joint.parent,
-					children: joint.children.slice()
+					children: joint.children.slice(),
+					skin: joint.skin
 				}
 
 				parsedJoints.push(data);
@@ -671,8 +688,30 @@ class RigModel {
 						if (this.activeJoint.parent) jointColor = this.activeJoint.parent === joint ? "#9b68e1" : jointColor;
 					}
 
-					if (timeline.graph.state.isPlaying) {
-						jointColor = config.render.joint.color.default;
+					if (joint.parent) {
+						if (typeof joint.skin.image == "object") {
+							if (joint.skin.image.src) {
+								let size = utils.scaleSize(joint.skin.image.width, joint.skin.image.height, joint.length, joint.length);
+
+								renderer.save();
+
+								let midpoint = {
+									x: (joint.position.x + joint.parent.position.x) / 2,
+									y: (joint.position.y + joint.parent.position.y) / 2
+								};
+
+								renderer.context.translate(midpoint.x, midpoint.y);
+								renderer.context.rotate(joint.angle + Math.PI / 2);
+
+
+								renderer.context.drawImage(joint.skin.image, -size.width / 2, -size.height / 2, size.width, size.height);
+								renderer.restore();
+							}
+
+							if (timeline.graph.state.isPlaying) {
+								jointColor = config.render.joint.color.default;
+							}
+						}
 					}
 				}
 

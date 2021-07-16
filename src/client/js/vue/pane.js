@@ -27,8 +27,8 @@ const paneApp = new Vue({
 			}
 		},
 		toggleAmount: function(e) {
-			e.preventDefault();
 			if (e.target != document.activeElement) return;
+			e.preventDefault();
 			if (!e.target.value.length) {
 				e.target.value = 1;
 			}
