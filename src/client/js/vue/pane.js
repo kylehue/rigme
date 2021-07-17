@@ -3,6 +3,8 @@ const utils = require("../../../../lib/utils.js");
 const dom = require("../../../../lib/dom.js");
 const config = require("../../../../lib/config.js");
 
+const skinningInputIds = ["skinPositionX", "skinPositionY", "skinScaleX", "skinScaleY", "skinAngle"];
+
 const paneApp = new Vue({
 	el: "#paneApp",
 	data: {
@@ -25,6 +27,10 @@ const paneApp = new Vue({
 			} else if (e.target.id == "jointLength") {
 				events.emit("jointLengthInputChange");
 			}
+
+			if (skinningInputIds.includes(e.target.id)) {
+				events.emit("jointSkinningInputChange");
+			}
 		},
 		toggleAmount: function(e) {
 			if (e.target != document.activeElement) return;
@@ -35,13 +41,18 @@ const paneApp = new Vue({
 
 			let isDown = e.wheelDeltaY < 0;
 			let value = parseFloat(e.target.value);
-			if (isDown) {
-				value--;
-			} else {
-				value++;
+			let weight = 1;
+			if (e.target.id == "skinScaleX" || e.target.id == "skinScaleY") {
+				weight = 0.1;
 			}
 
-			e.target.value = value.toString();
+			if (isDown) {
+				value -= weight;
+			} else {
+				value += weight;
+			}
+
+			e.target.value = value.toFixed(2);
 
 			if (e.target.id == "jointX" || e.target.id == "jointY") {
 				events.emit("jointPositionInputChange");
@@ -49,6 +60,10 @@ const paneApp = new Vue({
 				events.emit("jointAngleInputChange");
 			} else if (e.target.id == "jointLength") {
 				events.emit("jointLengthInputChange");
+			}
+
+			if (skinningInputIds.includes(e.target.id)) {
+				events.emit("jointSkinningInputChange");
 			}
 		},
 		showJoints: function() {

@@ -332,6 +332,7 @@ class Timeline {
 		let onScrollbar, onTimeline, onKeyframe, onScrollbarLeft, onScrollbarRight;
 
 		const dragStart = () => {
+			if (!mouseInside(this.canvas)) return;
 			dragging = true;
 
 			//Which area is getting dragged?

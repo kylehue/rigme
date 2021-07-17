@@ -68,6 +68,8 @@ const actionButtons = {
 	pan: document.getElementById("panCamera")
 };
 
+let cropBtn = dom.query("#displayCropApp", true);
+let materialsEl = dom.query("#propertyApp #materials", true);
 const fileButton = document.getElementById("fileButton");
 const optionButton = document.getElementById("optionButton");
 const materialApp = document.getElementById("materialApp");
@@ -105,8 +107,7 @@ function createMaterial(file) {
 
 	parent.append(button);
 
-	let comboBox = dom.query("#propertyApp #materials", true);
-	let option = comboBox.create("option");
+	let option = materialsEl.create("option");
 	option.value(fileURL);
 	option.text(file.name);
 
@@ -139,13 +140,6 @@ function handleMaterialFiles(files) {
 		if (exists) {
 			exists.el.remove();
 		}
-	}
-
-	//Enable properties skinning if there are materials
-	if (materials.length) {
-		dom.query("#skinningSection").removeClass("disabled");
-	} else {
-		dom.query("#skinningSection").addClass("disabled");
 	}
 }
 
@@ -183,30 +177,6 @@ materialApp.addEventListener("mousedown", event => {
 function removeActives() {
 	for (let btn of _actionButtons) {
 		actionButtons[btn].classList.remove("active-tool");
-	}
-}
-
-function undo() {
-	let prev = history.getPrevious();
-	if (!prev) return;
-	if (prev.group == "keyframe") {
-		rigModel.import(prev.value);
-		history.backward();
-
-		vue.timeline.graph.updateState();
-		vue.timeline.graph.redraw();
-	}
-}
-
-function redo() {
-	let next = history.getNext();
-	if (!next) return;
-	if (next.group == "keyframe") {
-		rigModel.import(next.value);
-		history.forward();
-
-		vue.timeline.graph.updateState();
-		vue.timeline.graph.redraw();
 	}
 }
 
@@ -401,38 +371,66 @@ events.on("removeOverlay", () => {
 	vue.optionApp.overlayConfigHidden = true;
 });
 
-let comboBox = dom.query("#propertyApp #materials", true);
-comboBox.on("change", e => {
-	let url = comboBox.value();
+cropBtn.on("click", () => {
 	let activeJoint = rigModel.activeJoint;
-	let img = new Image();
-	img.src = url;
 	if (activeJoint) {
-		let imgData = {
-			image: img,
-			crop: {
-				from: {
-					x: 0,
-					y: 0
-				},
-				to: {
-					x: 0,
-					y: 0
-				}
-			},
-			offset: {
-				x: 0,
-				y: 0,
-				scaleX: 0,
-				scaleY: 0,
-				angle: 0
-			}
-		};
+		if (activeJoint.skin) {
+			if (activeJoint.skin.imageSrc) {
+				let img = new Image();
+				img.src =activeJoint.skin.imageSrc;
 
-		rigModel.editJoint(activeJoint.id, {
-			skin: imgData
-		});
+				img.onload = function () {
+					vue.cropApp.show(img);
+				}
+			}
+		}
 	}
+});
+
+materialsEl.on("change", () => {
+	let url = materialsEl.value();
+	let activeJoint = rigModel.activeJoint;
+
+	if (url) {
+		cropBtn.removeClass("disabled");
+	} else {
+		cropBtn.addClass("disabled");
+	}
+
+	utils.imageToBase64(url).then(res => {
+		if (activeJoint) {
+			let _skin = {
+				imageSrc: res,
+				crop: {
+					from: {
+						x: 0,
+						y: 0
+					},
+					to: {
+						x: 0,
+						y: 0
+					}
+				},
+				offset: {
+					x: 0,
+					y: 0,
+					scaleX: 1,
+					scaleY: 1,
+					angle: 0
+				}
+			};
+
+			rigModel.editJoint(activeJoint.id, {
+				skin: _skin
+			});
+
+			history.add({
+				label: "Change skin",
+				value: rigModel.clone(),
+				group: "keyframe"
+			});
+		}
+	});
 });
 
 function createJointElement(id, name) {
@@ -477,6 +475,7 @@ function setJointProperties(joint) {
 	if (joint) {
 		propertyPane.query("#mainSection").removeClass("disabled");
 
+		//Transform
 		let nameEl = propertyPane.query("#jointName");
 		let xEl = propertyPane.query("#jointX");
 		let yEl = propertyPane.query("#jointY");
@@ -484,11 +483,35 @@ function setJointProperties(joint) {
 		let lengthEl = propertyPane.query("#jointLength");
 
 		nameEl.value(joint.name);
-		xEl.value(joint.position.x);
-		yEl.value(joint.position.y);
+		xEl.value(joint.position.x.toFixed(2));
+		yEl.value(joint.position.y.toFixed(2));
 		let jointAngle = utils.degrees(utils.map(joint.angle, -Math.PI, Math.PI, 0, Math.PI * 2));
-		angleEl.value(jointAngle);
-		lengthEl.value(joint.length);
+		angleEl.value(jointAngle.toFixed(2));
+		lengthEl.value(joint.length.toFixed(2));
+
+		//Skinning
+		if (joint.skin) {
+			if (joint.skin.imageSrc) {
+				cropBtn.removeClass("disabled");
+			} else {
+				cropBtn.addClass("disabled");
+			}
+
+			if (joint.skin.offset) {
+				let x = dom.query("#skinPositionX");
+				let y = dom.query("#skinPositionY");
+				let scaleX = dom.query("#skinScaleX");
+				let scaleY = dom.query("#skinScaleY");
+				let angle = dom.query("#skinAngle");
+
+				x.value(joint.skin.offset.x.toFixed(2));
+				y.value(joint.skin.offset.y.toFixed(2));
+				scaleX.value(joint.skin.offset.scaleX.toFixed(2));
+				scaleY.value(joint.skin.offset.scaleY.toFixed(2));
+				let offsetAngle = utils.degrees(joint.skin.offset.angle);
+				angle.value(offsetAngle.toFixed(2));
+			}
+		}
 	} else {
 		propertyPane.query("#mainSection").addClass("disabled");
 	}
@@ -545,13 +568,6 @@ events.on("jointChange", joints => {
 	let activeJoint = rigModel.activeJoint;
 	setJointProperties(activeJoint);
 
-	//Enable properties skinning if there are materials
-	if (materials.length) {
-		dom.query("#skinningSection").removeClass("disabled");
-	} else {
-		dom.query("#skinningSection").addClass("disabled");
-	}
-
 	//Hide angle, length, & skinning properties if there's no parent
 	if (rigModel.activeJoint) {
 		if (!rigModel.activeJoint.parent) {
@@ -572,10 +588,44 @@ events.on("jointNameInputChange", () => {
 		let name = dom.query("#jointName", true).value();
 		activeJoint.name = name;
 
+		rigModel.editJoint(activeJoint.id, {
+			name: name
+		});
+
 		events.emit("jointChange");
 
 		history.add({
 			label: "Change joint name",
+			value: rigModel.clone(),
+			group: "keyframe"
+		});
+	}
+});
+
+events.on("jointSkinningInputChange", () => {
+	let activeJoint = rigModel.activeJoint;
+	if (activeJoint) {
+		let activeJointSkin = activeJoint.skin;
+		let x = parseFloat(dom.query("#skinPositionX", true).value());
+		let y = parseFloat(dom.query("#skinPositionY", true).value());
+		let scaleX = parseFloat(dom.query("#skinScaleX", true).value());
+		let scaleY = parseFloat(dom.query("#skinScaleY", true).value());
+		let angle = parseFloat(dom.query("#skinAngle", true).value());
+
+		activeJointSkin.offset = {
+			x: x,
+			y: y,
+			scaleX: scaleX,
+			scaleY: scaleY,
+			angle: utils.radians(utils.map(angle, 0, 360, -180, 180)) + Math.PI
+		};
+
+		rigModel.editJoint(activeJoint.id, {
+			skin: activeJointSkin
+		});
+
+		history.add({
+			label: "Change skin offset",
 			value: rigModel.clone(),
 			group: "keyframe"
 		});
@@ -616,7 +666,7 @@ events.on("jointLengthInputChange", () => {
 events.on("historyChange", () => {
 	//Autosave
 	if (history.eventCount % config.autosave.threshold == 0) {
-		let model = rigModel.toJSON();
+		let model = rigModel.toJSON(null, true);
 		localStorage.setItem(config.autosave.label, JSON.stringify(model));
 	}
 });
@@ -659,11 +709,27 @@ events.on("resetCamera", () => {
 });
 
 events.on("undo", () => {
-	undo();
+	let prev = history.getPrevious();
+	if (!prev) return;
+	if (prev.group == "keyframe") {
+		rigModel.import(prev.value);
+		history.backward();
+
+		vue.timeline.graph.updateState();
+		vue.timeline.graph.redraw();
+	}
 });
 
 events.on("redo", () => {
-	redo();
+	let next = history.getNext();
+	if (!next) return;
+	if (next.group == "keyframe") {
+		rigModel.import(next.value);
+		history.forward();
+
+		vue.timeline.graph.updateState();
+		vue.timeline.graph.redraw();
+	}
 });
 
 events.on("renderSleep", () => {
@@ -874,6 +940,13 @@ renderer.render(function() {
 
 key.on("keydown", function() {
 	if (key.code === 16) {
-		console.log(history.events)
+		console.time();
+		rigModel.toJSON();
+		console.timeEnd();
+
+		console.time();
+		rigModel.toJSON(rigModel.clone());
+		console.timeEnd();
+		console.log(rigModel);
 	}
 });

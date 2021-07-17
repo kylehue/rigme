@@ -325,7 +325,9 @@ class RigModel {
 
 					if (frontJoint && backJoint) {
 						let position = frontJoint.position.copy().lerp(backJoint.position, lerpWeight)
+						let length = utils.lerp(frontJoint.length, backJoint.length, lerpWeight);
 
+						joint.length = length;
 						joint.position.set(position);
 						for (var k = 0; k < joint.children.length; k++) {
 							let child = joint.children[k];
@@ -485,7 +487,15 @@ class RigModel {
 		if (!this.activeJoint) return;
 		if (timeline.graph) {
 			if (config.animation.autoAddKeyframe) {
-				this.setKeyframe(timeline.graph.state.currentMark);
+				let currentMark = timeline.graph.state.currentMark;
+				let frame = this.keyframes[currentMark];
+				if (!frame) {
+					this.setKeyframe(currentMark);
+				} else {
+					if (frame.type != "head") {
+						this.setKeyframe(currentMark);
+					}
+				}
 			} else {
 				timeline.graph.setCurrentMark(timeline.graph.state.currentFrame, false);
 				timeline.graph.updateState();
@@ -521,7 +531,7 @@ class RigModel {
 		return joint;
 	}
 
-	toJSON(_keyframes) {
+	toJSON(_keyframes, excludeImageSrc) {
 		let keyframes = _keyframes || this.clone();
 		let json = {};
 		let keys = Object.keys(keyframes);
@@ -553,7 +563,9 @@ class RigModel {
 					parent: joint.parent ? joint.parent.id : null,
 					hierarchy: joint.hierarchy,
 					children: [],
-					skin: joint.skin
+					skinImageSrc: joint.skin && !excludeImageSrc ? joint.skin.imageSrc : undefined,
+					skinCrop: joint.skin ? joint.skin.crop : null,
+					skinOffset: joint.skin ? joint.skin.offset : null,
 				};
 
 				for (var k = 0; k < joint.children.length; k++) {
@@ -596,7 +608,11 @@ class RigModel {
 					hierarchy: joint.hierarchy,
 					parent: joint.parent,
 					children: joint.children.slice(),
-					skin: joint.skin
+					skin: {
+						offset: joint.skinOffset,
+						crop: joint.skinCrop,
+						imageSrc: joint.skinImageSrc
+					}
 				}
 
 				parsedJoints.push(data);
@@ -689,27 +705,64 @@ class RigModel {
 					}
 
 					if (joint.parent) {
-						if (typeof joint.skin.image == "object") {
-							if (joint.skin.image.src) {
-								let size = utils.scaleSize(joint.skin.image.width, joint.skin.image.height, joint.length, joint.length);
-
-								renderer.save();
-
-								let midpoint = {
-									x: (joint.position.x + joint.parent.position.x) / 2,
-									y: (joint.position.y + joint.parent.position.y) / 2
-								};
-
-								renderer.context.translate(midpoint.x, midpoint.y);
-								renderer.context.rotate(joint.angle + Math.PI / 2);
-
-
-								renderer.context.drawImage(joint.skin.image, -size.width / 2, -size.height / 2, size.width, size.height);
-								renderer.restore();
+						if (joint.skin.imageSrc) {
+							if (!joint.skin.image) {
+								let img = new Image();
+								img.src = joint.skin.imageSrc;
+								joint.skin.image = img;
+							} else {
+								if (!joint.skin.image.width) {
+									let img = new Image();
+									img.src = joint.skin.imageSrc;
+									joint.skin.image = img;
+								}
 							}
+						}
 
-							if (timeline.graph.state.isPlaying) {
-								jointColor = config.render.joint.color.default;
+						if (joint.skin) {
+							if (typeof joint.skin.image == "object") {
+								if (joint.skin.image.src) {
+									let newWidth = joint.length;
+									let newHeight = joint.length;
+									let angleAuto = 0;
+									if (joint.skin.image.width > joint.skin.image.height) {
+										newHeight = Number.MAX_SAFE_INTEGER;
+									} else {
+										newWidth = Number.MAX_SAFE_INTEGER;
+										angleAuto = Math.PI / 2;
+									}
+
+									let size = utils.scaleSize(joint.skin.image.width, joint.skin.image.height, newWidth, newHeight);
+
+									renderer.save();
+
+									let midpoint = {
+										x: (joint.position.x + joint.parent.position.x) / 2,
+										y: (joint.position.y + joint.parent.position.y) / 2
+									};
+
+									renderer.context.translate(midpoint.x, midpoint.y);
+									renderer.context.rotate(joint.angle + angleAuto);
+
+									if (joint.skin.offset) {
+										let xOffset = joint.skin.offset.x;
+										let yOffset = joint.skin.offset.y;
+										let scaleXOffset = joint.skin.offset.scaleX;
+										let scaleYOffset = joint.skin.offset.scaleY;
+										let angleOffset = joint.skin.offset.angle;
+
+										renderer.context.rotate(angleOffset);
+										renderer.context.translate(xOffset, yOffset);
+										renderer.context.scale(scaleXOffset, scaleYOffset);
+									}
+
+									renderer.context.drawImage(joint.skin.image, -size.width / 2, -size.height / 2, size.width, size.height);
+									renderer.restore();
+								}
+
+								if (timeline.graph.state.isPlaying) {
+									jointColor = config.render.joint.color.default;
+								}
 							}
 						}
 					}

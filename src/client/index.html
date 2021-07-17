@@ -13,6 +13,7 @@
 		<link rel="stylesheet" type="text/css" href="css/file.css">
 		<link rel="stylesheet" type="text/css" href="css/save.css">
 		<link rel="stylesheet" type="text/css" href="css/load.css">
+		<link rel="stylesheet" type="text/css" href="css/crop.css">
 		<link rel="stylesheet" type="text/css" href="css/option.css">
 		<link rel="stylesheet" type="text/css" href="css/overlay.css">
 		<link rel="stylesheet" type="text/css" href="css/overlay.config.css">
@@ -63,7 +64,7 @@
 				<div class="row">
 					<div class="drag"></div>
 					<p class="title">Save Project</p>
-					<button class="darko-a close" v-on:click="hide" v-bind:title="closeMsg">x</button>
+					<button class="darko-a close" v-on:click="hide" v-bind:title="'Close'">x</button>
 				</div>
 				<div class="row">
 					<div class="field">
@@ -80,7 +81,7 @@
 				<div class="row">
 					<div class="drag"></div>
 					<p class="title">Load Project</p>
-					<button class="darko-a close" v-on:click="hide" v-bind:title="closeMsg">x</button>
+					<button class="darko-a close" v-on:click="hide" v-bind:title="'Close'">x</button>
 				</div>
 				<div class="row section">
 					<div class="title-wrapper">
@@ -99,12 +100,26 @@
 					<button id="import" class="darko-a disabled" v-on:click="validate">Load</button>
 				</div>
 			</div>
+			<!-- Crop app -->
+			<div id="cropApp" class="darko-b" v-if="!hidden">
+				<div class="row">
+					<div class="drag"></div>
+					<p class="title">Crop</p>
+					<button class="darko-a close" v-on:click="hide" v-bind:title="'Close'">x</button>
+				</div>
+				<div class="row section">
+					<canvas id="cropCanvas"></canvas>
+				</div>
+				<div class="row">
+					<button id="import" class="darko-a disabled" v-on:click="save">Save</button>
+				</div>
+			</div>
 			<!-- Overlay app -->
 			<div id="overlayApp" class="darko-b" v-if="!hidden">
 				<div class="row">
 					<div class="drag"></div>
 					<p class="title">Add Overlay</p>
-					<button class="darko-a close" v-on:click="hide" v-bind:title="closeMsg">x</button>
+					<button class="darko-a close" v-on:click="hide" v-bind:title="'Close'">x</button>
 				</div>
 				<div class="row section">
 					<div class="title-wrapper">
@@ -163,7 +178,7 @@
 				<div class="row">
 					<div class="drag"></div>
 					<p class="title">Overlay Settings</p>
-					<button class="darko-a close" v-on:click="hide" v-bind:title="closeMsg">x</button>
+					<button class="darko-a close" v-on:click="hide" v-bind:title="'Close'">x</button>
 				</div>
 				<div class="row section">
 					<div class="title-wrapper">
@@ -370,16 +385,25 @@
 											</div>
 										</div>
 									</div>
-									<div id="skinningSection" class="section disabled">
+									<div id="skinningSection" class="section">
 										<div class="header">
 											<p class="title">Skinning</p>
 										</div>
 										<div class="body">
-											<div class="input-wrapper">
-												<label>Image</label>
-												<select id="materials" class="darko-a">
-													<option selected disabled></option>
-												</select>
+											<div class="section">
+												<div class="header">
+													<p class="title">Image</p>
+												</div>
+												<div class="body">
+													<div class="input-wrapper">
+														<select id="materials" class="darko-a">
+															<option selected disabled>Choose one:</option>
+														</select>
+													</div>
+													<div class="input-wrapper">
+														<button id="displayCropApp" class="darko-a disabled">Crop</button>
+													</div>
+												</div>
 											</div>
 											<div class="section">
 												<div class="header">
@@ -388,25 +412,29 @@
 												<div class="body">
 													<div class="input-wrapper">
 														<label for="skinPositionX">X</label>
-														<input id="skinPositionX" type="text" class="darko-c" placeholder="Type here..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount">
+														<input id="skinPositionX" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount">
 													</div>
 													<div class="input-wrapper">
 														<label for="skinPositionY">Y</label>
-														<input id="skinPositionY" type="text" class="darko-c" placeholder="Type here..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount">
+														<input id="skinPositionY" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount">
 													</div>
 													<div class="input-wrapper">
 														<label for="skinScaleX">Scale X</label>
-														<input id="skinScaleX" type="text" class="darko-c" placeholder="Type here..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:input="validateFormat" v-on:wheel="toggleAmount">
+														<input id="skinScaleX" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:input="validateFormat" v-on:wheel="toggleAmount">
 													</div>
 													<div class="input-wrapper">
 														<label for="skinScaleY">Scale Y</label>
-														<input id="skinScaleY" type="text" class="darko-c" placeholder="Type here..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:input="validateFormat" v-on:wheel="toggleAmount">
+														<input id="skinScaleY" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:input="validateFormat" v-on:wheel="toggleAmount">
 													</div>
 													<div class="input-wrapper">
 														<label for="skinAngle">Angle</label>
-														<input id="skinAngle" type="text" class="darko-c" placeholder="Type here..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount">
+														<input id="skinAngle" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount">
 													</div>
 												</div>
+											</div>
+											
+											<div class="input-wrapper">
+												<button id="removeSkin" class="darko-a">Remove Skin</button>
 											</div>
 										</div>
 									</div>
