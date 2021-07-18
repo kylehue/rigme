@@ -341,7 +341,13 @@ class RigModel {
 				}
 			}
 
-			if (!config.animation.linear) this.computeKinematics(frame.joints);
+			if (config.riggingMode != "linear") {
+				if (config.riggingMode == "forwardKinematics") {
+					this.computeKinematics(frame.joints);
+				} else if (config.riggingMode == "inverseKinematics") {
+					this.computeKinematics(frame.joints, true);
+				}
+			}
 		}
 	}
 
@@ -466,17 +472,29 @@ class RigModel {
 		events.emit("jointChange", this.joints);
 	}
 
-	computeKinematics(jointChain) {
-		//Forward kinematics
-		for (var i = 0; i < jointChain.length; i++) {
-			let joint = jointChain[i];
-			for (var j = 0; j < joint.children.length; j++) {
-				let child = joint.children[j];
-				child.angle = child.position.heading(joint.position);
-				child.position.set({
-					x: joint.position.x - Math.cos(child.angle) * child.length,
-					y: joint.position.y - Math.sin(child.angle) * child.length
-				});
+	computeKinematics(jointChain, inverse) {
+		if (!inverse) {
+			for (var i = 0; i < jointChain.length; i++) {
+				let joint = jointChain[i];
+				for (var j = 0; j < joint.children.length; j++) {
+					let child = joint.children[j];
+					child.angle = child.position.heading(joint.position);
+					child.position.set({
+						x: joint.position.x - Math.cos(child.angle) * child.length,
+						y: joint.position.y - Math.sin(child.angle) * child.length
+					});
+				}
+			}
+		} else {
+			for (var i = jointChain.length - 1; i >= 0; i--) {
+				let joint = jointChain[i];
+				if (joint.parent) {
+					joint.parent.angle = joint.position.heading(joint.parent.position);
+					joint.parent.position.set({
+						x: joint.position.x + Math.cos(joint.parent.angle) * joint.length,
+						y: joint.position.y + Math.sin(joint.parent.angle) * joint.length
+					});
+				}
 			}
 		}
 	}
@@ -512,18 +530,29 @@ class RigModel {
 
 			this.activeJoint.position.set(x, y);
 
-			if (config.animation.linear) {
+			if (config.riggingMode == "linear") {
 				if (this.activeJoint.parent) {
 					this.activeJoint.angle = this.activeJoint.position.heading(this.activeJoint.parent.position);
+
+					//Update length
 					this.activeJoint.length = this.activeJoint.position.dist(this.activeJoint.parent.position);
+					for(var i = 0; i < this.activeJoint.children.length; i++){
+						let child = this.activeJoint.children[i];
+						child.length = child.position.dist(this.activeJoint.position);
+					}
 				}
 			}
 
 			this.updateBounds();
 		}
 
-		if (!config.animation.linear) this.computeKinematics(this.joints);
-
+		if (config.riggingMode != "linear") {
+			if (config.riggingMode == "forwardKinematics") {
+				this.computeKinematics(this.joints);
+			} else if (config.riggingMode == "inverseKinematics") {
+				this.computeKinematics(this.joints, true);
+			}
+		}
 	}
 
 	getJoint(id) {
@@ -566,6 +595,7 @@ class RigModel {
 					skinImageSrc: joint.skin && !excludeImageSrc ? joint.skin.imageSrc : undefined,
 					skinCrop: joint.skin ? joint.skin.crop : null,
 					skinOffset: joint.skin ? joint.skin.offset : null,
+					_vueCrop: joint.skin ? joint.skin._vueCrop : null
 				};
 
 				for (var k = 0; k < joint.children.length; k++) {
@@ -611,6 +641,7 @@ class RigModel {
 					skin: {
 						offset: joint.skinOffset,
 						crop: joint.skinCrop,
+						_vueCrop: joint._vueCrop,
 						imageSrc: joint.skinImageSrc
 					}
 				}
@@ -725,14 +756,19 @@ class RigModel {
 									let newWidth = joint.length;
 									let newHeight = joint.length;
 									let angleAuto = 0;
-									if (joint.skin.image.width > joint.skin.image.height) {
+
+									let crop = joint.skin.crop;
+									let cropWidth = crop.to.x - crop.from.x;
+									let cropHeight = crop.to.y - crop.from.y;
+
+									if (cropWidth > cropHeight) {
 										newHeight = Number.MAX_SAFE_INTEGER;
 									} else {
 										newWidth = Number.MAX_SAFE_INTEGER;
 										angleAuto = Math.PI / 2;
 									}
 
-									let size = utils.scaleSize(joint.skin.image.width, joint.skin.image.height, newWidth, newHeight);
+									let size = utils.scaleSize(cropWidth, cropHeight, newWidth, newHeight);
 
 									renderer.save();
 
@@ -756,7 +792,7 @@ class RigModel {
 										renderer.context.scale(scaleXOffset, scaleYOffset);
 									}
 
-									renderer.context.drawImage(joint.skin.image, -size.width / 2, -size.height / 2, size.width, size.height);
+									renderer.context.drawImage(joint.skin.image, crop.from.x, crop.from.y, cropWidth, cropHeight, -size.width / 2, -size.height / 2, size.width, size.height);
 									renderer.restore();
 								}
 
