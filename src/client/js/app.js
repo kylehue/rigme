@@ -13,7 +13,8 @@ const vue = require("./vue/vue.js");
 const rigModel = require("../lib/rig.model.js");
 const history = require("../lib/history.js");
 const extractKeyframes = require("../lib/extract.keyframes.js");
-
+//adding/removing joints affects all keyframes
+//update properties when seeking the timeline
 events.emit("loadedApps", vue);
 
 //Disable rightclick menu
@@ -69,6 +70,9 @@ const actionButtons = {
 };
 
 let cropBtn = dom.query("#displayCropApp", true);
+let resetOffsetBtn = dom.query("#resetOffset", true);
+let removeSkinBtn = dom.query("#removeSkin", true);
+let focusRigBtn = dom.query("#focusRig", true);
 let materialsEl = dom.query("#propertyApp #materials", true);
 const fileButton = document.getElementById("fileButton");
 const optionButton = document.getElementById("optionButton");
@@ -82,6 +86,7 @@ const animationSpeedInput = document.getElementById("animationSpeed");
 const _actionButtons = Object.keys(actionButtons);
 const __actionButtons = Object.values(actionButtons);
 
+let jointCrop;
 
 
 let materials = [];
@@ -371,20 +376,150 @@ events.on("removeOverlay", () => {
 	vue.optionApp.overlayConfigHidden = true;
 });
 
+let rigModeBtns = dom.query("#riggingMode button");
+
+rigModeBtns.on("click", event => {
+	rigModeBtns.removeClass("selected");;
+	let btn = dom.query(event.target, true);
+	btn.addClass("selected");
+
+	if (btn.node.id == "inverseKinematics") {
+		config.riggingMode = "inverseKinematics";
+	} else if (btn.node.id == "forwardKinematics") {
+		config.riggingMode = "forwardKinematics";
+	} else {
+		config.riggingMode = "linear";
+	}
+
+	history.add({
+		label: "Change rig mode",
+		value: config.riggingMode,
+		group: "config"
+	});
+});
+
+let autoAddKeyframeBtn = dom.query("#autoAddKeyframe", true);
+autoAddKeyframeBtn.on("click", () => {
+	autoAddKeyframeBtn.toggleClass("selected");
+
+	if (autoAddKeyframeBtn.node.classList.contains("selected")) {
+		config.animation.autoAddKeyframe = true;
+	} else {
+		config.animation.autoAddKeyframe = false;
+	}
+});
+
+focusRigBtn.on("click", () => {
+	if (rigModel.bounds) {
+		cameraMovement.x = (rigModel.bounds.min.x + rigModel.bounds.max.x) / 2;
+		cameraMovement.y = (rigModel.bounds.min.y + rigModel.bounds.max.y) / 2;
+	}
+});
+
 cropBtn.on("click", () => {
 	let activeJoint = rigModel.activeJoint;
 	if (activeJoint) {
 		if (activeJoint.skin) {
 			if (activeJoint.skin.imageSrc) {
 				let img = new Image();
-				img.src =activeJoint.skin.imageSrc;
+				img.src = activeJoint.skin.imageSrc;
 
-				img.onload = function () {
+				img.onload = function() {
+					if (activeJoint.skin._vueCrop) {
+						vue.cropApp.cropFrom = activeJoint.skin._vueCrop.from;
+						vue.cropApp.cropTo = activeJoint.skin._vueCrop.to;
+					}
+
 					vue.cropApp.show(img);
+					jointCrop = activeJoint;
 				}
 			}
 		}
 	}
+});
+
+removeSkinBtn.on("click", () => {
+	let activeJoint = rigModel.activeJoint;
+	if (activeJoint) {
+		if (activeJoint.skin) {
+			if (activeJoint.skin.imageSrc) {
+
+				let skin = activeJoint.skin;
+
+				delete skin.imageSrc;
+				delete skin.image;
+
+				rigModel.editJoint(activeJoint.id, {
+					skin: skin
+				});
+
+				history.add({
+					label: "Remove joint skin",
+					value: rigModel.clone(),
+					group: "keyframe"
+				});
+			}
+		}
+	}
+});
+
+resetOffsetBtn.on("click", () => {
+	let activeJoint = rigModel.activeJoint;
+	if (activeJoint) {
+		if (activeJoint.skin) {
+			if (activeJoint.skin.offset) {
+				if (activeJoint.skin.offset.x != 0 || activeJoint.skin.offset.y != 0 || activeJoint.skin.offset.scaleX != 1 || activeJoint.skin.offset.scaleY != 1 || activeJoint.skin.offset.angle != 0) {
+
+					let skin = activeJoint.skin;
+
+					skin.offset.x = 0;
+					skin.offset.y = 0;
+					skin.offset.scaleX = 1;
+					skin.offset.scaleY = 1;
+					skin.offset.angle = 0;
+
+					rigModel.editJoint(activeJoint.id, {
+						skin: skin
+					});
+
+					setJointProperties(activeJoint);
+
+					history.add({
+						label: "Reset transform offset",
+						value: rigModel.clone(),
+						group: "keyframe"
+					});
+				}
+			}
+		}
+	}
+});
+
+events.on("crop", (crop, _vueCrop) => {
+	let skin = jointCrop.skin;
+
+	skin.crop = crop;
+
+	skin._vueCrop = {
+		from: {
+			x: _vueCrop.from.x,
+			y: _vueCrop.from.y
+		},
+		to: {
+			x: _vueCrop.to.x,
+			y: _vueCrop.to.y
+		}
+	};
+
+	rigModel.editJoint(jointCrop.id, {
+		skin: skin
+	});
+
+	history.add({
+		label: "Crop skin",
+		value: rigModel.clone(),
+		group: "keyframe"
+	});
 });
 
 materialsEl.on("change", () => {
@@ -397,26 +532,44 @@ materialsEl.on("change", () => {
 		cropBtn.addClass("disabled");
 	}
 
-	utils.imageToBase64(url).then(res => {
+	utils.loadImage(url).then(res => {
 		if (activeJoint) {
-			let _skin = {
-				imageSrc: res,
-				crop: {
-					from: {
-						x: 0,
-						y: 0
-					},
-					to: {
-						x: 0,
-						y: 0
-					}
-				},
-				offset: {
+			let x = parseFloat(dom.query("#skinPositionX", true).value());
+			let y = parseFloat(dom.query("#skinPositionY", true).value());
+			let scaleX = parseFloat(dom.query("#skinScaleX", true).value());
+			let scaleY = parseFloat(dom.query("#skinScaleY", true).value());
+			let angle = parseFloat(dom.query("#skinAngle", true).value());
+
+			let crop = {
+				from: {
 					x: 0,
-					y: 0,
-					scaleX: 1,
-					scaleY: 1,
-					angle: 0
+					y: 0
+				},
+				to: {
+					x: res.width,
+					y: res.height
+				}
+			};
+
+			if (activeJoint.skin) {
+				if (activeJoint.skin.crop) {
+					crop.from.x = activeJoint.skin.crop.from.x;
+					crop.from.y = activeJoint.skin.crop.from.y;
+					crop.to.x = activeJoint.skin.crop.to.x;
+					crop.to.y = activeJoint.skin.crop.to.y;
+				}
+			}
+
+			let _skin = {
+				imageSrc: res.url,
+				crop: crop,
+				_vueCrop: activeJoint.skin._vueCrop || null,
+				offset: {
+					x: x || 0,
+					y: y || 0,
+					scaleX: scaleX || 0,
+					scaleY: scaleY || 0,
+					angle: utils.radians(utils.map(angle, 0, 360, -180, 180)) + Math.PI || 0
 				}
 			};
 
@@ -815,7 +968,7 @@ mouse.on("mousemove", function() {
 });
 
 renderer.canvas.addEventListener("mousemove", function(e) {
-	if (mouse.dragged) {
+	if (mouse.dragged && !sleep) {
 		if (action === actions.pan) {
 			cameraMovement.set({
 				x: mouseLast.x - worldMouse.x + renderer.camera.movement.x,
@@ -824,12 +977,12 @@ renderer.canvas.addEventListener("mousemove", function(e) {
 		}
 	}
 
-	if (action === actions.move) {
+	if (action === actions.move && !sleep) {
 		if (mouse.pressed) {
 			rigModel.moveJoint(worldMouse.x, worldMouse.y);
 		}
 	}
-})
+});
 
 renderer.canvas.addEventListener("click", function() {
 	if (vue.overlayApp.hidden && vue.overlayConfigApp.hidden && vue.fileApp.hidden && vue.loadApp.hidden && vue.saveApp.hidden && vue.optionApp.hidden) {
@@ -860,7 +1013,8 @@ renderer.canvas.addEventListener("mousewheel", function() {
 });
 
 function fixRendererSize() {
-	renderer.setSize(canvasContainer.offsetWidth - 1, innerHeight - navigation.offsetHeight - vue.timeline.app.$el.offsetHeight);
+	let toolApp = document.getElementById("toolApp");
+	renderer.setSize(canvasContainer.offsetWidth - 1 - toolApp.offsetWidth, innerHeight - navigation.offsetHeight - vue.timeline.app.$el.offsetHeight);
 }
 
 addEventListener("resize", function() {
@@ -874,8 +1028,7 @@ fixRendererSize();
 renderer.camera.setZoomSpeed(0.2);
 renderer.camera.setMoveSpeed(0.4);
 renderer.render(function() {
-	let focused = vue.overlayApp.hidden && vue.overlayConfigApp.hidden && vue.fileApp.hidden && vue.loadApp.hidden && vue.saveApp.hidden && vue.optionApp.hidden;
-
+	let focused = vue.overlayApp.hidden && vue.overlayConfigApp.hidden && vue.fileApp.hidden && vue.loadApp.hidden && vue.saveApp.hidden && vue.optionApp.hidden && !sleep;
 
 	worldMouse.set(renderer.camera.screenToWorld(mouse.x - renderer.bounds.x, mouse.y - renderer.bounds.y));
 
@@ -940,13 +1093,7 @@ renderer.render(function() {
 
 key.on("keydown", function() {
 	if (key.code === 16) {
-		console.time();
-		rigModel.toJSON();
-		console.timeEnd();
-
-		console.time();
-		rigModel.toJSON(rigModel.clone());
-		console.timeEnd();
+		console.log(sleep);
 		console.log(rigModel);
 	}
 });
