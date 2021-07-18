@@ -78,6 +78,10 @@ input#frameCount {
 	color: var(--white);
 }
 
+#timelineApp .wrapper .row-a {
+	border-bottom: 1px solid var(--darko-c);
+}
+
 #timelineApp .wrapper .row-b {
 	display: flex;
 	flex-flow: row wrap;
@@ -93,14 +97,7 @@ input#frameCount {
 	position: relative;
 	width: 30px;
 	height: 30px;
-	margin-right: 3px;
-}
-
-#timelineApp .wrapper .row-b button {
-	position: relative;
-	width: 30px;
-	height: 30px;
-	margin-right: 3px;
+	margin: 2.5px;
 }
 
 #timelineGraphWrapper {

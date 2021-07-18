@@ -111,7 +111,8 @@
 					<canvas id="cropCanvas"></canvas>
 				</div>
 				<div class="row">
-					<button id="import" class="darko-a disabled" v-on:click="save">Save</button>
+					<button id="import" class="darko-a" v-on:click="reset">Reset</button>
+					<button id="import" class="darko-a" v-on:click="save">Save</button>
 				</div>
 			</div>
 			<!-- Overlay app -->
@@ -238,36 +239,66 @@
 			<div class="work-container">
 				<!-- Nav -->
 				<div id="navigation" class="darko-b">
-					<div class="wrapper-left">
-						<button id="fileButton" class="darko-a fit">File</button>
-						<button id="optionButton" class="darko-a fit">Options</button>
+					<div class="row">
+						<div class="logo-wrapper">
+							<img src="assets/svg/rigme-full.svg">
+						</div>
+						<div class="menu-wrapper">
+							<button id="fileButton" class="">File</button>
+							<button id="optionButton" class="">Options</button>
+						</div>
 					</div>
-					<div class="wrapper-right">
-						<button id="panCamera" class="darko-a active-tool" v-bind:title="moveMsg">
-						<img src="assets/svg/quad-arrow.svg" class="" />
-						</button>
-						<button id="addJoint" class="darko-a" v-bind:title="addJointMsg">
-						<img src="assets/svg/joint-plus.svg" class="" />
-						</button>
-						<button id="selectJoint" class="darko-a" v-bind:title="selectJointMsg">
-						<img src="assets/svg/joint-click.svg" class="" />
-						</button>
-						<button id="moveJoint" class="darko-a" v-bind:title="moveJointMsg">
-						<img src="assets/svg/joint-arrow.svg" class="" />
-						</button>
-						<button id="removeJoint" class="darko-a" v-bind:title="removeJointMsg">
-						<img src="assets/svg/joint-trash.svg" class="" />
-						</button>
+
+					<div class="row">
+						<div id="riggingMode" class="config">
+							<button id="forwardKinematics" class="option selected" v-bind:title="'Forward kinematics'">
+								<img src="assets/svg/joint-arrow-down.svg" class="" />
+							</button>
+							<button id="inverseKinematics" class="option" v-bind:title="'Inverse kinematics'">
+								<img src="assets/svg/joint-arrow-up.svg" class="" />
+							</button>
+							<button id="linear" class="option" v-bind:title="'Free rigging'">
+								<img src="assets/svg/joint-arrows.svg" class="" />
+							</button>
+						</div>
+						<div class="config">
+							<button id="autoAddKeyframe" class="option selected" v-bind:title="'Auto add keyframes'">
+								<img src="assets/svg/key-arrows.svg" class="" />
+							</button>
+						</div>
+						<div class="config">
+							<button id="focusRig" class="darko-a">Focus Rig</button>
+						</div>
 					</div>
-					<div id="progressBarWrapper">
+
+					<!-- <div id="progressBarWrapper">
 						<div id="progressBar"></div>
 						<p>Converting to frames...</p>
 						<button class="darko-a">Cancel</button>
-					</div>
+					</div> -->
 				</div>
+
 				<div class="canvas-container">
+					<div id="toolApp">
+						<button id="panCamera" class="active-tool" v-bind:title="'Pan camera'">
+						<img src="assets/svg/quad-arrow.svg" class="" />
+						</button>
+						<button id="selectJoint" class="" v-bind:title="'Select joint'">
+						<img src="assets/svg/joint-click.svg" class="" />
+						</button>
+						<button id="addJoint" class="" v-bind:title="'Add joint'">
+						<img src="assets/svg/joint-plus.svg" class="" />
+						</button>
+						<button id="moveJoint" class="" v-bind:title="'Move joint'">
+						<img src="assets/svg/joint-arrow.svg" class="" />
+						</button>
+						<button id="removeJoint" class="" v-bind:title="'Remove joint'">
+						<img src="assets/svg/joint-trash.svg" class="" />
+						</button>
+					</div>
 					<canvas id="gameCanvas"></canvas>
 				</div>
+				
 				<!-- Timeline App -->
 				<div id="timelineApp" class="darko-b">
 					<div class="wrapper">
@@ -430,6 +461,7 @@
 														<label for="skinAngle">Angle</label>
 														<input id="skinAngle" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount">
 													</div>
+													<button id="resetOffset" class="darko-a">Reset</button>
 												</div>
 											</div>
 											

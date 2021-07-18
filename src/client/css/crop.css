@@ -1,11 +1,9 @@
 #cropApp {
 	position: absolute;
-	top: 20%;
-	right: 20%;
+	top: calc(50% - 175px);
+	right: calc(50% - 175px);
 	z-index: 9999;
-	max-width: 400px;
-	min-width: 200px;
-	width: 80%;
+	width: 350px;
 	height: fit-content;
 	display: flex;
 	flex-wrap: wrap;
@@ -16,7 +14,7 @@
 	border-radius: 3px;
 	box-shadow: var(--drop-shadow);
 
-	opacity: 1;
+	opacity: 0;
 }
 
 #cropApp .row {
@@ -74,6 +72,7 @@
 #cropApp .row:last-child button {
 	width: 80px;
 	height: 30px;
+	margin: 0 2.5px;
 }
 
 #cropApp button.close {

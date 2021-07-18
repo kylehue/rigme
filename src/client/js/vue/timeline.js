@@ -334,6 +334,7 @@ class Timeline {
 		const dragStart = () => {
 			if (!mouseInside(this.canvas)) return;
 			dragging = true;
+			events.emit("renderSleep");
 
 			//Which area is getting dragged?
 			if (dragging && !activeDrag) {
@@ -367,6 +368,7 @@ class Timeline {
 
 		const dragEnd = () => {
 			dragging = false;
+			events.emit("renderFocus");
 
 			if (activeDrag == "playbackHandleStart" || activeDrag == "playbackHandleEnd") {
 				let configData = {
@@ -878,11 +880,17 @@ class Timeline {
 	}
 
 	updateSize() {
-		let parentBounds = this.canvas.parentNode.getBoundingClientRect();
-		this.canvas.width = parentBounds.width;
-		this.canvas.height = parentBounds.height;
-		this.bounds = this.canvas.getBoundingClientRect();
-		this.redraw();
+		let _res = () => {
+			let parentBounds = this.canvas.parentNode.getBoundingClientRect();
+			this.canvas.width = parentBounds.width;
+			this.canvas.height = parentBounds.height;
+			this.bounds = this.canvas.getBoundingClientRect();
+			this.redraw();
+		};
+
+		_res();
+
+		setTimeout(_res, 100);
 	}
 
 	minimize() {

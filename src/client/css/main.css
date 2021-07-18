@@ -283,10 +283,6 @@ span.shortcut {
 	height: 100%;
 }
 
-.active-tool {
-	background: var(--accent);
-}
-
 .error-text {
 	font-size: 12px;
 	color: red;
@@ -342,12 +338,65 @@ span.shortcut {
 
 .canvas-container {
 	position: relative;
-	display: block;
+	display: flex;
+	flex-flow: row nowrap;
 	width: 100%;
 	height: fit-content;
 	box-sizing: border-box;
 	border: var(--wrapper-borders);
 	border-right: none;
+}
+
+#toolApp {
+	background: var(--darko-b);
+	display: flex;
+	flex-flow: column wrap;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: flex-start;
+	width: 30px;
+	height: 100%;
+	box-sizing: border-box;
+	border-right: var(--wrapper-borders);
+}
+
+#toolApp button {
+	background: inherit;
+	border: none;
+	width: 25px;
+	height: 25px;
+	margin: 2.5px 0;
+}
+
+#toolApp button:hover {
+	filter: brightness(1.05);
+}
+
+#toolApp button img {
+	width: 70%;
+}
+
+.active-tool {
+	background: var(--darko-c) !important;
+	border: var(--borders) !important;
+}
+
+.active-tool:hover {
+	background: none;
+}
+
+.checkbox {
+	display: flex;
+	flex-flow: row nowrap;
+	width: fit-content;
+	align-items: center;
+	justify-content: center;
+}
+
+.checkbox label {
+	line-height: 1;
+	font-size: 12px;
+	margin-left: 5px;
 }
 
 canvas#gameCanvas {
