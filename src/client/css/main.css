@@ -406,6 +406,122 @@ canvas#gameCanvas {
 	height: fit-content;
 }
 
+#progressBarWrapper {
+	position: absolute;
+	z-index: 9999;
+	display: none;
+	flex-flow: row nowrap;
+	align-items: center;
+	align-content: center;
+	justify-content: space-between;
+	width: calc(100% - 30px);
+	height: fit-content;
+	left: 30px;
+	padding-top: 5px;
+}
+
+#progressBarWrapper p {
+	font-size: 12px;
+	line-height: 1;
+	color: var(--accent);
+	margin-left: 2.5px;
+}
+
+#progressBarWrapper button {
+	padding: 2px 5px;
+	margin-right: 2.5px;
+}
+
+#progressBar {
+	position: absolute;
+	background: var(--accent);
+	width: 0%;
+	height: 3px;
+	top: 0;
+}
+
+#actionPreview {
+	position: absolute;
+	z-index: 1;
+	display: block;
+	width: 13px;
+	height: 13px;
+}
+
+#actionPreview img {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+.custom-select {
+	position: relative;
+	display: flex;
+	flex-flow: row nowrap;
+	align-items: center;
+	align-content: center;
+	justify-content: flex-start;
+	padding: 5px;
+	box-sizing: border-box;
+	cursor: pointer !important;
+}
+
+.custom-select > label {
+	line-height: 1 !important;
+	user-select: none !important;
+	width: calc(100% - 20px) !important;
+	color: var(--white) !important;
+	text-align: left !important;
+	pointer-events: none !important;
+	white-space: nowrap !important;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.custom-select > img {
+	position: absolute;
+	right: 10px;
+	height: 30%;
+}
+
+.custom-select .options {
+	background: var(--darko-d);
+	box-shadow: var(--drop-shadow);
+	border-radius: 3px;
+	position: absolute;
+	z-index: 999999;
+	display: none;
+	flex-flow: column nowrap;
+	align-content: center;
+	align-items: flex-start;
+	justify-content: flex-start;
+	overflow-x: hidden;
+	overflow-y: auto;
+	width: 100%;
+	height: fit-content;
+	max-height: 200px;
+	text-overflow: ellipsis;
+	left: 0;
+}
+
+.custom-select .options p {
+	position: relative;
+	text-align: left;
+	width: 100%;
+	height: 30px;
+	padding: 5px;
+	box-sizing: border-box;
+	user-select: none;
+	cursor: pointer;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	flex-shrink: 0;
+}
+
+.custom-select .options p:hover {
+	background: rgba(0, 0, 0, 0.05);
+}
+
 .ignore{
 	pointer-events: none !important;
 	user-select: none !important;

@@ -593,17 +593,7 @@ class Timeline {
 
 		//Delete keyframe button
 		this.buttons.delete.addEventListener("click", () => {
-			let frame = rigModel.getKeyframe("index", this.state.currentFrame);
-			if (frame) {
-				if (frame.type == "head" && !frame.locked) {
-					rigModel.deleteKeyframe(frame.id);
-					history.add({
-						label: "Delete keyframe",
-						value: rigModel.clone(),
-						group: "keyframe"
-					});
-				}
-			}
+			events.emit("deleteKeyframe");
 		});
 
 		let holdInterval;
@@ -859,6 +849,7 @@ class Timeline {
 		timelineApp.setCurrentFrame(this.state.currentMark);
 		this.updateState(updateRig);
 		this.redraw();
+		events.emit("timelineSeeked");
 	}
 
 	play() {

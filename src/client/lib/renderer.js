@@ -12,6 +12,27 @@ class Renderer {
 		this.context.offscreens = [];
 		this._customOptions = ["fill", "stroke", "align", "close", "curve"];
 		this._currentContext = this.context;
+		this._render = null;
+
+		let _preventDefault = event => {
+			event.preventDefault();
+		}
+
+		this.canvas.addEventListener("drag", _preventDefault);
+		this.canvas.addEventListener("dragstart", _preventDefault);
+	}
+
+	draw(f) {
+		this._render = f;
+		if (typeof this._render == "function") {
+			this._render();
+		}
+	}
+
+	redraw() {
+		if (typeof this._render == "function") {
+			this._render();
+		}
 	}
 
 	render(f) {

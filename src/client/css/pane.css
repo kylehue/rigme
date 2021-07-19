@@ -242,7 +242,98 @@
 *Properties
 */
 
-#propertyApp .section p {
+#propertyApp {
+	position: relative;
+	display: flex;
+	flex-flow: column nowrap;
+	align-items: center;
+	align-content: center;
+	justify-content: flex-start;
+	width: 100%;
+}
+
+#propertyApp .section {
+	position: relative;
+	display: flex;
+	flex-flow: column nowrap;
+	align-items: center;
+	align-content: center;
+	justify-content: flex-start;
+	width: calc(100% - 15px);
+}
+
+#propertyApp label, #propertyApp p.title {
+	font-size: 12px;
+	line-height: 1;
+}
+
+#propertyApp label {
+	margin-right: 5px;
+	flex-shrink: 0;
+	text-align: right;
+	width: 40px;
+	color: var(--dim-b);
+}
+
+#propertyApp p {
+	font-size: 13px;
+	color: var(--white);
+}
+
+#propertyApp .section .header, #propertyApp .section .body {
+	width: 100%;
+	border-bottom: 1px solid var(--darko-c);
+	border-top: var(--borders);
+}
+
+#propertyApp .section .header {
+	padding: 5px 2px 3px 2px;
+	box-sizing: border-box;
+}
+
+#propertyApp .section .body {
+	padding: 5px 0 15px 0;
+	box-sizing: border-box;
+}
+
+#propertyApp .section:first-child .header {
+	border-top: none;
+}
+
+#propertyApp .section:last-child .body {
+	border-bottom: none;
+}
+
+#propertyApp .input-wrapper {
+	position: relative;
+	display: flex;
+	flex-flow: row wrap;
+	align-items: center;
+	align-content: center;
+	justify-content: flex-start;
+	width: 100%;
+	height: fit-content;
+}
+
+#propertyApp .input-wrapper input {
+	width: 100px;
+}
+
+button#removeSkin, button#resetOffset, button#displayCropApp {
+	height: 30px;
+	padding: 0 15px;
+	margin-top: 5px;
+	margin-left: auto;
+}
+
+#propertyApp #materials {
+	background: var(--darko-c);
+	border-radius: 3px;
+	width: 100%;
+	height: 30px;
+}
+
+/*#propertyApp .section p {
 	color: var(--white);
 	line-height: 1;
 	font-size: 12px;
@@ -320,4 +411,4 @@
 	flex-flow: column wrap;
 	width: 100%;
 	height: fit-content;
-}
+}*/

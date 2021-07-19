@@ -1,5 +1,6 @@
 #timelineApp {
-	z-index: 1;
+	position: relative;
+	z-index: 2;
 	width: 100%;
 	height: fit-content;
 	padding: 5px;

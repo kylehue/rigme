@@ -22,6 +22,10 @@
 	</head>
 	<body>
 		<div class="main-container">
+			<!-- Current action preview -->
+			<div id="actionPreview">
+				<img src="assets/svg/quad-arrow.svg">
+			</div>
 			<!-- Context Menu App -->
 			<div id="contextMenuApp" class="darko-d" v-if="!hidden">
 				<div class="wrapper">
@@ -46,7 +50,7 @@
 					<button id="showOverlayConfigApp" class="darko-d" v-on:mousedown="showOverlayConfigApp" v-if="!overlayConfigHidden">Overlay Settings...</button>
 					<button id="" class="darko-d" v-on:mousedown="undo">Undo<span class="shortcut">Ctrl + Z</span></button>
 					<button id="" class="darko-d" v-on:mousedown="redo">Redo<span class="shortcut">Ctrl + Y</span></button>
-					<button id="" class="darko-d" v-on:mousedown="clearJoints">Reset keyframes</button>
+					<button id="" class="darko-d" v-on:mousedown="clearJoints">Reset all</button>
 					<button id="" class="darko-d" v-on:mousedown="resetTimeline">Reset timeline</button>
 					<button id="" class="darko-d" v-on:mousedown="resetView">Reset view</button>
 				</div>
@@ -248,36 +252,28 @@
 							<button id="optionButton" class="">Options</button>
 						</div>
 					</div>
-
 					<div class="row">
 						<div id="riggingMode" class="config">
 							<button id="forwardKinematics" class="option selected" v-bind:title="'Forward kinematics'">
-								<img src="assets/svg/joint-arrow-down.svg" class="" />
+							<img src="assets/svg/joint-arrow-down.svg" class="" />
 							</button>
 							<button id="inverseKinematics" class="option" v-bind:title="'Inverse kinematics'">
-								<img src="assets/svg/joint-arrow-up.svg" class="" />
+							<img src="assets/svg/joint-arrow-up.svg" class="" />
 							</button>
 							<button id="linear" class="option" v-bind:title="'Free rigging'">
-								<img src="assets/svg/joint-arrows.svg" class="" />
+							<img src="assets/svg/joint-arrows.svg" class="" />
 							</button>
 						</div>
 						<div class="config">
 							<button id="autoAddKeyframe" class="option selected" v-bind:title="'Auto add keyframes'">
-								<img src="assets/svg/key-arrows.svg" class="" />
+							<img src="assets/svg/key-arrows.svg" class="" />
 							</button>
 						</div>
 						<div class="config">
 							<button id="focusRig" class="darko-a">Focus Rig</button>
 						</div>
 					</div>
-
-					<!-- <div id="progressBarWrapper">
-						<div id="progressBar"></div>
-						<p>Converting to frames...</p>
-						<button class="darko-a">Cancel</button>
-					</div> -->
 				</div>
-
 				<div class="canvas-container">
 					<div id="toolApp">
 						<button id="panCamera" class="active-tool" v-bind:title="'Pan camera'">
@@ -295,6 +291,11 @@
 						<button id="removeJoint" class="" v-bind:title="'Remove joint'">
 						<img src="assets/svg/joint-trash.svg" class="" />
 						</button>
+					</div>
+					<div id="progressBarWrapper">
+						<div id="progressBar"></div>
+						<p>Converting to frames...</p>
+						<button class="darko-a">Stop</button>
 					</div>
 					<canvas id="gameCanvas"></canvas>
 				</div>
@@ -356,7 +357,7 @@
 				<div class="wrapper">
 					<div class="wrapper-top darko-b">
 						<div class="tab-wrapper">
-							<button id="materialsTab" class="tab active">Materials</button>
+							<button id="materialsTab" class="tab active">Images</button>
 						</div>
 						<div id="dropIcon">
 							<img src="assets/svg/drop.svg">
@@ -383,7 +384,7 @@
 								
 							</div>
 							<div id="propertyApp" class="app hidden">
-								<div id="mainSection" class="section disabled">
+								<div class="section">
 									<div class="header">
 										<p class="title">Joint Properties</p>
 									</div>
@@ -392,82 +393,83 @@
 											<label for="jointName">Name</label>
 											<input id="jointName" type="text" class="darko-c" placeholder="Type here..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="handleInput">
 										</div>
-									</div>
-									<div class="section">
-										<div class="header">
-											<p class="title">Transform</p>
+										<div class="input-wrapper">
+											<label for="jointZIndex">Z-Index</label>
+											<input id="jointZIndex" type="text" class="darko-c" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:wheel="toggleAmount">
 										</div>
-										<div class="body">
-											<div class="input-wrapper">
-												<label for="jointX">X</label>
-												<input id="jointX" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:wheel="toggleAmount">
-											</div>
-											<div class="input-wrapper">
-												<label for="jointY">Y</label>
-												<input id="jointY" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:wheel="toggleAmount">
-											</div>
-											<div class="input-wrapper">
-												<label for="jointAngle">Angle</label>
-												<input id="jointAngle" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:wheel="toggleAmount">
-											</div>
-											<div class="input-wrapper" v-if="showLength">
-												<label for="jointLength">Length</label>
-												<input id="jointLength" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:wheel="toggleAmount">
-											</div>
+										<div class="input-wrapper" v-if="showLength">
+											<label for="jointLength">Length</label>
+											<input id="jointLength" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:wheel="toggleAmount">
 										</div>
 									</div>
-									<div id="skinningSection" class="section">
-										<div class="header">
-											<p class="title">Skinning</p>
+								</div>
+								<div class="section">
+									<div class="header">
+										<p class="title">Transform</p>
+									</div>
+									<div class="body">
+										<div class="input-wrapper">
+											<label for="jointX">X</label>
+											<input id="jointX" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:wheel="toggleAmount">
 										</div>
-										<div class="body">
-											<div class="section">
-												<div class="header">
-													<p class="title">Image</p>
-												</div>
-												<div class="body">
-													<div class="input-wrapper">
-														<select id="materials" class="darko-a">
-															<option selected disabled>Choose one:</option>
-														</select>
-													</div>
-													<div class="input-wrapper">
-														<button id="displayCropApp" class="darko-a disabled">Crop</button>
-													</div>
-												</div>
-											</div>
-											<div class="section">
-												<div class="header">
-													<p class="title">Transform Offset</p>
-												</div>
-												<div class="body">
-													<div class="input-wrapper">
-														<label for="skinPositionX">X</label>
-														<input id="skinPositionX" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount">
-													</div>
-													<div class="input-wrapper">
-														<label for="skinPositionY">Y</label>
-														<input id="skinPositionY" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount">
-													</div>
-													<div class="input-wrapper">
-														<label for="skinScaleX">Scale X</label>
-														<input id="skinScaleX" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:input="validateFormat" v-on:wheel="toggleAmount">
-													</div>
-													<div class="input-wrapper">
-														<label for="skinScaleY">Scale Y</label>
-														<input id="skinScaleY" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:input="validateFormat" v-on:wheel="toggleAmount">
-													</div>
-													<div class="input-wrapper">
-														<label for="skinAngle">Angle</label>
-														<input id="skinAngle" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount">
-													</div>
-													<button id="resetOffset" class="darko-a">Reset</button>
+										<div class="input-wrapper">
+											<label for="jointY">Y</label>
+											<input id="jointY" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:wheel="toggleAmount">
+										</div>
+										<div class="input-wrapper">
+											<label for="jointAngle">Angle</label>
+											<input id="jointAngle" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:wheel="toggleAmount">
+										</div>
+									</div>
+								</div>
+								<div class="section skinning">
+									<div class="header">
+										<p class="title">Skinning</p>
+									</div>
+									<div class="body">
+										<div class="input-wrapper">
+											<div id="materials" class="custom-select">
+												<label>Select image:</label>
+												<img src="assets/svg/arrow-down.svg">
+												<div class="options">
 												</div>
 											</div>
-											
-											<div class="input-wrapper">
-												<button id="removeSkin" class="darko-a">Remove Skin</button>
-											</div>
+											<button id="displayCropApp" class="darko-a disabled">Crop</button>
+										</div>
+									</div>
+								</div>
+								<div class="section skinning">
+									<div class="header">
+										<p class="title">Transform Skin</p>
+									</div>
+									<div class="body">
+										<div class="input-wrapper">
+											<label for="skinPositionX">X</label>
+											<input id="skinPositionX" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount">
+										</div>
+										<div class="input-wrapper">
+											<label for="skinPositionY">Y</label>
+											<input id="skinPositionY" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount">
+										</div>
+										<div class="input-wrapper">
+											<label for="skinScaleX">Scale X</label>
+											<input id="skinScaleX" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:input="validateFormat" v-on:wheel="toggleAmount">
+										</div>
+										<div class="input-wrapper">
+											<label for="skinScaleY">Scale Y</label>
+											<input id="skinScaleY" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:input="validateFormat" v-on:wheel="toggleAmount">
+										</div>
+										<div class="input-wrapper">
+											<label for="skinAngle">Angle</label>
+											<input id="skinAngle" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount">
+										</div>
+										<button id="resetOffset" class="darko-a">Reset</button>
+									</div>
+								</div>
+								<div class="section skinning">
+									<div class="body">
+										<div class="input-wrapper">
+											<button id="removeSkin" class="darko-a">Remove Skin</button>
 										</div>
 									</div>
 								</div>

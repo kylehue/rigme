@@ -14,7 +14,7 @@ const paneApp = new Vue({
 		showLength: !config.animation.linear
 	},
 	methods: {
-		handleInput: function () {
+		handleInput: function() {
 			events.emit("jointNameInputChange");
 		},
 		validateFormat: function(e) {
@@ -26,6 +26,8 @@ const paneApp = new Vue({
 				events.emit("jointAngleInputChange");
 			} else if (e.target.id == "jointLength") {
 				events.emit("jointLengthInputChange");
+			} else if (e.target.id == "jointZIndex") {
+				events.emit("jointZIndexInputChange");
 			}
 
 			if (skinningInputIds.includes(e.target.id)) {
@@ -60,6 +62,9 @@ const paneApp = new Vue({
 				events.emit("jointAngleInputChange");
 			} else if (e.target.id == "jointLength") {
 				events.emit("jointLengthInputChange");
+			} else if (e.target.id == "jointZIndex") {
+				events.emit("jointZIndexInputChange");
+				e.target.value = parseInt(e.target.value);
 			}
 
 			if (skinningInputIds.includes(e.target.id)) {

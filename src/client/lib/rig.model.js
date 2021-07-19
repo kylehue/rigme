@@ -13,7 +13,7 @@ class RigModel {
 		this.keyframes = {};
 		this.totalKeyframes = 0;
 
-		this.mouseBuffer = 10;
+		this.mouseBuffer = 5;
 		this.activeJoint = null;
 
 		this.bounds = {
@@ -26,8 +26,8 @@ class RigModel {
 
 	updateBounds() {
 		let keys = Object.keys(this.keyframes);
-		let xAxes = [];
-		let yAxes = [];
+		let xAxes = [0];
+		let yAxes = [0];
 		for (var i = 0; i < keys.length; i++) {
 			let frame = this.keyframes[keys[i]];
 			for (var j = 0; j < frame.joints.length; j++) {
@@ -354,14 +354,6 @@ class RigModel {
 	addJoint(x, y, jointChain) {
 		jointChain = jointChain || this.joints;
 
-		//Make sure the joint that is going to be added doesn't go over the top of other joints
-		/*for (var i = 0; i < this.joints.length; i++) {
-			let joint = this.joints[i];
-			if (joint.position.dist(x, y) < config.render.joint.radius * 2) {
-				return;
-			}
-		}*/
-
 		if (timeline.graph) {
 			timeline.graph.setCurrentMark(timeline.graph.state.currentFrame, false);
 		}
@@ -377,7 +369,8 @@ class RigModel {
 			children: [],
 			length: before ? before.position.dist(x, y) : 0,
 			hierarchy: before ? before.hierarchy + 1 : 1,
-			skin: {}
+			skin: {},
+			zIndex: this.joints.length + 1
 		};
 
 		if (before) before.children.push(joint);
@@ -422,14 +415,12 @@ class RigModel {
 		}
 	}
 
-	removeJoint(x, y, jointChain) {
-		if (!this.joints.length) return;
-
-		jointChain = jointChain || this.joints;
-
-		for (var i = 0; i < jointChain.length; i++) {
-			let joint = jointChain[i];
-			if (joint.position.dist(x, y) < config.render.joint.radius + this.mouseBuffer) {
+	removeJointById(id) {
+		let keys = Object.keys(this.keyframes);
+		for (var i = 0; i < keys.length; i++) {
+			let frame = this.keyframes[keys[i]];
+			let joint = frame.joints.find(j => j.id === id);
+			if (joint) {
 				for (var j = 0; j < joint.children.length; j++) {
 					let child = joint.children[j];
 					child.parent = joint.parent;
@@ -443,22 +434,13 @@ class RigModel {
 					this.activeJoint = joint.parent;
 				}
 
-				if (!joint.children.length && !joint.parent) {
-					this.activeJoint = null;
-				}
-
-				jointChain.splice(jointChain.indexOf(joint), 1);
+				frame.joints.splice(frame.joints.indexOf(joint), 1);
 			}
 		}
 
-		if (this.activeJoint) this.moveJoint(this.activeJoint.position.x, this.activeJoint.position.y);
-
-		if (timeline.graph) {
-			timeline.graph.setCurrentMark(timeline.graph.state.currentFrame, false);
-			timeline.graph.updateState();
-			if (this.activeJoint) this.updateKeyframe(timeline.graph.state.currentFrame, {
-				activeJointId: this.activeJoint.id
-			});
+		//Fix position
+		if (this.activeJoint) {
+			this.moveJoint(this.activeJoint.position.x, this.activeJoint.position.y);
 		}
 
 		this.updateBounds();
@@ -470,6 +452,17 @@ class RigModel {
 		});
 
 		events.emit("jointChange", this.joints);
+	}
+
+	removeJointByPosition(x, y) {
+		if (!this.joints.length) return;
+
+		for (var i = 0; i < this.joints.length; i++) {
+			let joint = this.joints[i];
+			if (joint.position.dist(x, y) < config.render.joint.radius + this.mouseBuffer) {
+				this.removeJointById(joint.id);
+			}
+		}
 	}
 
 	computeKinematics(jointChain, inverse) {
@@ -499,19 +492,19 @@ class RigModel {
 		}
 	}
 
-	moveJoint(x, y, jointChain) {
-		jointChain = jointChain || this.joints;
-
+	moveJoint(x, y) {
 		if (!this.activeJoint) return;
 		if (timeline.graph) {
 			if (config.animation.autoAddKeyframe) {
-				let currentMark = timeline.graph.state.currentMark;
-				let frame = this.keyframes[currentMark];
-				if (!frame) {
-					this.setKeyframe(currentMark);
-				} else {
-					if (frame.type != "head") {
+				if (!this.activeJoint.position.equals(x, y)) {
+					let currentMark = timeline.graph.state.currentMark;
+					let frame = this.keyframes[currentMark];
+					if (!frame) {
 						this.setKeyframe(currentMark);
+					} else {
+						if (frame.type != "head") {
+							this.setKeyframe(currentMark);
+						}
 					}
 				}
 			} else {
@@ -534,12 +527,12 @@ class RigModel {
 				if (this.activeJoint.parent) {
 					this.activeJoint.angle = this.activeJoint.position.heading(this.activeJoint.parent.position);
 
-					//Update length
 					this.activeJoint.length = this.activeJoint.position.dist(this.activeJoint.parent.position);
-					for(var i = 0; i < this.activeJoint.children.length; i++){
-						let child = this.activeJoint.children[i];
-						child.length = child.position.dist(this.activeJoint.position);
-					}
+				}
+
+				for (var i = 0; i < this.activeJoint.children.length; i++) {
+					let child = this.activeJoint.children[i];
+					child.length = child.position.dist(this.activeJoint.position);
 				}
 			}
 
@@ -595,7 +588,8 @@ class RigModel {
 					skinImageSrc: joint.skin && !excludeImageSrc ? joint.skin.imageSrc : undefined,
 					skinCrop: joint.skin ? joint.skin.crop : null,
 					skinOffset: joint.skin ? joint.skin.offset : null,
-					_vueCrop: joint.skin ? joint.skin._vueCrop : null
+					_vueCrop: joint.skin ? joint.skin._vueCrop : null,
+					zIndex: joint.zIndex
 				};
 
 				for (var k = 0; k < joint.children.length; k++) {
@@ -643,7 +637,8 @@ class RigModel {
 						crop: joint.skinCrop,
 						_vueCrop: joint._vueCrop,
 						imageSrc: joint.skinImageSrc
-					}
+					},
+					zIndex: joint.zIndex
 				}
 
 				parsedJoints.push(data);
@@ -833,7 +828,8 @@ class RigModel {
 		}
 
 		//Render current frame
-		_render(this.joints);
+		let sortedJoints = this.joints.slice(0).sort((a, b) => a.zIndex - b.zIndex);
+		_render(sortedJoints);
 	}
 }
 
