@@ -14,41 +14,34 @@ const history = require("../lib/history.js");
 const extractKeyframes = require("../lib/extract.keyframes.js");
 events.emit("loadedApps", vue);
 
-//Drag & drop material images to properties
-//Crop bug
-//Adding joints affects all keyframes
-//Extracting keyframes progress not adding all frames
-
-//Disable rightclick menu
-document.addEventListener("contextmenu", event => event.preventDefault());
-
 window.rigModel = rigModel;
 
-let cameraDistance = config.world.zoom;
-let cameraMovement = vector();
-let mouseLast = vector();
-let worldMouse = vector();
-
-let actions = {
-	pan: "pan",
-	add: "add",
-	select: "select",
-	move: "move",
-	remove: "remove"
-};
-
-let shortcuts = {
-	KeyQ: actions.pan,
-	KeyW: actions.add,
-	KeyE: actions.select,
-	KeyR: actions.move,
-	KeyT: actions.remove
-};
-
-let sleep = false;
-let showOverlay = true;
-
-let actionIconPaths = {};
+let jointCrop,
+	activePane,
+	materials = [],
+	sleep = false,
+	showOverlay = true,
+	mirror = null,
+	cameraDistance = config.world.zoom,
+	cameraMovement = vector(),
+	mouseLast = vector(),
+	worldMouse = vector(),
+	actions = {
+		pan: "pan",
+		select: "select",
+		add: "add",
+		move: "move",
+		remove: "remove"
+	},
+	shortcuts = {
+		KeyQ: actions.pan,
+		KeyW: actions.select,
+		KeyE: actions.add,
+		KeyR: actions.move,
+		KeyT: actions.remove
+	},
+	actionIconPaths = {},
+	action = actions.pan;
 
 actionIconPaths.add = "assets/svg/joint-plus.svg";
 actionIconPaths.select = "assets/svg/joint-click.svg";
@@ -56,56 +49,54 @@ actionIconPaths.move = "assets/svg/joint-arrow.svg";
 actionIconPaths.remove = "assets/svg/joint-trash.svg";
 actionIconPaths.pan = "assets/svg/quad-arrow.svg";
 
-let action = actions.pan;
-
+//Add action button click event
 const actionButtons = {
-	add: document.getElementById("addJoint"),
-	select: document.getElementById("selectJoint"),
-	move: document.getElementById("moveJoint"),
-	remove: document.getElementById("removeJoint"),
-	pan: document.getElementById("panCamera")
+	add: dom.query("#addJoint"),
+	select: dom.query("#selectJoint"),
+	move: dom.query("#moveJoint"),
+	remove: dom.query("#removeJoint"),
+	pan: dom.query("#panCamera")
 };
 
-let customSelects = dom.query(".custom-select");
-let customSelectOptions = dom.query(".custom-select .options");
-let cropBtn = dom.query("#displayCropApp", true);
-let resetOffsetBtn = dom.query("#resetOffset", true);
-let removeSkinBtn = dom.query("#removeSkin", true);
-let focusRigBtn = dom.query("#focusRig", true);
-let materialsEl = dom.query("#propertyApp #materials", true);
-let rigModeBtns = dom.query("#riggingMode button");
-let autoAddKeyframeBtn = dom.query("#autoAddKeyframe", true);
-const fileButton = document.getElementById("fileButton");
-const optionButton = document.getElementById("optionButton");
-const materialApp = document.getElementById("materialApp");
-const addMaterialButton = document.getElementById("addMaterial");
+const actionButtonNames = Object.keys(actionButtons);
 
-const canvasContainer = document.querySelector(".canvas-container");
-const navigation = document.getElementById("navigation");
-const frameCountInput = document.getElementById("frameCount");
-const animationSpeedInput = document.getElementById("animationSpeed");
-const _actionButtons = Object.keys(actionButtons);
-const __actionButtons = Object.values(actionButtons);
+function setAction(_action) {
+	action = _action;
+	rigModel.action = _action;
 
-let jointCrop, activePane;
-let materials = [];
-
-let _preventDefault = event => {
-	event.preventDefault();
+	dom.query("#toolApp button", true).removeClass("active-tool");
+	dom.query(actionButtons[_action].node).addClass("active-tool");
+	actionPreview.query("img").prop("src", actionIconPaths[_action]);
 }
 
-dom.query("div").on("drag", _preventDefault);
-dom.query("div").on("dragstart", _preventDefault);
+for (let btn of actionButtonNames) {
+	actionButtons[btn].on("click", () => {
+		setAction(actions[btn]);
+	});
+}
+
+//Disable some default events
+const _preventDefault = e => e.preventDefault();
+dom.query(document).on("contextmenu", _preventDefault);
+dom.query("div", true).on("drag", _preventDefault);
+dom.query("div", true).on("dragstart", _preventDefault);
+
+//Add material/images events
+const materialApp = dom.query("#materialApp");
+const materialsComboBox = dom.query("#propertyApp #materials");
 
 function configMaterial(id) {
 	let mat = materials.find(m => m.id === id);
-	if (mat) {}
+	if (mat) {
+		materialsComboBox.value(mat.src);
+		materialsComboBox.query("label", true).text(mat.file.name, true);
+		events.emit("materialChange", materialsComboBox.value());
+	}
 }
 
 function createMaterial(file) {
 	const id = utils.uid();
 	let fileURL = URL.createObjectURL(file);
-	let parent = dom.query("#materialApp", true);
 	let button = dom.create("button");
 	let img = button.create("img");
 
@@ -116,12 +107,14 @@ function createMaterial(file) {
 		configMaterial(id);
 	});
 
-	parent.append(button);
+	materialApp.append(button);
 
-
-	let option = materialsEl.query(".options", true).create("p");
-	option.value(fileURL);
+	let option = materialsComboBox.query(".options").create("p");
+	option.node.dataset.value = fileURL;
+	option.node.dataset.parentId = "#materials";
 	option.text(file.name);
+
+	materialApp.node.scrollTop = materialApp.node.scrollHeight;
 
 	return {
 		id: id,
@@ -132,7 +125,6 @@ function createMaterial(file) {
 }
 
 function handleMaterialFiles(files) {
-	console.log(files);
 	const validImageTypes = ["image/gif", "image/jpeg", "image/png", "image/svg+xml"];
 	for (var i = 0; i < files.length; i++) {
 		let file = files[i];
@@ -156,73 +148,84 @@ function handleMaterialFiles(files) {
 	}
 }
 
-function removeActives() {
-	for (let btn of _actionButtons) {
-		actionButtons[btn].classList.remove("active-tool");
-	}
-}
+const selectOptions = dom.query("#selectOptions");
+selectOptions.on("mousedown", event => {
+	let value = event.target.dataset.value;
+	let parentId = event.target.dataset.parentId;
+	let parent = dom.query(parentId);
+	parent.value(value);
+	parent.query("label").text(event.target.innerText, true);
 
-customSelectOptions.on("mousedown", event => {
-	let select = dom.query(event.target.parentNode.parentNode, true);
-	let value = select.value(event.target.value);
-
-	select.query("label").text(event.target.innerText, true);
-
-	events.emit("materialChange", value);
+	if (parentId == "#materials") events.emit("materialChange", value);
 });
 
-customSelects.on("mouseup", event => {
-	let options = dom.query(event.target).query(".options", true);
-	if (options.node.style.display != "flex") {
-		let parentBounds = options.node.parentNode.getBoundingClientRect();
-		
-		let y = parentBounds.height + 5;
+dom.query("#propertyApp").on("mousewheel", () => {
+	selectOptions.css("display", "none");
+});
 
-		options.css({
+dom.query(".custom-select", true).on("mouseup", event => {
+	let options = dom.query(event.target, true).query(".options");
+	selectOptions.html(options.html(), true);
+	if (selectOptions.node.style.display != "flex") {
+		let parentBounds = options.node.parentNode.getBoundingClientRect();
+
+		let x = parentBounds.x;
+		let y = parentBounds.y + parentBounds.height + 5;
+
+		selectOptions.css({
 			display: "flex",
+			left: `${x}px`,
 			top: `${y}px`,
+			width: `${parentBounds.width}px`
 		});
 
-		let bounds = options.node.getBoundingClientRect();
-		if (bounds.y + bounds.height >= innerHeight) {
-			options.css("top", `${-bounds.height - 5}px`);
+		let selectOptionBounds = selectOptions.node.getBoundingClientRect();
+
+		if (y + selectOptionBounds.height >= innerHeight) {
+			selectOptions.css("top", `${parentBounds.y - selectOptionBounds.height - 5}px`);
+		}
+
+		if (x + selectOptionBounds.width >= innerWidth) {
+			selectOptions.css("left", `${parentBounds.x - selectOptionBounds.width + parentBounds.width}px`);
 		}
 	} else {
-		options.css("display", "none");
+		selectOptions.css("display", "none");
 	}
 });
 
-materialApp.addEventListener("drop", event => {
+materialApp.on("drop", event => {
 	event.preventDefault();
 	let files = event.dataTransfer.files;
 	handleMaterialFiles(files);
 	dom.query("#dropIcon").css("visibility", "hidden");
 });
 
-addMaterialButton.addEventListener("change", () => {
-	let files = addMaterialButton.files;
+const addMaterialButton = dom.query("#addMaterial");
+addMaterialButton.on("change", () => {
+	let files = addMaterialButton.node.files;
 	handleMaterialFiles(files);
 });
 
-materialApp.addEventListener("dragenter", event => {
+materialApp.on("dragenter", event => {
 	dom.query("#dropIcon").css("visibility", "visible");
 });
 
-materialApp.addEventListener("dragleave", event => {
+materialApp.on("dragleave", event => {
 	dom.query("#dropIcon").css("visibility", "hidden");
 });
 
-materialApp.addEventListener("dragover", event => {
+materialApp.on("dragover", event => {
 	event.preventDefault();
 });
 
-materialApp.addEventListener("mousedown", event => {
+materialApp.on("mousedown", event => {
 	for (var i = 0; i < materialApp.children.length; i++) {
 		let child = materialApp.children[i];
 		child.classList.remove("selected");
 	}
 });
 
+let overlayFrames = [];
 events.on("saveProject", filename => {
 	let model = rigModel.toJSON();
 	let config = {
@@ -355,7 +358,6 @@ events.on("loadProject", data => {
 	});
 });
 
-let overlayFrames = [];
 events.on("extractFrames", (url, options) => {
 	overlayFrames = [];
 	let progressBarWrapper = document.getElementById("progressBarWrapper");
@@ -407,9 +409,10 @@ events.on("removeOverlay", () => {
 	vue.optionApp.overlayConfigHidden = true;
 });
 
+const rigModeBtns = dom.query("#riggingMode button", true);
 rigModeBtns.on("click", event => {
 	rigModeBtns.removeClass("selected");;
-	let btn = dom.query(event.target, true);
+	let btn = dom.query(event.target);
 	btn.addClass("selected");
 
 	if (btn.node.id == "inverseKinematics") {
@@ -419,31 +422,28 @@ rigModeBtns.on("click", event => {
 	} else {
 		config.riggingMode = "linear";
 	}
-
-	history.add({
-		label: "Change rig mode",
-		value: config.riggingMode,
-		group: "config"
-	});
 });
 
+const autoAddKeyframeBtn = dom.query("#autoAddKeyframe");
 autoAddKeyframeBtn.on("click", () => {
 	autoAddKeyframeBtn.toggleClass("selected");
 
-	if (autoAddKeyframeBtn.node.classList.contains("selected")) {
+	if (autoAddKeyframeBtn.hasClass("selected")) {
 		config.animation.autoAddKeyframe = true;
 	} else {
 		config.animation.autoAddKeyframe = false;
 	}
 });
 
-focusRigBtn.on("click", () => {
+dom.query("#focusRig").on("click", () => {
 	if (rigModel.bounds) {
+		if (!rigModel.joints.length) return;
 		cameraMovement.x = (rigModel.bounds.min.x + rigModel.bounds.max.x) / 2;
 		cameraMovement.y = (rigModel.bounds.min.y + rigModel.bounds.max.y) / 2;
 	}
 });
 
+const cropBtn = dom.query("#displayCropApp");
 cropBtn.on("click", () => {
 	let activeJoint = rigModel.activeJoint;
 	if (activeJoint) {
@@ -466,7 +466,7 @@ cropBtn.on("click", () => {
 	}
 });
 
-removeSkinBtn.on("click", () => {
+dom.query("#removeSkin").on("click", () => {
 	let activeJoint = rigModel.activeJoint;
 	if (activeJoint) {
 		if (activeJoint.skin) {
@@ -491,14 +491,14 @@ removeSkinBtn.on("click", () => {
 	}
 });
 
-resetOffsetBtn.on("click", () => {
+dom.query("#resetOffset").on("click", () => {
 	let activeJoint = rigModel.activeJoint;
 	if (activeJoint) {
 		if (activeJoint.skin) {
 			if (activeJoint.skin.offset) {
 				if (activeJoint.skin.offset.x != 0 || activeJoint.skin.offset.y != 0 || activeJoint.skin.offset.scaleX != 1 || activeJoint.skin.offset.scaleY != 1 || activeJoint.skin.offset.angle != 0) {
 
-					let skin = activeJoint.skin;
+					let skin = JSON.parse(JSON.stringify(activeJoint.skin));
 
 					skin.offset.x = 0;
 					skin.offset.y = 0;
@@ -524,9 +524,9 @@ resetOffsetBtn.on("click", () => {
 });
 
 events.on("crop", (crop, _vueCrop) => {
-	let skin = jointCrop.skin;
+	let skin = JSON.parse(JSON.stringify(jointCrop.skin));
 
-	skin.crop = crop;
+	skin.crop = JSON.parse(JSON.stringify(crop));
 
 	skin._vueCrop = {
 		from: {
@@ -561,11 +561,11 @@ events.on("materialChange", url => {
 
 	utils.loadImage(url).then(res => {
 		if (activeJoint) {
-			let x = parseFloat(dom.query("#skinPositionX", true).value());
-			let y = parseFloat(dom.query("#skinPositionY", true).value());
-			let scaleX = parseFloat(dom.query("#skinScaleX", true).value());
-			let scaleY = parseFloat(dom.query("#skinScaleY", true).value());
-			let angle = parseFloat(dom.query("#skinAngle", true).value());
+			let x = parseFloat(dom.query("#skinPositionX").value());
+			let y = parseFloat(dom.query("#skinPositionY").value());
+			let scaleX = parseFloat(dom.query("#skinScaleX").value());
+			let scaleY = parseFloat(dom.query("#skinScaleY").value());
+			let angle = parseFloat(dom.query("#skinAngle").value());
 
 			let crop = {
 				from: {
@@ -613,71 +613,6 @@ events.on("materialChange", url => {
 	});
 });
 
-/*materialsEl.on("mousedown", () => {
-	let url = materialsEl.value();
-	console.log(url);
-	let activeJoint = rigModel.activeJoint;
-
-	if (url) {
-		cropBtn.removeClass("disabled");
-	} else {
-		cropBtn.addClass("disabled");
-	}
-
-	utils.loadImage(url).then(res => {
-		if (activeJoint) {
-			let x = parseFloat(dom.query("#skinPositionX", true).value());
-			let y = parseFloat(dom.query("#skinPositionY", true).value());
-			let scaleX = parseFloat(dom.query("#skinScaleX", true).value());
-			let scaleY = parseFloat(dom.query("#skinScaleY", true).value());
-			let angle = parseFloat(dom.query("#skinAngle", true).value());
-
-			let crop = {
-				from: {
-					x: 0,
-					y: 0
-				},
-				to: {
-					x: res.width,
-					y: res.height
-				}
-			};
-
-			if (activeJoint.skin) {
-				if (activeJoint.skin.crop) {
-					crop.from.x = activeJoint.skin.crop.from.x;
-					crop.from.y = activeJoint.skin.crop.from.y;
-					crop.to.x = activeJoint.skin.crop.to.x;
-					crop.to.y = activeJoint.skin.crop.to.y;
-				}
-			}
-
-			let _skin = {
-				imageSrc: res.url,
-				crop: crop,
-				_vueCrop: activeJoint.skin._vueCrop || null,
-				offset: {
-					x: x || 0,
-					y: y || 0,
-					scaleX: scaleX || 0,
-					scaleY: scaleY || 0,
-					angle: utils.radians(utils.map(angle, 0, 360, -180, 180)) + Math.PI || 0
-				}
-			};
-
-			rigModel.editJoint(activeJoint.id, {
-				skin: _skin
-			});
-
-			history.add({
-				label: "Change skin",
-				value: rigModel.clone(),
-				group: "keyframe"
-			});
-		}
-	});
-});*/
-
 function createJointElement(id, name) {
 	let jointEl = dom.create("div");
 	jointEl.addClass("joint");
@@ -692,7 +627,7 @@ function createJointElement(id, name) {
 
 	jointEl.attr("id", id);
 
-	dom.query("#jointApp button.name.active").removeClass("active");
+	dom.query("#jointApp button.name.active", true).removeClass("active");
 
 	let joint = rigModel.joints.find(j => j.id === id);
 	if (joint) {
@@ -701,24 +636,34 @@ function createJointElement(id, name) {
 		}
 	}
 
-	jointBtn.on("click", () => {
-		let prev = dom.query("#jointApp button.name.active");
-		prev.removeClass("active");
-		jointBtn.addClass("active");
+	let jointApp = dom.query("#jointApp");
+	jointApp.node.scrollTop = jointApp.node.scrollHeight;
+	jointApp.node.scrollLeft = jointApp.node.scrollWidth;
 
-		let joint = rigModel.joints.find(j => j.id === id);
-		if (joint) {
-			rigModel.selectJoint(joint.position.x, joint.position.y);
+	jointBtn.on("click", () => {
+		if (!jointBtn.hasClass("active")) {
+			let prev = dom.query("#jointApp button.name.active");
+			prev.removeClass("active");
+			jointBtn.addClass("active");
+
+			let joint = rigModel.joints.find(j => j.id === id);
+			if (joint) {
+				rigModel.selectJoint(joint.position.x, joint.position.y);
+			}
 		}
 
 		activePane = "joints";
+	});
+
+	jointBtn.on("dblclick", () => {
+		cameraMovement.set(rigModel.activeJoint.position);
 	});
 
 	return jointEl;
 }
 
 function setJointProperties(joint) {
-	let propertyPane = dom.query("#propertyApp", true);
+	let propertyPane = dom.query("#propertyApp");
 	if (joint) {
 		propertyPane.removeClass("disabled");
 
@@ -729,6 +674,14 @@ function setJointProperties(joint) {
 		nameEl.value(joint.name);
 		lengthEl.value(joint.length.toFixed(2));
 		zIndexEl.value(parseInt(joint.zIndex));
+
+		if (!zIndexEl.node._lastValue) {
+			zIndexEl.node._lastValue = zIndexEl.value();
+		}
+
+		if (!nameEl.node._lastValue) {
+			nameEl.node._lastValue = nameEl.value();
+		}
 
 		//Transform
 		let xEl = propertyPane.query("#jointX");
@@ -761,6 +714,22 @@ function setJointProperties(joint) {
 				scaleY.value(joint.skin.offset.scaleY.toFixed(2));
 				let offsetAngle = utils.degrees(joint.skin.offset.angle);
 				angle.value(offsetAngle.toFixed(2));
+
+				if (!x.node._lastValue) {
+					x.node._lastValue = x.value();
+				}
+				if (!y.node._lastValue) {
+					y.node._lastValue = y.value();
+				}
+				if (!scaleX.node._lastValue) {
+					scaleX.node._lastValue = scaleX.value();
+				}
+				if (!scaleY.node._lastValue) {
+					scaleY.node._lastValue = scaleY.value();
+				}
+				if (!angle.node._lastValue) {
+					angle.node._lastValue = angle.value();
+				}
 			}
 		}
 	} else {
@@ -781,11 +750,11 @@ events.on("jointChange", joints => {
 	joints = joints || rigModel.joints;
 	//Joint Pane >
 	//Adding elements
-	let jointApp = dom.query("#jointApp", true);
+	let jointApp = dom.query("#jointApp");
 	for (var i = 0; i < joints.length; i++) {
 		let joint = joints[i];
 		//Check if it exists in dom
-		let check = jointApp.query("#" + joint.id, true);
+		let check = jointApp.query("#" + joint.id);
 		if (!check.node) {
 			let el = createJointElement(joint.id, joint.name);
 			jointApp.append(el);
@@ -793,34 +762,49 @@ events.on("jointChange", joints => {
 	}
 
 	//Fix each element hierarchy
-	let jointAppChildren = dom.query("#jointApp > *");
+	let jointAppChildren = dom.query("#jointApp > *", true);
 	for (var i = 0; i < jointAppChildren.elements.length; i++) {
 		let el = jointAppChildren.elements[i];
 		let joint = joints.find(j => j.id === el.node.id);
 		//Search for parent
 		if (joint) {
 			if (joint.parent) {
-				let parentEl = dom.query("#" + joint.parent.id + " > .children", true);
+				let parentEl = dom.query("#" + joint.parent.id + " > .children");
 				parentEl.append(el);
 			}
 		}
 	}
 
 	//Updating elements
-	let jointAppJoints = dom.query("#jointApp .joint");
+	let jointAppJoints = dom.query("#jointApp .joint", true);
 	for (var i = 0; i < jointAppJoints.elements.length; i++) {
 		let el = jointAppJoints.elements[i];
 		let rigJoint = rigModel.joints.find(j => j.id === el.node.id);
 		if (!rigJoint) {
+			let parentEl = dom.query(el.node.parentNode.parentNode);
+
+			//If a joint is deleted, its parent element will inherit its children elements
+			if (parentEl) {
+				let newParent;
+				if (parentEl.hasClass("joint")) {
+					newParent = dom.query("#" + parentEl.node.id + " > .children");
+				} else {
+					newParent = dom.query("#jointApp");
+				}
+
+				let children = dom.query("#" + el.node.id + " > .children > .joint", true);
+				newParent.append(children);
+			}
+
 			el.remove();
 		} else {
 			if (el.node.id === rigModel.activeJoint.id) {
-				el.query("button.name").addClass("active");
+				el.query("button.name", true).addClass("active");
 			} else {
-				el.query("button.name.active").removeClass("active");
+				el.query("button.name.active", true).removeClass("active");
 			}
 
-			el.query("button.name", true).text(rigJoint.name, true);
+			el.query("button.name").text(rigJoint.name, true);
 		}
 	}
 
@@ -831,21 +815,21 @@ events.on("jointChange", joints => {
 	//Hide angle, length, & skinning properties if there's no parent
 	if (rigModel.activeJoint) {
 		if (!rigModel.activeJoint.parent) {
-			dom.query(dom.query("#jointAngle", true).node.parentNode, true).css("display", "none");
-			dom.query(dom.query("#jointLength", true).node.parentNode, true).css("display", "none");
+			dom.query(dom.query("#jointAngle").node.parentNode).css("display", "none");
+			dom.query(dom.query("#jointLength").node.parentNode).css("display", "none");
 			dom.query(".section.skinning").css("display", "none");
 		} else {
-			dom.query(dom.query("#jointAngle", true).node.parentNode, true).css("display", "flex");
-			dom.query(dom.query("#jointLength", true).node.parentNode, true).css("display", "flex");
-			dom.query(".section.skinning").css("display", "flex");
+			dom.query(dom.query("#jointAngle").node.parentNode).css("display", "flex");
+			dom.query(dom.query("#jointLength").node.parentNode).css("display", "flex");
+			dom.query(".section.skinning", true).css("display", "flex");
 		}
 	}
 });
 
-events.on("jointNameInputChange", () => {
+events.on("jointNameInputChange", ignoreHistory => {
 	let activeJoint = rigModel.activeJoint;
 	if (activeJoint) {
-		let name = dom.query("#jointName", true).value();
+		let name = dom.query("#jointName").value();
 		activeJoint.name = name;
 
 		rigModel.editJoint(activeJoint.id, {
@@ -854,18 +838,20 @@ events.on("jointNameInputChange", () => {
 
 		events.emit("jointChange");
 
-		history.add({
-			label: "Change joint name",
-			value: rigModel.clone(),
-			group: "keyframe"
-		});
+		if (!ignoreHistory) {
+			history.add({
+				label: "Change joint name",
+				value: rigModel.clone(),
+				group: "keyframe"
+			});
+		}
 	}
 });
 
-events.on("jointZIndexInputChange", () => {
+events.on("jointZIndexInputChange", ignoreHistory => {
 	let activeJoint = rigModel.activeJoint;
 	if (activeJoint) {
-		let zIndex = dom.query("#jointZIndex", true).value();
+		let zIndex = dom.query("#jointZIndex").value();
 		activeJoint.zIndex = zIndex;
 
 		rigModel.editJoint(activeJoint.id, {
@@ -874,23 +860,25 @@ events.on("jointZIndexInputChange", () => {
 
 		events.emit("jointChange");
 
-		history.add({
-			label: "Change joint Z-Index",
-			value: rigModel.clone(),
-			group: "keyframe"
-		});
+		if (!ignoreHistory) {
+			history.add({
+				label: "Change joint Z-Index",
+				value: rigModel.clone(),
+				group: "keyframe"
+			});
+		}
 	}
 })
 
-events.on("jointSkinningInputChange", () => {
+events.on("jointSkinningInputChange", ignoreHistory => {
 	let activeJoint = rigModel.activeJoint;
 	if (activeJoint) {
 		let activeJointSkin = activeJoint.skin;
-		let x = parseFloat(dom.query("#skinPositionX", true).value());
-		let y = parseFloat(dom.query("#skinPositionY", true).value());
-		let scaleX = parseFloat(dom.query("#skinScaleX", true).value());
-		let scaleY = parseFloat(dom.query("#skinScaleY", true).value());
-		let angle = parseFloat(dom.query("#skinAngle", true).value());
+		let x = parseFloat(dom.query("#skinPositionX").value());
+		let y = parseFloat(dom.query("#skinPositionY").value());
+		let scaleX = parseFloat(dom.query("#skinScaleX").value());
+		let scaleY = parseFloat(dom.query("#skinScaleY").value());
+		let angle = parseFloat(dom.query("#skinAngle").value());
 
 		activeJointSkin.offset = {
 			x: x,
@@ -904,19 +892,21 @@ events.on("jointSkinningInputChange", () => {
 			skin: activeJointSkin
 		});
 
-		history.add({
-			label: "Change skin offset",
-			value: rigModel.clone(),
-			group: "keyframe"
-		});
+		if (!ignoreHistory) {
+			history.add({
+				label: "Change skin offset",
+				value: rigModel.clone(),
+				group: "keyframe"
+			});
+		}
 	}
 });
 
 events.on("jointPositionInputChange", () => {
 	let activeJoint = rigModel.activeJoint;
 	if (activeJoint) {
-		let x = parseFloat(dom.query("#jointX", true).value()) || 0;
-		let y = parseFloat(dom.query("#jointY", true).value()) || 0;
+		let x = parseFloat(dom.query("#jointX").value()) || 0;
+		let y = parseFloat(dom.query("#jointY").value()) || 0;
 		rigModel.moveJoint(x, y);
 	}
 });
@@ -925,7 +915,7 @@ events.on("jointAngleInputChange", () => {
 	let activeJoint = rigModel.activeJoint;
 	if (activeJoint) {
 		if (activeJoint.parent) {
-			let angle = parseFloat(dom.query("#jointAngle", true).value()) || 0;
+			let angle = parseFloat(dom.query("#jointAngle").value()) || 0;
 			angle = utils.radians(utils.map(angle, 0, 360, -180, 180));
 			let x = activeJoint.parent.position.x - Math.cos(angle) * activeJoint.length;
 			let y = activeJoint.parent.position.y - Math.sin(angle) * activeJoint.length;
@@ -937,10 +927,76 @@ events.on("jointAngleInputChange", () => {
 events.on("jointLengthInputChange", () => {
 	let activeJoint = rigModel.activeJoint;
 	if (activeJoint) {
-		let length = parseFloat(dom.query("#jointLength", true).value()) || 0;
+		let length = parseFloat(dom.query("#jointLength").value()) || 0;
 		activeJoint.length = length;
 		rigModel.moveJoint(activeJoint.position.x, activeJoint.position.y);
 	}
+});
+
+function addHistoryEl(event) {
+	let parent = dom.query("#historyApp");
+	parent.query(".history.current", true).removeClass("current");
+	let historyEl = parent.create("div");
+	historyEl.attr("id", event.id);
+	historyEl.addClass("history", "current");
+	let descEl = historyEl.create("p");
+	descEl.text(event.label);
+	parent.node.scrollTop = parent.node.scrollHeight;
+
+	historyEl.on("click", () => {
+		if (event.group == "keyframe") {
+			parent.query(".history.current", true).removeClass("current");
+			historyEl.addClass("current");
+
+			history.jump(event.id);
+			rigModel.import(event.value);
+
+			vue.timeline.graph.updateState();
+			vue.timeline.graph.redraw();
+
+			setJointProperties(rigModel.activeJoint);
+		}
+	});
+}
+
+events.on("undo", () => {
+	let prev = history.getPrevious();
+	if (!prev) return;
+	if (prev.group == "keyframe") {
+		rigModel.import(prev.value);
+		history.backward();
+
+		vue.timeline.graph.updateState();
+		vue.timeline.graph.redraw();
+
+		setJointProperties(rigModel.activeJoint);
+	}
+
+	dom.query(".history.current", true).removeClass("current");
+	let newCurrent = dom.query("#" + prev.id);
+	newCurrent.addClass("current");
+	let parent = dom.query("#historyApp");
+	parent.node.scrollTop = newCurrent.node.offsetTop;
+});
+
+events.on("redo", () => {
+	let next = history.getNext();
+	if (!next) return;
+	if (next.group == "keyframe") {
+		rigModel.import(next.value);
+		history.forward();
+
+		vue.timeline.graph.updateState();
+		vue.timeline.graph.redraw();
+
+		setJointProperties(rigModel.activeJoint);
+	}
+
+	dom.query(".history.current", true).removeClass("current");
+	let newCurrent = dom.query("#" + next.id);
+	newCurrent.addClass("current");
+	let parent = dom.query("#historyApp");
+	parent.node.scrollTop = newCurrent.node.offsetTop;
 });
 
 events.on("historyChange", () => {
@@ -949,16 +1005,38 @@ events.on("historyChange", () => {
 		let model = rigModel.toJSON(null, true);
 		localStorage.setItem(config.autosave.label, JSON.stringify(model));
 	}
+
+	//Remove elements that aren't in the history anymore
+	let historyElements = dom.query("#historyApp .history", true);
+	for (var i = 0; i < historyElements.elements.length; i++) {
+		let el = historyElements.elements[i].node;
+		let event = history.events.find(e => e.id === el.id);
+		if (!event) {
+			el.remove();
+		}
+	}
+
+	let latest = history.getLatest();
+	addHistoryEl(latest);
 });
 
 //Loading autosaved data
 utils.loadJSONData(config.autosave.label, data => {
 	rigModel.import(rigModel.fromJSON(data));
+
+	history.add({
+		label: "Load autosave",
+		value: rigModel.clone(),
+		group: "keyframe"
+	});
 });
 
 events.on("clearJoints", () => {
+	if (rigModel.joints.length) {
+		dom.query("#jointApp *").remove();
+	}
 	rigModel.reset();
-	dom.query("#jointApp *").remove();
+	dom.query("#propertyApp").addClass("disabled");
 });
 
 events.on("resetTimeline", () => {
@@ -988,30 +1066,6 @@ events.on("resetCamera", () => {
 	cameraDistance = config.world.zoom;
 });
 
-events.on("undo", () => {
-	let prev = history.getPrevious();
-	if (!prev) return;
-	if (prev.group == "keyframe") {
-		rigModel.import(prev.value);
-		history.backward();
-
-		vue.timeline.graph.updateState();
-		vue.timeline.graph.redraw();
-	}
-});
-
-events.on("redo", () => {
-	let next = history.getNext();
-	if (!next) return;
-	if (next.group == "keyframe") {
-		rigModel.import(next.value);
-		history.forward();
-
-		vue.timeline.graph.updateState();
-		vue.timeline.graph.redraw();
-	}
-});
-
 events.on("deleteKeyframe", () => {
 	let frame = rigModel.getKeyframe("index", vue.timeline.graph.state.currentFrame);
 	if (frame) {
@@ -1034,42 +1088,26 @@ events.on("renderFocus", () => {
 	sleep = false;
 });
 
-fileButton.addEventListener("mouseup", function() {
+dom.query("#fileButton").on("mouseup", function() {
 	let fileApp = vue.fileApp;
 	if (fileApp.hidden) {
 		fileApp.show(mouse.x + 5, mouse.y + 5);
 	}
 });
 
-optionButton.addEventListener("mouseup", function() {
+dom.query("#optionButton").on("mouseup", function() {
 	let optionApp = vue.optionApp;
 	if (optionApp.hidden) {
 		optionApp.show(mouse.x + 5, mouse.y + 5);
 	}
 });
 
-for (let btn of _actionButtons) {
-	actionButtons[btn].addEventListener("click", function() {
-		action = actions[btn];
-		rigModel.action = action;
-
-		removeActives();
-		actionButtons[btn].classList.add("active-tool");
-		actionPreview.query("img", true).prop("src", actionIconPaths[action]);
-	});
-}
-
+let previousAction;
 key.on("keydown", function(event) {
 	let pickedAction = actions[shortcuts[event.code]];
 	if (pickedAction) {
+		setAction(pickedAction);
 		action = pickedAction;
-		rigModel.action = action;
-
-		if (actionButtons[action]) {
-			removeActives();
-			actionButtons[action].classList.add("active-tool");
-			actionPreview.query("img", true).prop("src", actionIconPaths[action]);
-		}
 	}
 
 	if (event.ctrlKey) {
@@ -1082,18 +1120,42 @@ key.on("keydown", function(event) {
 		}
 	}
 
+	if (event.shiftKey) {
+		if (action == actions.add) {
+			if (rigModel.activeJoint) {
+				if (!mirror) {
+					mirror = rigModel.activeJoint;
+				}
+			}
+		}
+	}
+
+	if (event.keyCode == 32) {
+		if (action != actions.pan) {
+			previousAction = action;
+			setAction(actions.pan);
+		}
+	}
+
 	//Delete
 	if (event.keyCode == 46) {
 		if (activePane == "joints") {
 			let activeJoint = rigModel.activeJoint;
 			if (activeJoint) {
-				if (activeJoint.parent) {
-					rigModel.removeJointById(activeJoint.id);
-				}
+				rigModel.removeJointById(activeJoint.id);
 			}
 		} else if (activePane == "timeline") {
 			events.emit("deleteKeyframe");
 		}
+	}
+});
+
+key.on("keyup", function(event) {
+	if (mirror) mirror = null;
+
+	if (previousAction) {
+		setAction(previousAction);
+		previousAction = undefined;
 	}
 });
 
@@ -1116,11 +1178,8 @@ mouse.on("mouseup", function() {
 mouse.on("mousedown", function() {
 	vue.fileApp.hide();
 	vue.optionApp.hide();
-	dom.query(".custom-select .options").css("display", "none");
-});
-
-mouse.on("mousewheel", () => {
-	dom.query(".custom-select .options").css("display", "none");
+	vue.contextMenuApp.hide();
+	selectOptions.css("display", "none");
 });
 
 mouse.on("mousemove", function() {
@@ -1133,13 +1192,13 @@ mouse.on("mousemove", function() {
 	} else {
 		actionPreview.css({
 			display: "block",
-			top: `${mouse.y - 7}px`,
+			top: `${mouse.y - 10}px`,
 			left: `${mouse.x + 9}px`
 		});
 	}
 });
 
-let actionPreview = dom.query("#actionPreview", true);
+let actionPreview = dom.query("#actionPreview");
 
 renderer.canvas.addEventListener("mousemove", function(e) {
 	if (mouse.dragged && !sleep) {
@@ -1148,6 +1207,9 @@ renderer.canvas.addEventListener("mousemove", function(e) {
 				x: mouseLast.x - worldMouse.x + renderer.camera.movement.x,
 				y: mouseLast.y - worldMouse.y + renderer.camera.movement.y
 			});
+
+			cameraMovement.x = utils.clamp(cameraMovement.x, -9000, 9000);
+			cameraMovement.y = utils.clamp(cameraMovement.y, -9000, 9000);
 		}
 	}
 
@@ -1162,7 +1224,18 @@ renderer.canvas.addEventListener("mousemove", function(e) {
 renderer.canvas.addEventListener("click", function() {
 	if (vue.overlayApp.hidden && vue.overlayConfigApp.hidden && vue.fileApp.hidden && vue.loadApp.hidden && vue.saveApp.hidden && vue.optionApp.hidden) {
 		if (action == actions.add) {
+			if (mirror) {
+				let mirrorX = rigModel.activeJoint.position.x - worldMouse.x + mirror.position.x;
+				let joint = rigModel.addJoint(mirrorX, worldMouse.y, {
+					parent: mirror,
+					ignoreHistory: true,
+					ignoreDefaults: true
+				});
+				mirror = joint;
+			}
+
 			rigModel.addJoint(worldMouse.x, worldMouse.y);
+
 			activePane = "joints";
 		}
 
@@ -1181,17 +1254,23 @@ renderer.canvas.addEventListener("click", function() {
 
 renderer.canvas.addEventListener("mousewheel", function() {
 	if (mouse.scrollTop) {
-		cameraDistance -= 200;
+		cameraDistance -= 100;
 	} else {
-		cameraDistance += 200;
+		cameraDistance += 100;
 	}
 
 	cameraDistance = utils.clamp(cameraDistance, config.world.minZoom, config.world.maxZoom);
 });
 
+window.dom = dom;
+
 function fixRendererSize() {
-	let toolApp = document.getElementById("toolApp");
-	renderer.setSize(canvasContainer.offsetWidth - 1 - toolApp.offsetWidth, innerHeight - navigation.offsetHeight - vue.timeline.app.$el.offsetHeight);
+	let toolApp = dom.query("#toolApp");
+	let canvasContainer = dom.query(".canvas-container");
+	let nav = dom.query("#navigation");
+	let width = canvasContainer.node.offsetWidth - 1 - toolApp.node.offsetWidth;
+	let height = innerHeight - nav.node.offsetHeight - vue.timeline.app.$el.offsetHeight;
+	renderer.setSize(width, height);
 }
 
 addEventListener("resize", function() {
@@ -1206,7 +1285,7 @@ renderer.camera.setZoomSpeed(0.2);
 renderer.camera.setMoveSpeed(0.4);
 
 renderer.draw(() => {
-	let focused = vue.overlayApp.hidden && vue.overlayConfigApp.hidden && vue.fileApp.hidden && vue.loadApp.hidden && vue.saveApp.hidden && vue.optionApp.hidden && !sleep;
+	let focused = vue.overlayApp.hidden && vue.overlayConfigApp.hidden && vue.fileApp.hidden && vue.loadApp.hidden && vue.saveApp.hidden && vue.optionApp.hidden;
 
 	worldMouse.set(renderer.camera.screenToWorld(mouse.x - renderer.bounds.x, mouse.y - renderer.bounds.y));
 
@@ -1237,31 +1316,60 @@ renderer.draw(() => {
 			renderer.restore();
 		}
 
+		//
 		if (focused) {
 			if (action === actions.add) {
-				let translucent = "rgba(240, 230, 255, 0.3)";
+				let translucent = "rgba(240, 230, 255, 0.75)";
 				renderer.save();
 				renderer.context.globalCompositeOperation = "overlay";
-				let currentPart = rigModel.activeJoint;
-				if (currentPart) {
-					renderer.line(worldMouse.x, worldMouse.y, currentPart.position.x, currentPart.position.y, {
+				let parent = rigModel.activeJoint;
+				if (parent) {
+					renderer.line(worldMouse.x, worldMouse.y, parent.position.x, parent.position.y, {
 						lineWidth: config.render.segment.width,
 						lineCap: "round",
 						stroke: translucent
 					});
+
+					if (mirror) {
+						let mirrorX = parent.position.x - worldMouse.x + mirror.position.x;
+						renderer.line(mirrorX, worldMouse.y, mirror.position.x, mirror.position.y, {
+							lineWidth: config.render.segment.width,
+							lineCap: "round",
+							stroke: translucent
+						});
+
+						renderer.circle(mirrorX, worldMouse.y, config.render.joint.radius, {
+							fill: translucent
+						});
+					}
 				}
 
 				renderer.circle(worldMouse.x, worldMouse.y, config.render.joint.radius, {
 					fill: translucent
 				});
+
 				renderer.restore();
 			}
 		}
 
-		/*let actionSize = utils.map(cameraDistance, config.world.minZoom, config.world.maxZoom, 10, 100);
-		renderer.context.drawImage(actionIcons[action], worldMouse.x + 12, worldMouse.y - 8, actionSize, actionSize);*/
-
 		rigModel.render(renderer);
+
+		//Add grid
+		let gridArea = 10000;
+		let gridSpacing = 20;
+		for (var x = -cameraDistance - gridArea; x < cameraDistance + gridArea; x += gridSpacing) {
+			renderer.line(x, renderer.camera.viewport.top - gridArea, x, renderer.camera.viewport.bottom + gridArea, {
+				stroke: "rgba(240, 230, 250, 0.2)",
+				lineWidth: 0.2
+			});
+		}
+
+		for (var y = -cameraDistance - gridArea; y < cameraDistance + gridArea; y += gridSpacing) {
+			renderer.line(renderer.camera.viewport.left - gridArea, y, renderer.camera.viewport.right + gridArea, y, {
+				stroke: "rgba(240, 230, 250, 0.2)",
+				lineWidth: 0.2
+			});
+		}
 
 		//Draw the model's bounds
 		/*renderer.rect(rigModel.bounds.min.x, rigModel.bounds.min.y, rigModel.bounds.max.x - rigModel.bounds.min.x, rigModel.bounds.max.y - rigModel.bounds.min.y, {
@@ -1276,7 +1384,7 @@ renderer.render(() => {
 
 key.on("keydown", function() {
 	if (key.code === 16) {
-		console.log(sleep);
+		console.log(history);
 		console.log(rigModel);
 	}
 });
