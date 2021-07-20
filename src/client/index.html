@@ -18,7 +18,6 @@
 		<link rel="stylesheet" type="text/css" href="css/overlay.css">
 		<link rel="stylesheet" type="text/css" href="css/overlay.config.css">
 		<link rel="stylesheet" type="text/css" href="css/contextMenu.css">
-		<link rel="stylesheet" type="text/css" href="css/material.css">
 	</head>
 	<body>
 		<div class="main-container">
@@ -26,6 +25,7 @@
 			<div id="actionPreview">
 				<img src="assets/svg/quad-arrow.svg">
 			</div>
+			<div id="selectOptions"></div>
 			<!-- Context Menu App -->
 			<div id="contextMenuApp" class="darko-d" v-if="!hidden">
 				<div class="wrapper">
@@ -68,7 +68,7 @@
 				<div class="row">
 					<div class="drag"></div>
 					<p class="title">Save Project</p>
-					<button class="darko-a close" v-on:click="hide" v-bind:title="'Close'">x</button>
+					<button class="darko-a close" v-on:click="hide" title="Close">x</button>
 				</div>
 				<div class="row">
 					<div class="field">
@@ -85,7 +85,7 @@
 				<div class="row">
 					<div class="drag"></div>
 					<p class="title">Load Project</p>
-					<button class="darko-a close" v-on:click="hide" v-bind:title="'Close'">x</button>
+					<button class="darko-a close" v-on:click="hide" title="Close">x</button>
 				</div>
 				<div class="row section">
 					<div class="title-wrapper">
@@ -109,7 +109,7 @@
 				<div class="row">
 					<div class="drag"></div>
 					<p class="title">Crop</p>
-					<button class="darko-a close" v-on:click="hide" v-bind:title="'Close'">x</button>
+					<button class="darko-a close" v-on:click="hide" title="Close">x</button>
 				</div>
 				<div class="row section">
 					<canvas id="cropCanvas"></canvas>
@@ -124,7 +124,7 @@
 				<div class="row">
 					<div class="drag"></div>
 					<p class="title">Add Overlay</p>
-					<button class="darko-a close" v-on:click="hide" v-bind:title="'Close'">x</button>
+					<button class="darko-a close" v-on:click="hide" title="Close">x</button>
 				</div>
 				<div class="row section">
 					<div class="title-wrapper">
@@ -183,7 +183,7 @@
 				<div class="row">
 					<div class="drag"></div>
 					<p class="title">Overlay Settings</p>
-					<button class="darko-a close" v-on:click="hide" v-bind:title="'Close'">x</button>
+					<button class="darko-a close" v-on:click="hide" title="Close">x</button>
 				</div>
 				<div class="row section">
 					<div class="title-wrapper">
@@ -254,18 +254,18 @@
 					</div>
 					<div class="row">
 						<div id="riggingMode" class="config">
-							<button id="forwardKinematics" class="option selected" v-bind:title="'Forward kinematics'">
+							<button id="forwardKinematics" class="option selected" title="Forward kinematics">
 							<img src="assets/svg/joint-arrow-down.svg" class="" />
 							</button>
-							<button id="inverseKinematics" class="option" v-bind:title="'Inverse kinematics'">
+							<button id="inverseKinematics" class="option" title="Inverse kinematics">
 							<img src="assets/svg/joint-arrow-up.svg" class="" />
 							</button>
-							<button id="linear" class="option" v-bind:title="'Free rigging'">
+							<button id="linear" class="option" title="Linear">
 							<img src="assets/svg/joint-arrows.svg" class="" />
 							</button>
 						</div>
 						<div class="config">
-							<button id="autoAddKeyframe" class="option selected" v-bind:title="'Auto add keyframes'">
+							<button id="autoAddKeyframe" class="option selected" title="Auto add keyframes">
 							<img src="assets/svg/key-arrows.svg" class="" />
 							</button>
 						</div>
@@ -276,19 +276,19 @@
 				</div>
 				<div class="canvas-container">
 					<div id="toolApp">
-						<button id="panCamera" class="active-tool" v-bind:title="'Pan camera'">
+						<button id="panCamera" class="active-tool" title="Pan camera">
 						<img src="assets/svg/quad-arrow.svg" class="" />
 						</button>
-						<button id="selectJoint" class="" v-bind:title="'Select joint'">
+						<button id="selectJoint" class="" title="Select joint">
 						<img src="assets/svg/joint-click.svg" class="" />
 						</button>
-						<button id="addJoint" class="" v-bind:title="'Add joint'">
+						<button id="addJoint" class="" title="Add joint">
 						<img src="assets/svg/joint-plus.svg" class="" />
 						</button>
-						<button id="moveJoint" class="" v-bind:title="'Move joint'">
+						<button id="moveJoint" class="" title="Move joint">
 						<img src="assets/svg/joint-arrow.svg" class="" />
 						</button>
-						<button id="removeJoint" class="" v-bind:title="'Remove joint'">
+						<button id="removeJoint" class="" title="Remove joint">
 						<img src="assets/svg/joint-trash.svg" class="" />
 						</button>
 					</div>
@@ -312,35 +312,35 @@
 						<!-- Timeline control -->
 						<div class="row-b">
 							<div class="left-wrapper">
-								<button id="zoomInTimeline" class="darko-a" v-bind:title="'Zoom in'">
+								<button id="zoomInTimeline" class="darko-a" title="Zoom in">
 								<img src="assets/svg/magnifying-glass-plus.svg" class="" />
 								</button>
-								<button id="zoomOutTimeline" class="darko-a" v-bind:title="'Zoom out'">
+								<button id="zoomOutTimeline" class="darko-a" title="Zoom out">
 								<img src="assets/svg/magnifying-glass-minus.svg" class="" />
 								</button>
-								<button id="lastFrame" class="darko-a" v-bind:title="'Previous frame'">
+								<button id="lastFrame" class="darko-a" title="Previous frame">
 								<img src="assets/svg/previous.svg" class="" />
 								</button>
-								<button id="playStop" class="darko-a" v-bind:title="'Play / Stop'">
+								<button id="playStop" class="darko-a" title="Play / Stop">
 								<img src="assets/svg/play.svg" class="" />
 								</button>
-								<button id="nextFrame" class="darko-a" v-bind:title="'Next frame'">
+								<button id="nextFrame" class="darko-a" title="Next frame">
 								<img src="assets/svg/next.svg" class="" />
 								</button>
-								<button id="addKeyframe" class="darko-a" v-bind:title="'Add keyframe'">
+								<button id="addKeyframe" class="darko-a" title="Add keyframe">
 								<img src="assets/svg/key-plus.svg" class="" />
 								</button>
-								<button id="deleteKeyframe" class="darko-a" v-bind:title="'Delete keyframe'">
+								<button id="deleteKeyframe" class="darko-a" title="Delete keyframe">
 								<img src="assets/svg/key-minus.svg" class="" />
 								</button>
 							</div>
 							<div class="right-wrapper">
-								<div class="input-wrapper" v-bind:title="'Frame Count'">
+								<div class="input-wrapper" title="Frame Count">
 									<img src="assets/svg/f.svg">
 									<input id="frameCount" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="30" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
 								</div>
 								
-								<div class="input-wrapper" v-bind:title="'Animation Speed'">
+								<div class="input-wrapper" title="Animation Speed">
 									<img src="assets/svg/rabbit.svg">
 									<input id="animationSpeed" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="30" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
 								</div>
@@ -383,7 +383,7 @@
 							<div id="jointApp" class="app ">
 								
 							</div>
-							<div id="propertyApp" class="app hidden">
+							<div id="propertyApp" class="app disabled hidden">
 								<div class="section">
 									<div class="header">
 										<p class="title">Joint Properties</p>
@@ -391,11 +391,11 @@
 									<div class="body">
 										<div class="input-wrapper">
 											<label for="jointName">Name</label>
-											<input id="jointName" type="text" class="darko-c" placeholder="Type here..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="handleInput">
+											<input id="jointName" type="text" class="darko-c" placeholder="Type here..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="handleInput" v-on:focusout="handleFocusOut">
 										</div>
 										<div class="input-wrapper">
 											<label for="jointZIndex">Z-Index</label>
-											<input id="jointZIndex" type="text" class="darko-c" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:wheel="toggleAmount">
+											<input id="jointZIndex" type="text" class="darko-c" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:wheel="toggleAmount" v-on:focusout="handleFocusOut">
 										</div>
 										<div class="input-wrapper" v-if="showLength">
 											<label for="jointLength">Length</label>
@@ -445,23 +445,23 @@
 									<div class="body">
 										<div class="input-wrapper">
 											<label for="skinPositionX">X</label>
-											<input id="skinPositionX" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount">
+											<input id="skinPositionX" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount" v-on:focusout="handleFocusOut">
 										</div>
 										<div class="input-wrapper">
 											<label for="skinPositionY">Y</label>
-											<input id="skinPositionY" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount">
+											<input id="skinPositionY" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount" v-on:focusout="handleFocusOut">
 										</div>
 										<div class="input-wrapper">
 											<label for="skinScaleX">Scale X</label>
-											<input id="skinScaleX" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:input="validateFormat" v-on:wheel="toggleAmount">
+											<input id="skinScaleX" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:input="validateFormat" v-on:wheel="toggleAmount" v-on:focusout="handleFocusOut">
 										</div>
 										<div class="input-wrapper">
 											<label for="skinScaleY">Scale Y</label>
-											<input id="skinScaleY" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:input="validateFormat" v-on:wheel="toggleAmount">
+											<input id="skinScaleY" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:input="validateFormat" v-on:wheel="toggleAmount" v-on:focusout="handleFocusOut">
 										</div>
 										<div class="input-wrapper">
 											<label for="skinAngle">Angle</label>
-											<input id="skinAngle" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount">
+											<input id="skinAngle" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount" v-on:focusout="handleFocusOut">
 										</div>
 										<button id="resetOffset" class="darko-a">Reset</button>
 									</div>
@@ -475,7 +475,6 @@
 								</div>
 							</div>
 							<div id="historyApp" class="app hidden">
-								
 							</div>
 						</div>
 					</div>

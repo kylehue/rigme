@@ -165,7 +165,7 @@
 *Joints
 */
 
-#jointApp, #propertyApp {
+#jointApp, #propertyApp, #historyApp {
 	position: relative;
 	display: flex;
 	flex-flow: column wrap;
@@ -252,6 +252,12 @@
 	width: 100%;
 }
 
+#propertyApp.disabled {
+	pointer-events: none;
+	user-select: none;
+	opacity: 0.5;
+}
+
 #propertyApp .section {
 	position: relative;
 	display: flex;
@@ -333,82 +339,65 @@ button#removeSkin, button#resetOffset, button#displayCropApp {
 	height: 30px;
 }
 
-/*#propertyApp .section p {
-	color: var(--white);
-	line-height: 1;
-	font-size: 12px;
-}
+/*
+*History
+*History
+*/
 
-#propertyApp .section label {
-	margin-right: 5px;
-	width: 40px;
-	height: fit-content;
-	text-align: right;
-	color: var(--dim-b);
-	line-height: 1;
-	font-size: 12px;
-}
-
-#propertyApp .section:first-child {
-	width: calc(100% - 10px);
-}
-
-#propertyApp .section {
+#historyApp {
 	position: relative;
 	display: flex;
-	flex-flow: column wrap;
-	align-content: flex-start;
-	justify-content: center;
-	width: 100%;
-	height: fit-content;
-	box-sizing: border-box;
-	padding: 10px;
-	padding-top: 15px;
-	border: var(--borders);
-	margin-top: 15px;
-}
-
-#propertyApp .section p.title {
-	background: var(--darko-b);
-	font-size: 14px;
-	padding: 0 4px;
-}
-
-#propertyApp .section .header{
-	position: absolute;
-	display: flex;
-	flex-flow: row wrap;
-	width: 100%;
-	height: fit-content;
-	top: calc(-0.5em + 1px);
-}
-
-#propertyApp .section .input-wrapper{
-	display: flex;
-	flex-flow: row wrap;
+	flex-flow: column nowrap;
 	align-items: center;
+	align-content: center;
 	justify-content: flex-start;
-}
-
-#propertyApp .section .input-wrapper input{
-	width: 100px;
-}
-
-#propertyApp .section #materials{
 	width: 100%;
 }
 
-#propertyApp button {
-	height: 30px;
-	padding: 0 15px;
-	margin-top: 5px;
-	margin-left: auto;
-}
-
-#propertyApp .section .body{
-	position: relative;
+#historyApp .history {
 	display: flex;
-	flex-flow: column wrap;
+	flex-flow: row nowrap;
+	align-items: center;
+	align-content: center;
+	justify-content: flex-start;
+	flex-shrink: 0;
 	width: 100%;
+	height: 25px;
+	border-bottom: 1px solid var(--darko-c);
+	border-top: var(--borders);
+	cursor: pointer;
+}
+
+#historyApp .history:first-child {
+	border-top: none;
+}
+
+#historyApp .history:last-child {
+	border-bottom: none;
+}
+
+#historyApp .history p {
+	flex-shrink: 0;
+	color: var(--dim-b);
+	font-size: 12px;
+	line-height: 1;
+	width: calc(100% - 20px);
 	height: fit-content;
-}*/
+	overflow: hidden;
+	text-overflow: ellipsis;
+	user-select: none;
+	pointer-events: none;
+	padding-left: 5px;
+}
+
+#historyApp .history:hover {
+	background: rgba(0, 0, 0, 0.05);
+}
+
+#historyApp .history.current {
+	background: rgba(240, 230, 250, 0.05);
+}
+
+#historyApp .history.current p {
+	color: var(--white);
+}

@@ -26,8 +26,8 @@ class RigModel {
 
 	updateBounds() {
 		let keys = Object.keys(this.keyframes);
-		let xAxes = [0];
-		let yAxes = [0];
+		let xAxes = [];
+		let yAxes = [];
 		for (var i = 0; i < keys.length; i++) {
 			let frame = this.keyframes[keys[i]];
 			for (var j = 0; j < frame.joints.length; j++) {
@@ -351,33 +351,35 @@ class RigModel {
 		}
 	}
 
-	addJoint(x, y, jointChain) {
-		jointChain = jointChain || this.joints;
-
+	addJoint(x, y, options) {
+		options = options || {};
 		if (timeline.graph) {
 			timeline.graph.setCurrentMark(timeline.graph.state.currentFrame, false);
 		}
 
-		let before = this.activeJoint;
+		let parent = options.parent || this.activeJoint;
+
 		let joint = {
 			id: "J" + utils.uid(),
 			name: `Joint ${this.joints.length + 1}`,
 			position: vector(x, y),
 			positionPrev: vector(x, y),
-			angle: before ? vector(x, y).heading(before.position) : 0,
-			parent: before || null,
+			angle: parent ? vector(x, y).heading(parent.position) : 0,
+			parent: parent || null,
 			children: [],
-			length: before ? before.position.dist(x, y) : 0,
-			hierarchy: before ? before.hierarchy + 1 : 1,
+			length: parent ? parent.position.dist(x, y) : 0,
+			hierarchy: parent ? parent.hierarchy + 1 : 1,
 			skin: {},
 			zIndex: this.joints.length + 1
 		};
 
-		if (before) before.children.push(joint);
+		if (parent) parent.children.push(joint);
 
-		this.activeJoint = joint;
+		if (!options.ignoreDefaults) {
+			this.activeJoint = joint;
+		}
 
-		jointChain.push(joint);
+		this.joints.push(joint);
 
 		if (timeline.graph) {
 			this.updateKeyframe(timeline.graph.state.currentFrame, {
@@ -387,13 +389,17 @@ class RigModel {
 
 		this.updateBounds();
 
-		history.add({
-			label: "Add joint",
-			value: this.clone(),
-			group: "keyframe"
-		});
+		if (!options.ignoreHistory) {
+			history.add({
+				label: "Add joint",
+				value: this.clone(),
+				group: "keyframe"
+			});
+		}
 
 		events.emit("jointChange", this.joints);
+
+		return joint;
 	}
 
 	selectJoint(x, y) {
@@ -432,6 +438,8 @@ class RigModel {
 					joint.parent.children.splice(joint.parent.children.indexOf(joint), 1);
 					joint.parent.children.push(...joint.children);
 					this.activeJoint = joint.parent;
+				} else {
+					this.activeJoint = joint.children[0];
 				}
 
 				frame.joints.splice(frame.joints.indexOf(joint), 1);
@@ -707,7 +715,7 @@ class RigModel {
 
 	render(renderer) {
 		let _render = (jointChain, isPrev) => {
-			let translucent = "rgba(240, 230, 255, 0.3)";
+			let translucent = "rgba(240, 230, 255, 0.5)";
 			//Render the line that connects the joints
 			for (var i = 0; i < jointChain.length; i++) {
 				let joint = jointChain[i];

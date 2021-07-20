@@ -19,7 +19,7 @@ class History {
 		}
 
 		let event = {
-			id: utils.uid(),
+			id: "E" + utils.uid(),
 			label: options.label,
 			value: options.value,
 			group: options.group,
@@ -70,6 +70,13 @@ class History {
 
 	backward() {
 		this.present = this.getPrevious();
+	}
+
+	jump(id) {
+		let event = this.events.find(e => e.id === id);
+		if (id) {
+			this.present = event;
+		}
 	}
 }
 

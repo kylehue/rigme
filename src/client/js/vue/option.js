@@ -31,14 +31,16 @@ const optionApp = new Vue({
 			overlayConfig.show();
 		},
 		clearJoints: function () {
-			let con = confirm("Are you sure you want to delete all of the keyframes?");
+			let con = confirm("Are you sure you want to reset everything?");
 
 			if (con) {
 				events.emit("clearJoints");
+				events.emit("resetTimeline");
+				events.emit("resetCamera");
 			}
 		},
 		resetTimeline: function () {
-			let con = confirm("Are you sure you want to reset the timeline? (This won't reset the keyframes)");
+			let con = confirm("Are you sure you want to reset the timeline? (This action won't affect the keyframes)");
 
 			if (con) {
 				events.emit("resetTimeline");

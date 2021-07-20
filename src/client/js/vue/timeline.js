@@ -27,6 +27,12 @@ const timelineApp = new Vue({
 			timeline.snap();
 			timeline.redraw();
 
+			if (timeline.playbackHandle.end.mark >= this.totalFrames && this.totalFrames != 1) {
+				timeline.playbackHandle.end.mark = this.totalFrames - 1;
+				timeline.playbackHandle.end._x = timeline.markToX(timeline.playbackHandle.end.mark);
+				timeline.redraw();
+			}
+
 			let configData = {
 				frameCount: this.totalFrames,
 				animationSpeed: this.animationSpeed
@@ -335,6 +341,12 @@ class Timeline {
 			if (!mouseInside(this.canvas)) return;
 			dragging = true;
 			events.emit("renderSleep");
+
+			if (this.playbackHandle.end.mark >= timelineApp.totalFrames && timelineApp.totalFrames != 1) {
+				this.playbackHandle.end.mark = timelineApp.totalFrames - 1;
+				this.playbackHandle.end._x = this.markToX(this.playbackHandle.end.mark);
+				this.redraw();
+			}
 
 			//Which area is getting dragged?
 			if (dragging && !activeDrag) {
@@ -766,7 +778,15 @@ class Timeline {
 		}
 
 		//Handle
-		this.createRect(handleX - handleWidth / 2, this.scrollbar.height, handleWidth, handleHeight, config.accent);
+		this.context.beginPath();
+		this.context.moveTo(handleX - handleWidth / 2, this.scrollbar.height);
+		this.context.lineTo(handleX + handleWidth / 2, this.scrollbar.height);
+		this.context.lineTo(handleX + handleWidth / 2, this.scrollbar.height + handleHeight - 5);
+		this.context.lineTo(handleX, this.scrollbar.height + handleHeight);
+		this.context.lineTo(handleX - handleWidth / 2, this.scrollbar.height + handleHeight - 5);
+		this.context.closePath();
+		this.context.fillStyle = config.accent;
+		this.context.fill();
 		this.text(handleText, handleX + handleWidth, handleHeight / 2 + 8 + this.scrollbar.height, config.accent, "left");
 
 		//Adjust playback start handle

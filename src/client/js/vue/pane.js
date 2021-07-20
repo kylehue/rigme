@@ -14,8 +14,23 @@ const paneApp = new Vue({
 		showLength: !config.animation.linear
 	},
 	methods: {
+		handleFocusOut: function(e) {
+			let el = e.target;
+
+			if (el._lastValue != el.value) {
+				if (skinningInputIds.includes(el.id)) {
+					events.emit("jointSkinningInputChange");
+				}else if (el.id == "jointZIndex") {
+					events.emit("jointZIndexInputChange");
+				}else if (el.id == "jointName") {
+					events.emit("jointNameInputChange");
+				}
+			}
+
+			el._lastValue = el.value;
+		},
 		handleInput: function() {
-			events.emit("jointNameInputChange");
+			events.emit("jointNameInputChange", true);
 		},
 		validateFormat: function(e) {
 			e.target.value = e.target.value.replace(/[^0-9.-]/g, "").replace(/(\..*)\./g, "$1").replace(/^0+/g, "").replace(/(?<!^)-/g, "");
@@ -31,7 +46,7 @@ const paneApp = new Vue({
 			}
 
 			if (skinningInputIds.includes(e.target.id)) {
-				events.emit("jointSkinningInputChange");
+				events.emit("jointSkinningInputChange", true);
 			}
 		},
 		toggleAmount: function(e) {
@@ -63,12 +78,12 @@ const paneApp = new Vue({
 			} else if (e.target.id == "jointLength") {
 				events.emit("jointLengthInputChange");
 			} else if (e.target.id == "jointZIndex") {
-				events.emit("jointZIndexInputChange");
+				events.emit("jointZIndexInputChange", true);
 				e.target.value = parseInt(e.target.value);
 			}
 
 			if (skinningInputIds.includes(e.target.id)) {
-				events.emit("jointSkinningInputChange");
+				events.emit("jointSkinningInputChange", true);
 			}
 		},
 		showJoints: function() {

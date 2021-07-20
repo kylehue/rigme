@@ -166,7 +166,7 @@ function getMousePosition(x, y) {
 	};
 }
 
-let doc = dom.query("body", true);
+let doc = dom.query("body");
 let isDragging = false,
 	startMousePos,
 	startMouse,

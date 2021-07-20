@@ -5,7 +5,6 @@ const overlayConfigApp = require("./overlay.config.js");
 const fileApp = require("./file.js");
 const saveApp = require("./save.js");
 const loadApp = require("./load.js");
-const nav = require("./navigation.js");
 const optionApp = require("./option.js");
 const paneApp = require("./pane.js");
 const cropApp = require("./crop.js");

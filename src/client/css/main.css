@@ -67,11 +67,12 @@ input {
 	box-sizing: border-box;
 }
 
-select {
-	padding: 2px 3px;
-	cursor: pointer;
-	font-size: 12px;
-	box-sizing: border-box;
+label, p {
+	user-select: none;
+}
+
+::placeholder {
+	user-select: none;
 }
 
 option {
@@ -356,6 +357,7 @@ span.shortcut {
 	justify-content: flex-start;
 	width: 30px;
 	height: 100%;
+	padding-top: 5px;
 	box-sizing: border-box;
 	border-right: var(--wrapper-borders);
 }
@@ -444,8 +446,8 @@ canvas#gameCanvas {
 	position: absolute;
 	z-index: 1;
 	display: block;
-	width: 13px;
-	height: 13px;
+	width: 11px;
+	height: 11px;
 }
 
 #actionPreview img {
@@ -485,6 +487,10 @@ canvas#gameCanvas {
 }
 
 .custom-select .options {
+	display: none;
+}
+
+#selectOptions {
 	background: var(--darko-d);
 	box-shadow: var(--drop-shadow);
 	border-radius: 3px;
@@ -497,19 +503,20 @@ canvas#gameCanvas {
 	justify-content: flex-start;
 	overflow-x: hidden;
 	overflow-y: auto;
-	width: 100%;
 	height: fit-content;
 	max-height: 200px;
 	text-overflow: ellipsis;
 	left: 0;
 }
 
-.custom-select .options p {
+#selectOptions p {
 	position: relative;
 	text-align: left;
 	width: 100%;
 	height: 30px;
 	padding: 5px;
+	font-size: 12px;
+	color: var(--white);
 	box-sizing: border-box;
 	user-select: none;
 	cursor: pointer;
@@ -518,7 +525,7 @@ canvas#gameCanvas {
 	flex-shrink: 0;
 }
 
-.custom-select .options p:hover {
+#selectOptions p:hover {
 	background: rgba(0, 0, 0, 0.05);
 }
 
