@@ -58,41 +58,47 @@
 			<!-- File app -->
 			<div id="fileApp" v-if="!hidden">
 				<div class="wrapper">
-					<button id="showSaveApp" class="darko-d" v-on:mousedown="showSaveApp">Save Project</button>
-					<button id="showLoadApp" class="darko-d" v-on:mousedown="showLoadApp">Load Project</button>
-					<button id="showExportApp" class="darko-d">Export as...</button>
+					<button id="showSaveApp" class="darko-d" v-on:mousedown="showSaveApp" v-on:mouseover="showExportFormats = false">Save Project</button>
+					<button id="showLoadApp" class="darko-d" v-on:mousedown="showLoadApp" v-on:mouseover="showExportFormats = false">Load Project</button>
+					<button id="showExportFormats" class="darko-d" v-on:mouseover="showExportFormats = true"><span>Export as...</span><img src="assets/svg/play.svg"></button>
+				</div>
+
+				<div id="exportFormats" v-if="showExportFormats">
+					<button id="spritesheet" class="darko-d" v-on:mousedown="showSpritesheetExportApp">Spritesheet</button>
+					<button id="frames" class="darko-d" v-on:mousedown="showFrameExportApp">Frames</button>
+					<button id="gif" class="darko-d" v-on:mousedown="showGIFExportApp">GIF</button>
 				</div>
 			</div>
 			<!-- Save app -->
-			<div id="saveApp" class="darko-b" v-if="!hidden">
+			<div id="saveApp" class="darko-d" v-if="!hidden">
 				<div class="row">
 					<div class="drag"></div>
 					<p class="title">Save Project</p>
-					<button class="darko-a close" v-on:click="hide" title="Close">x</button>
+					<button class="darko-g close" v-on:click="hide" title="Close">x</button>
 				</div>
 				<div class="row">
 					<div class="field">
 						<label for="filename">File name:</label>
-						<input id="saveFilename" type="text" class="darko-c" placeholder="Type here..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-model="defaultTitle" v-on:input="checkFilename" v-on:keydown.enter="validate" >
+						<input id="saveFilename" type="text" placeholder="Type here..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-model="defaultTitle" v-on:input="checkFilename" v-on:keydown.enter="validate" >
 					</div>
 				</div>
 				<div class="row">
-					<button id="download" class="darko-a" v-on:click="validate">Save</button>
+					<button id="download" class="darko-g" v-on:click="validate">Save</button>
 				</div>
 			</div>
 			<!-- Load app -->
-			<div id="loadApp" class="darko-b" v-if="!hidden">
+			<div id="loadApp" class="darko-d" v-if="!hidden">
 				<div class="row">
 					<div class="drag"></div>
 					<p class="title">Load Project</p>
-					<button class="darko-a close" v-on:click="hide" title="Close">x</button>
+					<button class="darko-g close" v-on:click="hide" title="Close">x</button>
 				</div>
 				<div class="row section">
 					<div class="title-wrapper">
 						<p class="title">File</p>
 					</div>
 					<div class="custom-file">
-						<button class="darko-a">Upload</button>
+						<button class="darko-g">Upload</button>
 						<input id="importInput" type="file" accept=".rigme" v-on:change="checkFile" />
 					</div>
 					<div class="filename-wrapper">
@@ -101,37 +107,37 @@
 					<p class="error-text" v-if="fileError">{{errorMessage}}</p>
 				</div>
 				<div class="row">
-					<button id="import" class="darko-a disabled" v-on:click="validate">Load</button>
+					<button id="import" class="darko-g disabled" v-on:click="validate">Load</button>
 				</div>
 			</div>
 			<!-- Crop app -->
-			<div id="cropApp" class="darko-b" v-if="!hidden">
+			<div id="cropApp" class="darko-d" v-if="!hidden">
 				<div class="row">
 					<div class="drag"></div>
 					<p class="title">Crop</p>
-					<button class="darko-a close" v-on:click="hide" title="Close">x</button>
+					<button class="darko-g close" v-on:click="hide" title="Close">x</button>
 				</div>
 				<div class="row section">
 					<canvas id="cropCanvas"></canvas>
 				</div>
 				<div class="row">
-					<button id="import" class="darko-a" v-on:click="reset">Reset</button>
-					<button id="import" class="darko-a" v-on:click="save">Save</button>
+					<button id="import" class="darko-g" v-on:click="reset">Reset</button>
+					<button id="import" class="darko-g" v-on:click="save">Save</button>
 				</div>
 			</div>
 			<!-- Overlay app -->
-			<div id="overlayApp" class="darko-b" v-if="!hidden">
+			<div id="overlayApp" class="darko-d" v-if="!hidden">
 				<div class="row">
 					<div class="drag"></div>
 					<p class="title">Add Overlay</p>
-					<button class="darko-a close" v-on:click="hide" title="Close">x</button>
+					<button class="darko-g close" v-on:click="hide" title="Close">x</button>
 				</div>
 				<div class="row section">
 					<div class="title-wrapper">
 						<p class="title">Upload a Video</p>
 					</div>
 					<div class="custom-file">
-						<button class="darko-a">Choose</button>
+						<button class="darko-g">Choose</button>
 						<input id="overlayInput" type="file" accept="video/*" v-on:change="checkFile" />
 					</div>
 					<div class="filename-wrapper">
@@ -143,7 +149,7 @@
 						<p class="title">Video Quality</p>
 					</div>
 					<div class="field row-field">
-						<input id="overlayQuality" type="text" class="darko-c" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-min="10" data-max="100" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
+						<input id="overlayQuality" type="text" class="" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-min="10" data-max="100" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
 						<p>%</p>
 					</div>
 				</div>
@@ -153,12 +159,12 @@
 					</div>
 					<div class="field">
 						<label for="overlayFrameCount">Frame Count:</label>
-						<input id="overlayFrameCount" type="text" class="darko-c" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-min="1" data-max="99999999" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
+						<input id="overlayFrameCount" type="text" class="" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-min="1" data-max="99999999" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
 					</div>
 					
 					<div class="field">
 						<label for="overlayFrameRate">Frame Rate:</label>
-						<input id="overlayFrameRate" type="text" class="darko-c" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-min="1" data-max="120" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
+						<input id="overlayFrameRate" type="text" class="" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-min="1" data-max="120" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
 					</div>
 				</div>
 				<div class="row section disabled">
@@ -167,23 +173,23 @@
 					</div>
 					<div class="field">
 						<label for="overlayStart">Start:</label>
-						<input id="overlayStart" type="text" class="darko-c" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-min="1" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
+						<input id="overlayStart" type="text" class="" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-min="1" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
 					</div>
 					<div class="field">
 						<label for="overlayEnd">End:</label>
-						<input id="overlayEnd" type="text" class="darko-c" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
+						<input id="overlayEnd" type="text" class="" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
 					</div>
 				</div>
 				<div class="row">
-					<button id="addOverlay" class="darko-a disabled" v-on:click="validate">Add</button>
+					<button id="addOverlay" class="darko-g disabled" v-on:click="validate">Add</button>
 				</div>
 			</div>
 			<!-- Overlay config app -->
-			<div id="overlayConfigApp" class="darko-b" v-if="!hidden">
+			<div id="overlayConfigApp" class="darko-d" v-if="!hidden">
 				<div class="row">
 					<div class="drag"></div>
 					<p class="title">Overlay Settings</p>
-					<button class="darko-a close" v-on:click="hide" title="Close">x</button>
+					<button class="darko-g close" v-on:click="hide" title="Close">x</button>
 				</div>
 				<div class="row section">
 					<div class="title-wrapper">
@@ -192,23 +198,23 @@
 					<div class="field max-width-field">
 						<label for="overlayFrameCount">Opacity:</label>
 						<div id="scaleSlider" class="slider-wrapper" data-label="opacity">
-							<div class="handle darko-e"></div>
-							<div class="track darko-d"></div>
+							<div class="handle darko-g"></div>
+							<div class="track darko-g"></div>
 						</div>
 					</div>
 					<div class="field max-width-field">
 						<label for="overlayFrameCount">Scale:</label>
 						<div id="opacitySlider" class="slider-wrapper" data-label="scale">
-							<div class="handle darko-e"></div>
-							<div class="track darko-d"></div>
+							<div class="handle darko-g"></div>
+							<div class="track darko-g"></div>
 						</div>
 					</div>
 					
 					<div class="field max-width-field">
 						<label for="overlayFrameRate">Rotate:</label>
 						<div id="rotateSlider" class="slider-wrapper" data-label="rotate">
-							<div class="handle darko-e"></div>
-							<div class="track darko-d"></div>
+							<div class="handle darko-g"></div>
+							<div class="track darko-g"></div>
 						</div>
 					</div>
 				</div>
@@ -218,11 +224,11 @@
 					</div>
 					<div class="field">
 						<label for="overlayConfigTrimStart">Start:</label>
-						<input id="overlayConfigTrimStart" type="text" class="darko-c" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-min="1" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
+						<input id="overlayConfigTrimStart" type="text" class="" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-min="1" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
 					</div>
 					<div class="field">
 						<label for="overlayConfigTrimEnd">End:</label>
-						<input id="overlayConfigTrimEnd" type="text" class="darko-c" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
+						<input id="overlayConfigTrimEnd" type="text" class="" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
 					</div>
 				</div>
 				<div class="row section">
@@ -230,14 +236,14 @@
 						<p class="title">Frame Start</p>
 					</div>
 					<div class="field row-field">
-						<input id="overlayConfigStart" type="text" class="darko-c" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-min="1" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
+						<input id="overlayConfigStart" type="text" class="" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-min="1" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
 						<p>F</p>
 					</div>
 					
 				</div>
 				<div class="row">
-					<button id="removeOverlay" class="darko-a fit" v-on:click="removeOverlay">Delete Overlay</button>
-					<button id="resetOverlayConfig" class="darko-a fit" v-on:click="reset">Reset</button>
+					<button id="removeOverlay" class="darko-g fit" v-on:click="removeOverlay">Delete Overlay</button>
+					<button id="resetOverlayConfig" class="darko-g fit" v-on:click="reset">Reset</button>
 				</div>
 			</div>
 			<div class="work-container">
@@ -254,12 +260,12 @@
 					</div>
 					<div class="row">
 						<div id="riggingMode" class="config">
-							<button id="forwardKinematics" class="option selected" title="Forward kinematics">
+							<button id="forwardKinematics" class="option selected" title="Maintain length">
 							<img src="assets/svg/joint-arrow-down.svg" class="" />
 							</button>
-							<button id="inverseKinematics" class="option" title="Inverse kinematics">
+							<!-- <button id="inverseKinematics" class="option" title="Inverse kinematics"> 
 							<img src="assets/svg/joint-arrow-up.svg" class="" />
-							</button>
+							</button>-->
 							<button id="linear" class="option" title="Linear">
 							<img src="assets/svg/joint-arrows.svg" class="" />
 							</button>
@@ -282,11 +288,11 @@
 						<button id="selectJoint" class="" title="Select joint">
 						<img src="assets/svg/joint-click.svg" class="" />
 						</button>
-						<button id="addJoint" class="" title="Add joint">
-						<img src="assets/svg/joint-plus.svg" class="" />
-						</button>
 						<button id="moveJoint" class="" title="Move joint">
 						<img src="assets/svg/joint-arrow.svg" class="" />
+						</button>
+						<button id="addJoint" class="" title="Add joint">
+						<img src="assets/svg/joint-plus.svg" class="" />
 						</button>
 						<button id="removeJoint" class="" title="Remove joint">
 						<img src="assets/svg/joint-trash.svg" class="" />
@@ -337,12 +343,12 @@
 							<div class="right-wrapper">
 								<div class="input-wrapper" title="Frame Count">
 									<img src="assets/svg/f.svg">
-									<input id="frameCount" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="30" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
+									<input id="frameCount" class="" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="30" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
 								</div>
 								
 								<div class="input-wrapper" title="Animation Speed">
 									<img src="assets/svg/rabbit.svg">
-									<input id="animationSpeed" class="darko-c" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="30" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
+									<input id="animationSpeed" class="" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="30" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount"></input>
 								</div>
 							</div>
 							
@@ -391,15 +397,15 @@
 									<div class="body">
 										<div class="input-wrapper">
 											<label for="jointName">Name</label>
-											<input id="jointName" type="text" class="darko-c" placeholder="Type here..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="handleInput" v-on:focusout="handleFocusOut">
+											<input id="jointName" type="text" class="" placeholder="Type here..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="handleInput" v-on:focusout="handleFocusOut">
 										</div>
 										<div class="input-wrapper">
 											<label for="jointZIndex">Z-Index</label>
-											<input id="jointZIndex" type="text" class="darko-c" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:wheel="toggleAmount" v-on:focusout="handleFocusOut">
+											<input id="jointZIndex" type="text" class="" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:wheel="toggleAmount" v-on:focusout="handleFocusOut">
 										</div>
 										<div class="input-wrapper" v-if="showLength">
 											<label for="jointLength">Length</label>
-											<input id="jointLength" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:wheel="toggleAmount">
+											<input id="jointLength" type="text" class="" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:wheel="toggleAmount">
 										</div>
 									</div>
 								</div>
@@ -410,15 +416,15 @@
 									<div class="body">
 										<div class="input-wrapper">
 											<label for="jointX">X</label>
-											<input id="jointX" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:wheel="toggleAmount">
+											<input id="jointX" type="text" class="" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:wheel="toggleAmount">
 										</div>
 										<div class="input-wrapper">
 											<label for="jointY">Y</label>
-											<input id="jointY" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:wheel="toggleAmount">
+											<input id="jointY" type="text" class="" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:wheel="toggleAmount">
 										</div>
 										<div class="input-wrapper">
 											<label for="jointAngle">Angle</label>
-											<input id="jointAngle" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:wheel="toggleAmount">
+											<input id="jointAngle" type="text" class="" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:wheel="toggleAmount">
 										</div>
 									</div>
 								</div>
@@ -445,23 +451,23 @@
 									<div class="body">
 										<div class="input-wrapper">
 											<label for="skinPositionX">X</label>
-											<input id="skinPositionX" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount" v-on:focusout="handleFocusOut">
+											<input id="skinPositionX" type="text" class="" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount" v-on:focusout="handleFocusOut">
 										</div>
 										<div class="input-wrapper">
 											<label for="skinPositionY">Y</label>
-											<input id="skinPositionY" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount" v-on:focusout="handleFocusOut">
+											<input id="skinPositionY" type="text" class="" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount" v-on:focusout="handleFocusOut">
 										</div>
 										<div class="input-wrapper">
 											<label for="skinScaleX">Scale X</label>
-											<input id="skinScaleX" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:input="validateFormat" v-on:wheel="toggleAmount" v-on:focusout="handleFocusOut">
+											<input id="skinScaleX" type="text" class="" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:input="validateFormat" v-on:wheel="toggleAmount" v-on:focusout="handleFocusOut">
 										</div>
 										<div class="input-wrapper">
 											<label for="skinScaleY">Scale Y</label>
-											<input id="skinScaleY" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:input="validateFormat" v-on:wheel="toggleAmount" v-on:focusout="handleFocusOut">
+											<input id="skinScaleY" type="text" class="" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:input="validateFormat" v-on:wheel="toggleAmount" v-on:focusout="handleFocusOut">
 										</div>
 										<div class="input-wrapper">
 											<label for="skinAngle">Angle</label>
-											<input id="skinAngle" type="text" class="darko-c" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount" v-on:focusout="handleFocusOut">
+											<input id="skinAngle" type="text" class="" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount" v-on:focusout="handleFocusOut">
 										</div>
 										<button id="resetOffset" class="darko-a">Reset</button>
 									</div>

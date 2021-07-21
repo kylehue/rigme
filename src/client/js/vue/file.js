@@ -1,10 +1,10 @@
 const saveApp = require("./save.js");
 const loadApp = require("./load.js");
-const overlayApp = require("./overlay.js");
 
 const fileApp = new Vue({
 	el: "#fileApp",
 	data: {
+		showExportFormats: false,
 		hidden: true,
 		position: {
 			x: 0,
@@ -22,6 +22,7 @@ const fileApp = new Vue({
 		},
 		hide: function() {
 			this.hidden = true;
+			this.showExportFormats = false;
 		},
 		showSaveApp: function () {
 			saveApp.show();
@@ -29,8 +30,14 @@ const fileApp = new Vue({
 		showLoadApp: function () {
 			loadApp.show();
 		},
-		showOverlayApp: function () {
-			overlayApp.show();
+		showSpritesheetExportApp: function () {
+			
+		},
+		showFrameExportApp: function () {
+			
+		},
+		showGIFExportApp: function () {
+			
 		}
 	}
 });

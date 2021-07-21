@@ -36,8 +36,8 @@ let jointCrop,
 	shortcuts = {
 		KeyQ: actions.pan,
 		KeyW: actions.select,
-		KeyE: actions.add,
-		KeyR: actions.move,
+		KeyE: actions.move,
+		KeyR: actions.add,
 		KeyT: actions.remove
 	},
 	actionIconPaths = {},
@@ -219,8 +219,8 @@ materialApp.on("dragover", event => {
 });
 
 materialApp.on("mousedown", event => {
-	for (var i = 0; i < materialApp.children.length; i++) {
-		let child = materialApp.children[i];
+	for (var i = 0; i < materialApp.node.children.length; i++) {
+		let child = materialApp.node.children[i];
 		child.classList.remove("selected");
 	}
 });
@@ -1382,7 +1382,7 @@ renderer.render(() => {
 	renderer.redraw();
 });
 
-key.on("keydown", function() {
+key.on("keyup", function() {
 	if (key.code === 16) {
 		console.log(history);
 		console.log(rigModel);

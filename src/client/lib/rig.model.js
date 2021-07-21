@@ -474,6 +474,45 @@ class RigModel {
 	}
 
 	computeKinematics(jointChain, inverse) {
+		/*let doforward = [];
+		let doinverse = [];
+		for (var i = 0; i < jointChain.length; i++) {
+			let joint = jointChain[i];
+			if (joint.hierarchy <= this.activeJoint.hierarchy) {
+				doinverse.push(joint);
+			} 
+			if (joint.hierarchy >= this.activeJoint.hierarchy) {
+				doforward.push(joint);
+			}
+		}
+		doforward.sort((a, b) => a.hierarchy - b.hierarchy);
+		for (var i = 0; i < doforward.length; i++) {
+			let joint = doforward[i];
+			for (var j = 0; j < joint.children.length; j++) {
+				let child = joint.children[j];
+				child.angle = child.position.heading(joint.position);
+				child.position.set({
+					x: joint.position.x - Math.cos(child.angle) * child.length,
+					y: joint.position.y - Math.sin(child.angle) * child.length
+				});
+			}
+		}
+		doinverse.sort((a, b) => b.hierarchy - a.hierarchy);
+		for (var i = doinverse.length - 1; i >= 0; i--) {
+			let joint = doinverse[i];
+			if (joint.parent !== this.activeJoint) {
+				if (joint.parent) {
+					joint.parent.angle = joint.position.heading(joint.parent.position);
+					joint.parent.position.set({
+						x: joint.position.x + Math.cos(joint.parent.angle) * joint.length,
+						y: joint.position.y + Math.sin(joint.parent.angle) * joint.length
+					});
+				}
+			}
+		}*/
+
+
+
 		if (!inverse) {
 			for (var i = 0; i < jointChain.length; i++) {
 				let joint = jointChain[i];
@@ -489,6 +528,7 @@ class RigModel {
 		} else {
 			for (var i = jointChain.length - 1; i >= 0; i--) {
 				let joint = jointChain[i];
+
 				if (joint.parent) {
 					joint.parent.angle = joint.position.heading(joint.parent.position);
 					joint.parent.position.set({
