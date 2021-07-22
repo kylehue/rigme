@@ -17,6 +17,10 @@ const paneApp = new Vue({
 		handleFocusOut: function(e) {
 			let el = e.target;
 
+			if (!el.value.length || !el.value) {
+				el.value = 0;
+			}
+
 			if (el._lastValue != el.value) {
 				if (skinningInputIds.includes(el.id)) {
 					events.emit("jointSkinningInputChange");

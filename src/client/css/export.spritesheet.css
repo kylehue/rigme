@@ -161,10 +161,6 @@
 	width: 100%;
 }
 
-#spritesheetExportApp .custom-checkbox p {
-	color: var(--dim-b);
-}
-
 #spritesheetExportApp #filename {
 	margin-top: 9px;
 	width: calc(100% - 20px);

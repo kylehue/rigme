@@ -13,7 +13,7 @@ class RigModel {
 		this.keyframes = {};
 		this.totalKeyframes = 0;
 
-		this.mouseBuffer = 5;
+		this.mouseBuffer = 10;
 		this.activeJoint = null;
 
 		this.bounds = {
@@ -34,17 +34,24 @@ class RigModel {
 				let joint = frame.joints[j];
 				xAxes.push(joint.position.x);
 				yAxes.push(joint.position.y);
+
+				if (joint.skin.vertices) {
+					for (var k = 0; k < joint.skin.vertices.length; k++) {
+						xAxes.push(joint.skin.vertices[k].x);
+						yAxes.push(joint.skin.vertices[k].y);
+					}
+				}
 			}
 		}
 
 		this.bounds.min.set({
-			x: Math.min(...xAxes),
-			y: Math.min(...yAxes)
+			x: Math.min(...xAxes) - config.render.joint.radius,
+			y: Math.min(...yAxes) - config.render.joint.radius
 		});
 
 		this.bounds.max.set({
-			x: Math.max(...xAxes),
-			y: Math.max(...yAxes)
+			x: Math.max(...xAxes) + config.render.joint.radius,
+			y: Math.max(...yAxes) + config.render.joint.radius
 		});
 	}
 
@@ -93,11 +100,12 @@ class RigModel {
 		return null;
 	}
 
-	editJoint(id, prop) {
+	editJoint(id, prop, unique) {
 		let keyframes = Object.values(this.keyframes);
 		for (var i = 0; i < keyframes.length; i++) {
 			let frame = keyframes[i];
 			let joint = frame.joints.find(j => j.id === id);
+			prop = unique ? JSON.parse(JSON.stringify(prop)) : prop;
 			if (joint) {
 				let _props = Object.keys(prop);
 				for (var j = 0; j < _props.length; j++) {
@@ -149,6 +157,92 @@ class RigModel {
 		this.updateSubKeyframes();
 		timeline.graph.updateState();
 		timeline.graph.redraw();
+	}
+
+	updateSubKeyframes() {
+		let keys = Object.keys(this.keyframes);
+
+		for (var i = keys.length - 1; i >= 0; i--) {
+			let frame = this.keyframes[keys[i]];
+			if (!frame) continue;
+			if (frame.type == "head") continue;
+
+			let back = null;
+			for (var j = frame.index; j >= 0; j--) {
+				let key = this.keyframes[j];
+				if (key) {
+					if (key.type == "head") {
+						back = key.index;
+						break;
+					}
+				}
+			}
+
+			let front = null;
+			for (var j = frame.index; j < timeline.app.totalFrames; j++) {
+				let key = this.keyframes[j];
+				if (key) {
+					if (key.type == "head") {
+						front = key.index;
+						break;
+					}
+				}
+			}
+
+			let lerpWeight = utils.map(frame.index, front, back, 0, 1);
+
+			let frontFrame = this.keyframes[front];
+			let backFrame = this.keyframes[back];
+
+			for (var j = 0; j < frame.joints.length; j++) {
+				let joint = frame.joints[j];
+				if (joint) {
+					let frontJoint = frontFrame.joints.find(fj => fj.id === joint.id);
+					let backJoint = backFrame.joints.find(bj => bj.id === joint.id);
+
+					if (frontJoint && backJoint) {
+						let position = frontJoint.position.copy().lerp(backJoint.position, lerpWeight)
+						let length = utils.lerp(frontJoint.length, backJoint.length, lerpWeight);
+
+						joint.length = length;
+						joint.position.set(position);
+
+						if (config.animateSkin) {
+							if (backJoint.skin && frontJoint.skin) {
+								if (backJoint.skin.offset && frontJoint.skin.offset) {
+									joint.skin.offset = {
+										x: utils.lerp(frontJoint.skin.offset.x, backJoint.skin.offset.x, lerpWeight),
+										y: utils.lerp(frontJoint.skin.offset.y, backJoint.skin.offset.y, lerpWeight),
+										scaleX: utils.lerp(frontJoint.skin.offset.scaleX, backJoint.skin.offset.scaleX, lerpWeight),
+										scaleY: utils.lerp(frontJoint.skin.offset.scaleY, backJoint.skin.offset.scaleY, lerpWeight),
+										angle: utils.lerp(frontJoint.skin.offset.angle, backJoint.skin.offset.angle, lerpWeight)
+									};
+								}
+							}
+						}
+
+						for (var k = 0; k < joint.children.length; k++) {
+							let child = joint.children[k];
+							child.angle = child.position.heading(joint.position);
+						}
+					}
+
+					if (joint.id == backFrame.activeJointId) {
+						frame.activeJointId = joint.id;
+					}
+				}
+			}
+
+			if (config.riggingMode != "linear") {
+				if (config.riggingMode == "forwardKinematics") {
+					this.computeKinematics(frame.joints);
+				} else if (config.riggingMode == "inverseKinematics") {
+					this.computeKinematics(frame.joints, true);
+				}
+			}
+
+			this.updateSkin(frame.joints);
+		}
 	}
 
 	setKeyframe(index, options) {
@@ -279,76 +373,6 @@ class RigModel {
 		}
 
 		this.updateSubKeyframes();
-	}
-
-	updateSubKeyframes() {
-		let keys = Object.keys(this.keyframes);
-
-		for (var i = keys.length - 1; i >= 0; i--) {
-			let frame = this.keyframes[keys[i]];
-			if (!frame) continue;
-			if (frame.type == "head") continue;
-
-			let back = null;
-			for (var j = frame.index; j >= 0; j--) {
-				let key = this.keyframes[j];
-				if (key) {
-					if (key.type == "head") {
-						back = key.index;
-						break;
-					}
-				}
-			}
-
-			let front = null;
-			for (var j = frame.index; j < timeline.app.totalFrames; j++) {
-				let key = this.keyframes[j];
-				if (key) {
-					if (key.type == "head") {
-						front = key.index;
-						break;
-					}
-				}
-			}
-
-
-			let lerpWeight = utils.map(frame.index, front, back, 0, 1);
-
-			let frontFrame = this.keyframes[front];
-			let backFrame = this.keyframes[back];
-
-			for (var j = 0; j < frame.joints.length; j++) {
-				let joint = frame.joints[j];
-				if (joint) {
-					let frontJoint = frontFrame.joints.find(fj => fj.id === joint.id);
-					let backJoint = backFrame.joints.find(bj => bj.id === joint.id);
-
-					if (frontJoint && backJoint) {
-						let position = frontJoint.position.copy().lerp(backJoint.position, lerpWeight)
-						let length = utils.lerp(frontJoint.length, backJoint.length, lerpWeight);
-
-						joint.length = length;
-						joint.position.set(position);
-						for (var k = 0; k < joint.children.length; k++) {
-							let child = joint.children[k];
-							child.angle = child.position.heading(joint.position);
-						}
-					}
-
-					if (joint.id == backFrame.activeJointId) {
-						frame.activeJointId = joint.id;
-					}
-				}
-			}
-
-			if (config.riggingMode != "linear") {
-				if (config.riggingMode == "forwardKinematics") {
-					this.computeKinematics(frame.joints);
-				} else if (config.riggingMode == "inverseKinematics") {
-					this.computeKinematics(frame.joints, true);
-				}
-			}
-		}
 	}
 
 	addJoint(x, y, options) {
@@ -540,6 +564,91 @@ class RigModel {
 		}
 	}
 
+	updateSkin(jointChain) {
+		jointChain = jointChain || this.joints;
+		for (var i = 0; i < jointChain.length; i++) {
+			let joint = jointChain[i];
+			if (!joint.parent || !joint.skin.crop || !joint.skin.image) continue;
+
+			let newWidth = joint.length;
+			let newHeight = joint.length;
+			let angleAuto = 0;
+
+			let crop = joint.skin.crop;
+			let cropWidth = crop.to.x - crop.from.x;
+			let cropHeight = crop.to.y - crop.from.y;
+
+			if (cropWidth > cropHeight) {
+				newHeight = Number.MAX_SAFE_INTEGER;
+			} else {
+				newWidth = Number.MAX_SAFE_INTEGER;
+				angleAuto = Math.PI / 2;
+			}
+
+			joint.skin.size = utils.scaleSize(cropWidth, cropHeight, newWidth, newHeight);;
+			joint.skin._sizeOriginal = {
+				width: cropWidth,
+				height: cropHeight
+			};
+
+			joint.skin.position = {
+				x: (joint.position.x + joint.parent.position.x) / 2,
+				y: (joint.position.y + joint.parent.position.y) / 2
+			};
+
+			joint.skin.angleAuto = angleAuto;
+
+			let xOffset = 0;
+			let yOffset = 0;
+			let scaleXOffset = 1;
+			let scaleYOffset = 1;
+			let angleOffset = 0;
+
+			if (joint.skin.offset) {
+				xOffset = joint.skin.offset.x || 0;
+				yOffset = joint.skin.offset.y || 0;
+				scaleXOffset = joint.skin.offset.scaleX || 0;
+				scaleYOffset = joint.skin.offset.scaleY || 0;
+				angleOffset = joint.skin.offset.angle || 0;
+			}
+
+			let vertices = [{
+				x: joint.skin.position.x + xOffset - joint.skin.size.width / 2,
+				y: joint.skin.position.y + yOffset - joint.skin.size.height / 2
+			}, {
+				x: joint.skin.position.x + xOffset + joint.skin.size.width / 2,
+				y: joint.skin.position.y + yOffset - joint.skin.size.height / 2
+			}, {
+				x: joint.skin.position.x + xOffset + joint.skin.size.width / 2,
+				y: joint.skin.position.y + yOffset + joint.skin.size.height / 2
+			}, {
+				x: joint.skin.position.x + xOffset - joint.skin.size.width / 2,
+				y: joint.skin.position.y + yOffset + joint.skin.size.height / 2
+			}];
+
+			for (let vert of vertices) {
+				let vertexDelta = {
+					x: vert.x - joint.skin.position.x,
+					y: vert.y - joint.skin.position.y
+				};
+
+				vert.x = vert.x + vertexDelta.x * (scaleXOffset - 1);
+				vert.y = vert.y + vertexDelta.y * (scaleYOffset - 1);
+			}
+
+			for (let vert of vertices) {
+				let angle = joint.angle + joint.skin.angleAuto + angleOffset;
+				let x = (vert.x - joint.skin.position.x) * Math.cos(angle) - (vert.y - joint.skin.position.y) * Math.sin(angle);
+				let y = (vert.x - joint.skin.position.x) * Math.sin(angle) + (vert.y - joint.skin.position.y) * Math.cos(angle);
+
+				vert.x = x + joint.skin.position.x;
+				vert.y = y + joint.skin.position.y;
+			}
+
+			joint.skin.vertices = vertices;
+		}
+	}
+
 	moveJoint(x, y) {
 		if (!this.activeJoint) return;
 		if (timeline.graph) {
@@ -584,7 +693,6 @@ class RigModel {
 				}
 			}
 
-			this.updateBounds();
 		}
 
 		if (config.riggingMode != "linear") {
@@ -594,6 +702,9 @@ class RigModel {
 				this.computeKinematics(this.joints, true);
 			}
 		}
+
+		this.updateSkin();
+		this.updateBounds();
 	}
 
 	getJoint(id) {
@@ -636,6 +747,10 @@ class RigModel {
 					skinImageSrc: joint.skin && !excludeImageSrc ? joint.skin.imageSrc : undefined,
 					skinCrop: joint.skin ? joint.skin.crop : null,
 					skinOffset: joint.skin ? joint.skin.offset : null,
+					skinPosition: joint.skin ? joint.skin.position : null,
+					skinAngleAuto: joint.skin ? joint.skin.angleAuto : undefined,
+					skinSize: joint.skin ? joint.skin.size : null,
+					_skinSizeOriginal: joint.skin ? joint.skin._sizeOriginal : null,
 					_vueCrop: joint.skin ? joint.skin._vueCrop : null,
 					zIndex: joint.zIndex
 				};
@@ -684,7 +799,11 @@ class RigModel {
 						offset: joint.skinOffset,
 						crop: joint.skinCrop,
 						_vueCrop: joint._vueCrop,
-						imageSrc: joint.skinImageSrc
+						imageSrc: joint.skinImageSrc,
+						position: joint.skinPosition,
+						angleAuto: joint.angleAuto,
+						size: joint.skinSize,
+						_sizeOriginal: joint._skinSizeOriginal
 					},
 					zIndex: joint.zIndex
 				}
@@ -749,6 +868,7 @@ class RigModel {
 			timeline.graph.updateState();
 		}
 
+		this.updateSkin();
 		this.updateBounds();
 		events.emit("jointChange", this.joints);
 	}
@@ -776,16 +896,21 @@ class RigModel {
 				let joint = frame.joints[i];
 
 				if (joint.parent) {
+					//Load image if there's an image url
 					if (joint.skin.imageSrc) {
 						if (!joint.skin.image) {
 							let img = new Image();
 							img.src = joint.skin.imageSrc;
 							joint.skin.image = img;
+							this.updateSkin();
+							this.updateBounds();
 						} else {
 							if (!joint.skin.image.width) {
 								let img = new Image();
 								img.src = joint.skin.imageSrc;
 								joint.skin.image = img;
+								this.updateSkin();
+								this.updateBounds();
 							}
 						}
 					}
@@ -793,32 +918,9 @@ class RigModel {
 					if (joint.skin) {
 						if (typeof joint.skin.image == "object") {
 							if (joint.skin.image.src) {
-								let newWidth = joint.length;
-								let newHeight = joint.length;
-								let angleAuto = 0;
-
-								let crop = joint.skin.crop;
-								let cropWidth = crop.to.x - crop.from.x;
-								let cropHeight = crop.to.y - crop.from.y;
-
-								if (cropWidth > cropHeight) {
-									newHeight = Number.MAX_SAFE_INTEGER;
-								} else {
-									newWidth = Number.MAX_SAFE_INTEGER;
-									angleAuto = Math.PI / 2;
-								}
-
-								let size = utils.scaleSize(cropWidth, cropHeight, newWidth, newHeight);
-
 								ctx.save();
-
-								let midpoint = {
-									x: (joint.position.x + joint.parent.position.x) / 2,
-									y: (joint.position.y + joint.parent.position.y) / 2
-								};
-
-								ctx.translate(midpoint.x + offset.x, midpoint.y + offset.y);
-								ctx.rotate(joint.angle + angleAuto);
+								ctx.translate(joint.skin.position.x + offset.x, joint.skin.position.y + offset.y);
+								ctx.rotate(joint.angle + joint.skin.angleAuto);
 
 								if (joint.skin.offset) {
 									let xOffset = joint.skin.offset.x;
@@ -832,8 +934,13 @@ class RigModel {
 									ctx.scale(scaleXOffset, scaleYOffset);
 								}
 
-								ctx.drawImage(joint.skin.image, crop.from.x, crop.from.y, cropWidth, cropHeight, -size.width / 2, -size.height / 2, size.width, size.height);
+								ctx.drawImage(joint.skin.image, joint.skin.crop.from.x, joint.skin.crop.from.y, joint.skin._sizeOriginal.width, joint.skin._sizeOriginal.height, -joint.skin.size.width / 2, -joint.skin.size.height / 2, joint.skin.size.width, joint.skin.size.height);
 								ctx.restore();
+
+								if (!joint.skin.vertices) {
+									this.updateSkin();
+									this.updateBounds();
+								}
 							}
 						}
 					}
@@ -850,6 +957,7 @@ class RigModel {
 					ctx.moveTo(joint.position.x + offset.x, joint.position.y + offset.y);
 					ctx.lineTo(joint.parent.position.x + offset.x, joint.parent.position.y + offset.y);
 					ctx.lineWidth = config.render.segment.width;
+					ctx.lineCap = "round";
 					ctx.strokeStyle = config.render.segment.color;
 					ctx.stroke();
 				}

@@ -111,10 +111,10 @@ img[src*="joint-arrows.svg"], img[src*="key-arrows.svg"] {
 	height: 70% !important;
 }
 
-#navigation .config .checkbox label {
-	color: var(--dim-b);
-}
-
 #navigation .config button#focusRig {
 	padding: 0 5px;
+}
+
+#navigation .custom-checkbox {
+	margin-right: 5px;
 }

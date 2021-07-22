@@ -60,7 +60,7 @@
 }
 
 #loadApp .row.section p {
-	background: var(--darko-b);
+	background: var(--darko-d);
 	margin: 0;
 	padding: 0;
 	width: fit-content;

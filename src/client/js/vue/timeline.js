@@ -335,7 +335,7 @@ class Timeline {
 		let activeKeyframe;
 		let scrollbarDragStartX = 0;
 		let mouseX, mouseY;
-		let onScrollbar, onTimeline, onKeyframe, onScrollbarLeft, onScrollbarRight;
+		let onScrollbar, onTimeline, onKeyframe, onScrollbarLeft, onScrollbarRight, onPlaybackHandle;
 
 		const dragStart = () => {
 			if (!mouseInside(this.canvas)) return;
@@ -436,7 +436,7 @@ class Timeline {
 			let playbackHandleStartX = this.markToX(this.playbackHandle.start.mark, true);
 			let playbackHandleEndX = this.markToX(this.playbackHandle.end.mark, true);
 			let playbackHandleArea = this.playbackHandle.width / 2 + this.playbackHandle.offset / 2;
-			let onPlaybackHandle = ((mouseX >= playbackHandleStartX - playbackHandleArea && mouseX <= playbackHandleStartX + playbackHandleArea) || (mouseX >= playbackHandleEndX - playbackHandleArea && mouseX <= playbackHandleEndX + playbackHandleArea)) && onTimeline;
+			onPlaybackHandle = ((mouseX >= playbackHandleStartX - playbackHandleArea && mouseX <= playbackHandleStartX + playbackHandleArea) || (mouseX >= playbackHandleEndX - playbackHandleArea && mouseX <= playbackHandleEndX + playbackHandleArea)) && onTimeline;
 			if (onScrollbarResize || onPlaybackHandle) {
 				this.canvas.style.cursor = "ew-resize";
 			} else {

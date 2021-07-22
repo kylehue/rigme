@@ -14,6 +14,10 @@ const history = require("../lib/history.js");
 const extractKeyframes = require("../lib/extract.keyframes.js");
 events.emit("loadedApps", vue);
 
+//Adding joint affects all frames
+//Animate skin offset
+//Export spritesheet images not follwing angle, pos
+
 window.rigModel = rigModel;
 
 let jointCrop,
@@ -149,9 +153,21 @@ function handleMaterialFiles(files) {
 }
 
 //Custom checkbox
+let checkBoxes = dom.query(".checkbox.checked", true);
+for (var i = 0; i < checkBoxes.elements.length; i++) {
+	let chkbox = checkBoxes.elements[i];
+	chkbox.node.parentNode.checked = true;
+}
+
 dom.query(".custom-checkbox", true).on("click", event => {
 	let el = dom.query(event.target).query(".checkbox");
 	el.toggleClass("checked");
+	dom.query(event.target).prop("checked", el.hasClass("checked"));
+
+	//
+	if (event.target.id == "animateSkin") {
+		config.animateSkin = el.hasClass("checked");
+	}
 });
 
 //Custom select
@@ -422,11 +438,11 @@ events.on("exportSpritesheet", options => {
 	canvas.height = options.cellHeight * options.rows;
 	let ctx = canvas.getContext("2d");
 	let lastExistingFrame;
-	for(var frame = options.start - 1; frame <= options.end - 1; frame++){
+	for (var frame = options.start - 1; frame <= options.end - 1; frame++) {
 		let index = frame - options.start + 1;
 		let x = Math.floor(index % options.cols) * options.cellWidth;
 		let y = Math.floor(index / options.cols) * options.cellHeight;
-		
+
 		if (rigModel.keyframes[frame]) {
 			lastExistingFrame = frame;
 		}
@@ -512,7 +528,7 @@ dom.query("#removeSkin").on("click", () => {
 		if (activeJoint.skin) {
 			if (activeJoint.skin.imageSrc) {
 
-				let skin = activeJoint.skin;
+				let skin = JSON.parse(JSON.stringify(activeJoint.skin));
 
 				delete skin.imageSrc;
 				delete skin.image;
@@ -557,6 +573,9 @@ dom.query("#resetOffset").on("click", () => {
 						value: rigModel.clone(),
 						group: "keyframe"
 					});
+
+					rigModel.updateSkin();
+					rigModel.updateBounds();
 				}
 			}
 		}
@@ -588,6 +607,9 @@ events.on("crop", (crop, _vueCrop) => {
 		value: rigModel.clone(),
 		group: "keyframe"
 	});
+
+	rigModel.updateSkin();
+	rigModel.updateBounds();
 });
 
 events.on("materialChange", url => {
@@ -642,13 +664,14 @@ events.on("materialChange", url => {
 
 			rigModel.editJoint(activeJoint.id, {
 				skin: _skin
-			});
+			}, true);
 
 			history.add({
 				label: "Change skin",
 				value: rigModel.clone(),
 				group: "keyframe"
 			});
+
 		}
 	});
 });
@@ -928,9 +951,11 @@ events.on("jointSkinningInputChange", ignoreHistory => {
 			angle: utils.radians(utils.map(angle, 0, 360, -180, 180)) + Math.PI
 		};
 
-		rigModel.editJoint(activeJoint.id, {
-			skin: activeJointSkin
-		});
+		if (!config.animateSkin) {
+			rigModel.editJoint(activeJoint.id, {
+				skin: activeJointSkin
+			}, true);
+		}
 
 		if (!ignoreHistory) {
 			history.add({
@@ -939,6 +964,10 @@ events.on("jointSkinningInputChange", ignoreHistory => {
 				group: "keyframe"
 			});
 		}
+
+		rigModel.updateSubKeyframes();
+		rigModel.updateSkin();
+		rigModel.updateBounds();
 	}
 });
 
@@ -1324,6 +1353,8 @@ fixRendererSize();
 renderer.camera.setZoomSpeed(0.2);
 renderer.camera.setMoveSpeed(0.4);
 
+let showBounds = dom.query("#showBounds");
+let showGrid = dom.query("#showGrid");
 renderer.draw(() => {
 	let focused = vue.overlayApp.hidden && vue.overlayConfigApp.hidden && vue.fileApp.hidden && vue.loadApp.hidden && vue.saveApp.hidden && vue.optionApp.hidden;
 
@@ -1392,29 +1423,44 @@ renderer.draw(() => {
 			}
 		}
 
-		rigModel.render(renderer);
-
 		//Add grid
-		let gridArea = 10000;
-		let gridSpacing = 20;
-		for (var x = -cameraDistance - gridArea; x < cameraDistance + gridArea; x += gridSpacing) {
-			renderer.line(x, renderer.camera.viewport.top - gridArea, x, renderer.camera.viewport.bottom + gridArea, {
-				stroke: "rgba(240, 230, 250, 0.2)",
-				lineWidth: 0.2
-			});
-		}
+		if (showGrid.prop("checked")) {
+			let gridArea = 10000;
+			let gridSpacing = 20;
+			for (var x = -cameraDistance - gridArea; x < cameraDistance + gridArea; x += gridSpacing) {
+				renderer.line(x, renderer.camera.viewport.top - gridArea, x, renderer.camera.viewport.bottom + gridArea, {
+					stroke: "rgba(240, 230, 250, 0.2)",
+					lineWidth: 0.2
+				});
+			}
 
-		for (var y = -cameraDistance - gridArea; y < cameraDistance + gridArea; y += gridSpacing) {
-			renderer.line(renderer.camera.viewport.left - gridArea, y, renderer.camera.viewport.right + gridArea, y, {
-				stroke: "rgba(240, 230, 250, 0.2)",
-				lineWidth: 0.2
-			});
+			for (var y = -cameraDistance - gridArea; y < cameraDistance + gridArea; y += gridSpacing) {
+				renderer.line(renderer.camera.viewport.left - gridArea, y, renderer.camera.viewport.right + gridArea, y, {
+					stroke: "rgba(240, 230, 250, 0.2)",
+					lineWidth: 0.2
+				});
+			}
 		}
 
 		//Draw the model's bounds
-		/*renderer.rect(rigModel.bounds.min.x, rigModel.bounds.min.y, rigModel.bounds.max.x - rigModel.bounds.min.x, rigModel.bounds.max.y - rigModel.bounds.min.y, {
-			stroke: "red"
-		});*/
+		if (showBounds.prop("checked")) {
+			let boundsColor = "rgba(225, 50, 255, 0.5)";
+			let w = rigModel.bounds.max.x - rigModel.bounds.min.x;
+			let h = rigModel.bounds.max.y - rigModel.bounds.min.y;
+			let text = parseInt(w) + "x" + parseInt(h);
+			renderer.text(text, rigModel.bounds.min.x, rigModel.bounds.min.y, {
+				align: "left bottom",
+				font: "10px Consolas",
+				fill: boundsColor
+			});
+
+			renderer.rect(rigModel.bounds.min.x, rigModel.bounds.min.y, w, h, {
+				lineWidth: 0.35,
+				stroke: boundsColor
+			});
+		}
+
+		rigModel.render(renderer);
 	});
 });
 

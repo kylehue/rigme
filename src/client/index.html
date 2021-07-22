@@ -338,6 +338,20 @@
 							</button>
 						</div>
 						<div class="config">
+							<div id="showBounds" class="custom-checkbox">
+								<div class="checkbox checked">
+									<img src="assets/svg/check.svg">
+								</div>
+								<p>Bounds</p>
+							</div>
+							<div id="showGrid" class="custom-checkbox">
+								<div class="checkbox checked">
+									<img src="assets/svg/check.svg">
+								</div>
+								<p>Grid</p>
+							</div>
+						</div>
+						<div class="config">
 							<button id="focusRig" class="darko-a">Focus Rig</button>
 						</div>
 					</div>
@@ -531,7 +545,15 @@
 											<label for="skinAngle">Angle</label>
 											<input id="skinAngle" type="text" class="" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="0" v-on:input="validateFormat" v-on:wheel="toggleAmount" v-on:focusout="handleFocusOut">
 										</div>
-										<button id="resetOffset" class="darko-a">Reset</button>
+										<div class="input-wrapper">
+											<div id="animateSkin" class="custom-checkbox">
+												<div class="checkbox checked">
+													<img src="assets/svg/check.svg">
+												</div>
+												<p>Animate</p>
+											</div>
+											<button id="resetOffset" class="darko-a">Reset</button>
+										</div>
 									</div>
 								</div>
 								<div class="section skinning">

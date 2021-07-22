@@ -553,6 +553,8 @@ canvas#gameCanvas {
 	width: fit-content;
 	height: fit-content;
 	pointer-events: none;
+	color: var(--white);
+	margin-left: 2.5px;
 }
 
 #selectOptions {
