@@ -30,7 +30,8 @@
 }
 
 ::placeholder {
-	color: rgba(245, 238, 255, 0.1);
+	color: rgba(245, 238, 255, 0.15);
+	user-select: none;
 }
 
 ::-webkit-scrollbar {
@@ -73,10 +74,6 @@ input {
 }
 
 label, p {
-	user-select: none;
-}
-
-::placeholder {
 	user-select: none;
 }
 
