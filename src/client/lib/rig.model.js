@@ -753,131 +753,185 @@ class RigModel {
 		events.emit("jointChange", this.joints);
 	}
 
-	render(renderer) {
-		let _render = (jointChain, isPrev) => {
-			let translucent = "rgba(240, 230, 255, 0.5)";
-			//Render the line that connects the joints
-			for (var i = 0; i < jointChain.length; i++) {
-				let joint = jointChain[i];
+	renderTo(ctx, options) {
+		options = options || {};
+		let frame = this.keyframes[options.frame];
+
+		if (!frame) return;
+
+		options.position = options.position || {
+			x: 0,
+			y: 0
+		};
+
+		let offset = {
+			x: -this.bounds.min.x + options.position.x,
+			y: -this.bounds.min.y + options.position.y
+		};
+
+		frame.joints.sort((a, b) => a.zIndex - b.zIndex);
+
+		if (options.showSkin) {
+			for (var i = 0; i < frame.joints.length; i++) {
+				let joint = frame.joints[i];
+
 				if (joint.parent) {
-					renderer.line(joint.position.x, joint.position.y, joint.parent.position.x, joint.parent.position.y, {
-						lineWidth: config.render.segment.width,
-						stroke: isPrev ? translucent : config.render.segment.color
-					});
+					if (joint.skin.imageSrc) {
+						if (!joint.skin.image) {
+							let img = new Image();
+							img.src = joint.skin.imageSrc;
+							joint.skin.image = img;
+						} else {
+							if (!joint.skin.image.width) {
+								let img = new Image();
+								img.src = joint.skin.imageSrc;
+								joint.skin.image = img;
+							}
+						}
+					}
+
+					if (joint.skin) {
+						if (typeof joint.skin.image == "object") {
+							if (joint.skin.image.src) {
+								let newWidth = joint.length;
+								let newHeight = joint.length;
+								let angleAuto = 0;
+
+								let crop = joint.skin.crop;
+								let cropWidth = crop.to.x - crop.from.x;
+								let cropHeight = crop.to.y - crop.from.y;
+
+								if (cropWidth > cropHeight) {
+									newHeight = Number.MAX_SAFE_INTEGER;
+								} else {
+									newWidth = Number.MAX_SAFE_INTEGER;
+									angleAuto = Math.PI / 2;
+								}
+
+								let size = utils.scaleSize(cropWidth, cropHeight, newWidth, newHeight);
+
+								ctx.save();
+
+								let midpoint = {
+									x: (joint.position.x + joint.parent.position.x) / 2,
+									y: (joint.position.y + joint.parent.position.y) / 2
+								};
+
+								ctx.translate(midpoint.x + offset.x, midpoint.y + offset.y);
+								ctx.rotate(joint.angle + angleAuto);
+
+								if (joint.skin.offset) {
+									let xOffset = joint.skin.offset.x;
+									let yOffset = joint.skin.offset.y;
+									let scaleXOffset = joint.skin.offset.scaleX;
+									let scaleYOffset = joint.skin.offset.scaleY;
+									let angleOffset = joint.skin.offset.angle;
+
+									ctx.rotate(angleOffset);
+									ctx.translate(xOffset, yOffset);
+									ctx.scale(scaleXOffset, scaleYOffset);
+								}
+
+								ctx.drawImage(joint.skin.image, crop.from.x, crop.from.y, cropWidth, cropHeight, -size.width / 2, -size.height / 2, size.width, size.height);
+								ctx.restore();
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if (options.showBones) {
+			for (var i = 0; i < frame.joints.length; i++) {
+				let joint = frame.joints[i];
+
+				if (joint.parent) {
+					ctx.beginPath();
+					ctx.moveTo(joint.position.x + offset.x, joint.position.y + offset.y);
+					ctx.lineTo(joint.parent.position.x + offset.x, joint.parent.position.y + offset.y);
+					ctx.lineWidth = config.render.segment.width;
+					ctx.strokeStyle = config.render.segment.color;
+					ctx.stroke();
 				}
 			}
 
-			//Render the joints
-			for (var i = 0; i < jointChain.length; i++) {
-				let joint = jointChain[i];
+			for (var i = 0; i < frame.joints.length; i++) {
+				let joint = frame.joints[i];
 
 				let jointColor = joint === this.activeJoint ? config.render.joint.color.selected : config.render.joint.color.default;
-				if (timeline.graph && !isPrev) {
+
+				if (timeline.graph) {
 					if (this.activeJoint && !timeline.graph.state.isPlaying) {
 						if (this.activeJoint.children.length) jointColor = this.activeJoint.children.includes(joint) ? "#5bff85" : jointColor;
 						if (this.activeJoint.parent) jointColor = this.activeJoint.parent === joint ? "#9b68e1" : jointColor;
 					}
 
-					if (joint.parent) {
-						if (joint.skin.imageSrc) {
-							if (!joint.skin.image) {
-								let img = new Image();
-								img.src = joint.skin.imageSrc;
-								joint.skin.image = img;
-							} else {
-								if (!joint.skin.image.width) {
-									let img = new Image();
-									img.src = joint.skin.imageSrc;
-									joint.skin.image = img;
-								}
-							}
-						}
-
-						if (joint.skin) {
-							if (typeof joint.skin.image == "object") {
-								if (joint.skin.image.src) {
-									let newWidth = joint.length;
-									let newHeight = joint.length;
-									let angleAuto = 0;
-
-									let crop = joint.skin.crop;
-									let cropWidth = crop.to.x - crop.from.x;
-									let cropHeight = crop.to.y - crop.from.y;
-
-									if (cropWidth > cropHeight) {
-										newHeight = Number.MAX_SAFE_INTEGER;
-									} else {
-										newWidth = Number.MAX_SAFE_INTEGER;
-										angleAuto = Math.PI / 2;
-									}
-
-									let size = utils.scaleSize(cropWidth, cropHeight, newWidth, newHeight);
-
-									renderer.save();
-
-									let midpoint = {
-										x: (joint.position.x + joint.parent.position.x) / 2,
-										y: (joint.position.y + joint.parent.position.y) / 2
-									};
-
-									renderer.context.translate(midpoint.x, midpoint.y);
-									renderer.context.rotate(joint.angle + angleAuto);
-
-									if (joint.skin.offset) {
-										let xOffset = joint.skin.offset.x;
-										let yOffset = joint.skin.offset.y;
-										let scaleXOffset = joint.skin.offset.scaleX;
-										let scaleYOffset = joint.skin.offset.scaleY;
-										let angleOffset = joint.skin.offset.angle;
-
-										renderer.context.rotate(angleOffset);
-										renderer.context.translate(xOffset, yOffset);
-										renderer.context.scale(scaleXOffset, scaleYOffset);
-									}
-
-									renderer.context.drawImage(joint.skin.image, crop.from.x, crop.from.y, cropWidth, cropHeight, -size.width / 2, -size.height / 2, size.width, size.height);
-									renderer.restore();
-								}
-
-								if (timeline.graph.state.isPlaying) {
-									jointColor = config.render.joint.color.default;
-								}
-							}
-						}
+					if (timeline.graph.state.isPlaying) {
+						jointColor = config.render.joint.color.default;
 					}
 				}
 
-				renderer.circle(joint.position.x, joint.position.y, config.render.joint.radius, {
-					fill: isPrev ? translucent : jointColor
-				});
+				ctx.beginPath();
+				ctx.arc(joint.position.x + offset.x, joint.position.y + offset.y, config.render.joint.radius, 0, Math.PI * 2);
+				ctx.closePath();
+				ctx.fillStyle = options.workColor ? jointColor : config.render.joint.color.default;
+				ctx.fill();
 			}
 		}
+	}
 
-		//Render previous keyframe
+	render(renderer) {
 		if (timeline.graph) {
-			let previousFrame = this.keyframes[timeline.graph.state.previousFrame];
-			let currentFrame = this.keyframes[timeline.graph.state.currentFrame];
-			let nextFrame = this.keyframes[timeline.graph.state.nextFrame];
+			let previousFrame = timeline.graph.state.previousFrame;
+			let currentFrame = timeline.graph.state.currentFrame;
+			let nextFrame = timeline.graph.state.nextFrame;
+			let currentMark = timeline.graph.state.currentMark;
 
 			renderer.save();
-			renderer.context.globalCompositeOperation = "overlay";
-			if (currentFrame && !timeline.graph.state.isPlaying) {
-				_render(currentFrame.joints, true);
-			}
+			renderer.context.globalAlpha = 0.1;
+			this.renderTo(renderer.context, {
+				frame: previousFrame,
+				position: {
+					x: this.bounds.min.x,
+					y: this.bounds.min.y
+				},
+				showBones: true
+			});
 
-			if (previousFrame && !timeline.graph.state.isPlaying) {
-				_render(previousFrame.joints, true);
-			}
+			this.renderTo(renderer.context, {
+				frame: currentFrame,
+				position: {
+					x: this.bounds.min.x,
+					y: this.bounds.min.y
+				},
+				showBones: true
+			});
 
-			if (nextFrame && !timeline.graph.state.isPlaying) {
-				_render(nextFrame.joints, true);
-			}
+			this.renderTo(renderer.context, {
+				frame: nextFrame,
+				position: {
+					x: this.bounds.min.x,
+					y: this.bounds.min.y
+				},
+				showBones: true
+			});
 			renderer.restore();
-		}
 
-		//Render current frame
-		let sortedJoints = this.joints.slice(0).sort((a, b) => a.zIndex - b.zIndex);
-		_render(sortedJoints);
+			if (!this.keyframes[currentMark]) {
+				currentMark = currentFrame;
+			}
+
+			this.renderTo(renderer.context, {
+				frame: currentMark,
+				position: {
+					x: this.bounds.min.x,
+					y: this.bounds.min.y
+				},
+				showBones: true,
+				showSkin: true,
+				workColor: true
+			});
+		}
 	}
 }
 
@@ -886,11 +940,7 @@ const rigModel = new RigModel();
 events.once("loadedApps", vue => {
 	timeline = vue.timeline;
 
-	rigModel.setKeyframe(timeline.graph.state.currentMark, {
-		position: {
-			x: timeline.graph.hatchMark.spacing / 2,
-			y: 0
-		},
+	rigModel.setKeyframe(0, {
 		locked: true,
 		ignoreHistory: true
 	});

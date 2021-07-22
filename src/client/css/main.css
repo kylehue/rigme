@@ -499,6 +499,62 @@ canvas#gameCanvas {
 	display: none;
 }
 
+.custom-checkbox {
+	position: relative;
+	display: flex;
+	flex-flow: row nowrap;
+	align-items: center;
+	align-content: center;
+	justify-content: flex-start;
+	width: fit-content;
+	height: 25px;
+	cursor: pointer;
+}
+
+.custom-checkbox .checkbox {
+	position: relative;
+	flex-shrink: 0;
+	display: flex;
+	flex-flow: row nowrap;
+	align-items: center;
+	justify-content: center;
+	background: rgba(20, 10, 30, 0.1);
+	border: 1px solid rgba(240, 230, 250, 0.025);
+	border-radius: 3px;
+	width: 15px;
+	height: 15px;
+	pointer-events: none;
+}
+
+.custom-checkbox:hover .checkbox {
+	background: rgba(20, 10, 30, 0.15);
+}
+
+.custom-checkbox:active .checkbox {
+	background: rgba(20, 10, 30, 0.2);
+}
+
+.custom-checkbox .checkbox img {
+	display: none;
+	position: relative;
+	width: auto;
+	height: 70%;
+	pointer-events: none;
+}
+
+.custom-checkbox .checkbox.checked img {
+	display: block;
+}
+
+.custom-checkbox p {
+	position: relative;
+	line-height: 1;
+	font-size: 12px;
+	width: fit-content;
+	height: fit-content;
+	pointer-events: none;
+}
+
 #selectOptions {
 	background: var(--darko-d);
 	box-shadow: var(--drop-shadow);

@@ -18,6 +18,7 @@
 		<link rel="stylesheet" type="text/css" href="css/overlay.css">
 		<link rel="stylesheet" type="text/css" href="css/overlay.config.css">
 		<link rel="stylesheet" type="text/css" href="css/contextMenu.css">
+		<link rel="stylesheet" type="text/css" href="css/export.spritesheet.css">
 	</head>
 	<body>
 		<div class="main-container">
@@ -62,11 +63,72 @@
 					<button id="showLoadApp" class="darko-d" v-on:mousedown="showLoadApp" v-on:mouseover="showExportFormats = false">Load Project</button>
 					<button id="showExportFormats" class="darko-d" v-on:mouseover="showExportFormats = true"><span>Export as...</span><img src="assets/svg/play.svg"></button>
 				</div>
-
 				<div id="exportFormats" v-if="showExportFormats">
 					<button id="spritesheet" class="darko-d" v-on:mousedown="showSpritesheetExportApp">Spritesheet</button>
 					<button id="frames" class="darko-d" v-on:mousedown="showFrameExportApp">Frames</button>
 					<button id="gif" class="darko-d" v-on:mousedown="showGIFExportApp">GIF</button>
+				</div>
+			</div>
+			<!-- Spritesheet export app -->
+			<div id="spritesheetExportApp" class="darko-d" v-if="!hidden">
+				<div class="row">
+					<div class="drag"></div>
+					<p class="title">Export as Spritesheet</p>
+					<button class="darko-g close" v-on:click="hide" title="Close">x</button>
+				</div>
+				<div id="filename" class="field">
+					<label for="spritesheetName">File name:</label>
+					<input id="spritesheetName" type="text" class="" placeholder="Type here..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+				</div>
+				<div class="row section">
+					<div class="title-wrapper">
+						<p class="title">Region</p>
+					</div>
+					<div class="field">
+						<label for="spritesheetStart">Start frame:</label>
+						<input id="spritesheetStart" type="text" class="" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-min="1" data-max="99999999" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
+					</div>
+					
+					<div class="field">
+						<label for="spritesheetEnd">End frame:</label>
+						<input id="spritesheetEnd" type="text" class="" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-min="1" data-max="120" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
+					</div>
+				</div>
+				<div class="row section">
+					<div class="title-wrapper">
+						<p class="title">Options</p>
+					</div>
+					<div class="field">
+						<label for="spritesheetCellWidth">Cell width:</label>
+						<input id="spritesheetCellWidth" type="text" class="" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
+					</div>
+					<div class="field">
+						<label for="spritesheetCellHeight">Cell height:</label>
+						<input id="spritesheetCellHeight" type="text" class="" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
+					</div>
+					<div class="field full-width">
+						<label for="spritesheetRowCount">Row count:</label>
+						<input id="spritesheetRowCount" type="text" class="" placeholder="auto" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-min="1" v-on:input="validateFormat" v-on:focusout="validateMin" v-on:wheel="toggleAmount">
+					</div>
+					<div class="field full-width">
+						<div id="spritesheetShowSkin" class="custom-checkbox">
+							<div class="checkbox checked">
+								<img src="assets/svg/check.svg">
+							</div>
+							<p>Show skin</p>
+						</div>
+					</div>
+					<div class="field full-width">
+						<div id="spritesheetShowBones" class="custom-checkbox">
+							<div class="checkbox">
+								<img src="assets/svg/check.svg">
+							</div>
+							<p>Show bones</p>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<button id="exportSpritesheet" class="darko-g" v-on:click="validate">Export</button>
 				</div>
 			</div>
 			<!-- Save app -->
@@ -263,7 +325,7 @@
 							<button id="forwardKinematics" class="option selected" title="Maintain length">
 							<img src="assets/svg/joint-arrow-down.svg" class="" />
 							</button>
-							<!-- <button id="inverseKinematics" class="option" title="Inverse kinematics"> 
+							<!-- <button id="inverseKinematics" class="option" title="Inverse kinematics">
 							<img src="assets/svg/joint-arrow-up.svg" class="" />
 							</button>-->
 							<button id="linear" class="option" title="Linear">

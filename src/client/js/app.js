@@ -148,6 +148,13 @@ function handleMaterialFiles(files) {
 	}
 }
 
+//Custom checkbox
+dom.query(".custom-checkbox", true).on("click", event => {
+	let el = dom.query(event.target).query(".checkbox");
+	el.toggleClass("checked");
+});
+
+//Custom select
 const selectOptions = dom.query("#selectOptions");
 selectOptions.on("mousedown", event => {
 	let value = event.target.dataset.value;
@@ -407,6 +414,39 @@ events.on("extractFrames", (url, options) => {
 events.on("removeOverlay", () => {
 	overlayFrames = [];
 	vue.optionApp.overlayConfigHidden = true;
+});
+
+events.on("exportSpritesheet", options => {
+	let canvas = document.createElement("canvas");
+	canvas.width = options.cellWidth * options.cols;
+	canvas.height = options.cellHeight * options.rows;
+	let ctx = canvas.getContext("2d");
+	let lastExistingFrame;
+	for(var frame = options.start - 1; frame <= options.end - 1; frame++){
+		let index = frame - options.start + 1;
+		let x = Math.floor(index % options.cols) * options.cellWidth;
+		let y = Math.floor(index / options.cols) * options.cellHeight;
+		
+		if (rigModel.keyframes[frame]) {
+			lastExistingFrame = frame;
+		}
+
+		rigModel.renderTo(ctx, {
+			frame: rigModel.keyframes[frame] ? frame : lastExistingFrame,
+			position: {
+				x: x,
+				y: y
+			},
+			showSkin: options.showSkin,
+			showBones: options.showBones
+		});
+	}
+
+	let img = canvas.toDataURL("image/png");
+	let link = document.createElement("a");
+	link.download = options.name;
+	link.href = img;
+	link.click();
 });
 
 const rigModeBtns = dom.query("#riggingMode button", true);
