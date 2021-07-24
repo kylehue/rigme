@@ -421,6 +421,12 @@ class Timeline {
 		const drag = () => {
 			mouseX = mouse.x - this.bounds.x;
 			mouseY = mouse.y - this.bounds.y;
+			if (!dragging) {
+				if (mouseY < 0 || mouseY > this.canvas.height || mouseX < 0 || mouseX > this.canvas.width) {
+					return;
+				}
+			}
+			
 			onScrollbar = mouseY >= 0 && mouseY <= this.scrollbar.height;
 			onTimeline = mouseY >= this.scrollbar.height && mouseY <= this.scrollbar.height + this._timelineHeight;
 			onKeyframe = mouseY >= this.scrollbar.height + this._timelineHeight && mouseY <= this.canvas.height;
@@ -444,22 +450,24 @@ class Timeline {
 			}
 
 			//Check if head keyframes are getting hovered
-			let keys = Object.keys(rigModel.keyframes);
-			for (var i = 0; i < keys.length; i++) {
-				let frame = rigModel.keyframes[keys[i]];
-				if (frame.type == "head") {
-					let frameX = frame.render.position.x;
-					let frameY = frame.render.position.y;
-					let frameSize = frame.render.size;
-					if (mouseX <= frameX + frameSize && mouseX >= frameX - frameSize && mouseY <= frameY + frameSize && mouseY && mouseY >= frameY - frameSize) {
-						frame.hovered = true;
-						frame.render.color = config.render.keyframe.color.hovered;
-						this.canvas.style.cursor = "pointer";
-						this.redraw();
-					} else {
-						frame.hovered = false;
-						frame.render.color = config.render.keyframe.color.default;
-						this.redraw();
+			if (onKeyframe) {
+				let keys = Object.keys(rigModel.keyframes);
+				for (var i = 0; i < keys.length; i++) {
+					let frame = rigModel.keyframes[keys[i]];
+					if (frame.type == "head") {
+						let frameX = frame.render.position.x;
+						let frameY = frame.render.position.y;
+						let frameSize = frame.render.size;
+						if (mouseX <= frameX + frameSize && mouseX >= frameX - frameSize && mouseY <= frameY + frameSize && mouseY && mouseY >= frameY - frameSize) {
+							frame.hovered = true;
+							frame.render.color = config.render.keyframe.color.hovered;
+							this.canvas.style.cursor = "pointer";
+							this.redraw();
+						} else {
+							frame.hovered = false;
+							frame.render.color = config.render.keyframe.color.default;
+							this.redraw();
+						}
 					}
 				}
 			}

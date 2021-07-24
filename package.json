@@ -12,6 +12,7 @@
 		"@babel/core": "^7.14.6",
 		"@babel/preset-env": "^7.14.5",
 		"express": "^4.17.1",
+		"gifencoder": "^2.0.1",
 		"gulp": "^4.0.2",
 		"gulp-autoprefixer": "^8.0.0",
 		"gulp-babel": "^8.0.0",
@@ -24,7 +25,8 @@
 		"jshint": "^2.13.0",
 		"lodash.clonedeep": "^4.5.0",
 		"streamsaver": "^2.0.5",
-		"webpack-stream": "^6.1.2"
+		"webpack-stream": "^6.1.2",
+		"yieldable-json": "^2.0.1"
 	},
 	"devDependencies": {}
 }
