@@ -1,6 +1,8 @@
 const saveApp = require("./save.js");
 const loadApp = require("./load.js");
 const spritesheetExportApp = require("./export.spritesheet.js");
+const framesExportApp = require("./export.frames.js");
+const GIFExportApp = require("./export.gif.js");
 
 const fileApp = new Vue({
 	el: "#fileApp",
@@ -35,10 +37,10 @@ const fileApp = new Vue({
 			spritesheetExportApp.show();
 		},
 		showFrameExportApp: function () {
-			
+			framesExportApp.show();
 		},
 		showGIFExportApp: function () {
-			
+			GIFExportApp.show();
 		}
 	}
 });

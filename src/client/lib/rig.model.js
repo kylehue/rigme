@@ -32,8 +32,11 @@ class RigModel {
 			let frame = this.keyframes[keys[i]];
 			for (var j = 0; j < frame.joints.length; j++) {
 				let joint = frame.joints[j];
-				xAxes.push(joint.position.x);
-				yAxes.push(joint.position.y);
+				xAxes.push(joint.position.x + config.render.joint.radius);
+				yAxes.push(joint.position.y + config.render.joint.radius);
+
+				xAxes.push(joint.position.x - config.render.joint.radius);
+				yAxes.push(joint.position.y - config.render.joint.radius);
 
 				if (joint.skin.vertices) {
 					for (var k = 0; k < joint.skin.vertices.length; k++) {
@@ -45,13 +48,13 @@ class RigModel {
 		}
 
 		this.bounds.min.set({
-			x: Math.min(...xAxes) - config.render.joint.radius,
-			y: Math.min(...yAxes) - config.render.joint.radius
+			x: Math.min(...xAxes),
+			y: Math.min(...yAxes)
 		});
 
 		this.bounds.max.set({
-			x: Math.max(...xAxes) + config.render.joint.radius,
-			y: Math.max(...yAxes) + config.render.joint.radius
+			x: Math.max(...xAxes),
+			y: Math.max(...yAxes)
 		});
 	}
 
@@ -98,6 +101,19 @@ class RigModel {
 		}
 
 		return null;
+	}
+
+	editJoints(f) {
+		let keyframes = Object.values(this.keyframes);
+		for (var i = 0; i < keyframes.length; i++) {
+			let frame = keyframes[i];
+			for (var j = 0; j < frame.joints.length; j++) {
+				let joint = frame.joints[j];
+				if (typeof f == "function") {
+					f(joint, frame);
+				}
+			}
+		}
 	}
 
 	editJoint(id, prop, unique) {
@@ -568,15 +584,17 @@ class RigModel {
 		jointChain = jointChain || this.joints;
 		for (var i = 0; i < jointChain.length; i++) {
 			let joint = jointChain[i];
-			if (!joint.parent || !joint.skin.crop || !joint.skin.image) continue;
-
 			let newWidth = joint.length;
 			let newHeight = joint.length;
 			let angleAuto = 0;
 
 			let crop = joint.skin.crop;
-			let cropWidth = crop.to.x - crop.from.x;
-			let cropHeight = crop.to.y - crop.from.y;
+			let cropWidth = 0;
+			let cropHeight = 0;
+			if (crop) {
+				cropWidth = crop.to.x - crop.from.x;
+				cropHeight = crop.to.y - crop.from.y;
+			}
 
 			if (cropWidth > cropHeight) {
 				newHeight = Number.MAX_SAFE_INTEGER;
@@ -589,11 +607,6 @@ class RigModel {
 			joint.skin._sizeOriginal = {
 				width: cropWidth,
 				height: cropHeight
-			};
-
-			joint.skin.position = {
-				x: (joint.position.x + joint.parent.position.x) / 2,
-				y: (joint.position.y + joint.parent.position.y) / 2
 			};
 
 			joint.skin.angleAuto = angleAuto;
@@ -612,40 +625,47 @@ class RigModel {
 				angleOffset = joint.skin.offset.angle || 0;
 			}
 
-			let vertices = [{
-				x: joint.skin.position.x + xOffset - joint.skin.size.width / 2,
-				y: joint.skin.position.y + yOffset - joint.skin.size.height / 2
-			}, {
-				x: joint.skin.position.x + xOffset + joint.skin.size.width / 2,
-				y: joint.skin.position.y + yOffset - joint.skin.size.height / 2
-			}, {
-				x: joint.skin.position.x + xOffset + joint.skin.size.width / 2,
-				y: joint.skin.position.y + yOffset + joint.skin.size.height / 2
-			}, {
-				x: joint.skin.position.x + xOffset - joint.skin.size.width / 2,
-				y: joint.skin.position.y + yOffset + joint.skin.size.height / 2
-			}];
-
-			for (let vert of vertices) {
-				let vertexDelta = {
-					x: vert.x - joint.skin.position.x,
-					y: vert.y - joint.skin.position.y
+			if (joint.parent && crop) {
+				joint.skin.position = {
+					x: (joint.position.x + joint.parent.position.x) / 2,
+					y: (joint.position.y + joint.parent.position.y) / 2
 				};
 
-				vert.x = vert.x + vertexDelta.x * (scaleXOffset - 1);
-				vert.y = vert.y + vertexDelta.y * (scaleYOffset - 1);
+				let vertices = [{
+					x: joint.skin.position.x + xOffset - joint.skin.size.width / 2,
+					y: joint.skin.position.y + yOffset - joint.skin.size.height / 2
+				}, {
+					x: joint.skin.position.x + xOffset + joint.skin.size.width / 2,
+					y: joint.skin.position.y + yOffset - joint.skin.size.height / 2
+				}, {
+					x: joint.skin.position.x + xOffset + joint.skin.size.width / 2,
+					y: joint.skin.position.y + yOffset + joint.skin.size.height / 2
+				}, {
+					x: joint.skin.position.x + xOffset - joint.skin.size.width / 2,
+					y: joint.skin.position.y + yOffset + joint.skin.size.height / 2
+				}];
+
+				for (let vert of vertices) {
+					let vertexDelta = {
+						x: vert.x - joint.skin.position.x,
+						y: vert.y - joint.skin.position.y
+					};
+
+					vert.x = vert.x + vertexDelta.x * (scaleXOffset - 1);
+					vert.y = vert.y + vertexDelta.y * (scaleYOffset - 1);
+				}
+
+				for (let vert of vertices) {
+					let angle = joint.angle + joint.skin.angleAuto + angleOffset;
+					let x = (vert.x - joint.skin.position.x) * Math.cos(angle) - (vert.y - joint.skin.position.y) * Math.sin(angle);
+					let y = (vert.x - joint.skin.position.x) * Math.sin(angle) + (vert.y - joint.skin.position.y) * Math.cos(angle);
+
+					vert.x = x + joint.skin.position.x;
+					vert.y = y + joint.skin.position.y;
+				}
+
+				joint.skin.vertices = vertices;
 			}
-
-			for (let vert of vertices) {
-				let angle = joint.angle + joint.skin.angleAuto + angleOffset;
-				let x = (vert.x - joint.skin.position.x) * Math.cos(angle) - (vert.y - joint.skin.position.y) * Math.sin(angle);
-				let y = (vert.x - joint.skin.position.x) * Math.sin(angle) + (vert.y - joint.skin.position.y) * Math.cos(angle);
-
-				vert.x = x + joint.skin.position.x;
-				vert.y = y + joint.skin.position.y;
-			}
-
-			joint.skin.vertices = vertices;
 		}
 	}
 
@@ -917,7 +937,7 @@ class RigModel {
 
 					if (joint.skin) {
 						if (typeof joint.skin.image == "object") {
-							if (joint.skin.image.src) {
+							if (joint.skin.image.src && joint.skin.position) {
 								ctx.save();
 								ctx.translate(joint.skin.position.x + offset.x, joint.skin.position.y + offset.y);
 								ctx.rotate(joint.angle + joint.skin.angleAuto);

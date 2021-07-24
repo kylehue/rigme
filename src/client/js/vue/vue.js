@@ -9,6 +9,8 @@ const optionApp = require("./option.js");
 const paneApp = require("./pane.js");
 const cropApp = require("./crop.js");
 const spritesheetExportApp = require("./export.spritesheet.js");
+const framesExportApp = require("./export.frames.js");
+const GIFExportApp = require("./export.gif.js");
 const apps = {
 	timeline: timeline,
 	contextMenuApp: contextMenu,
@@ -20,7 +22,9 @@ const apps = {
 	overlayConfigApp: overlayConfigApp,
 	paneApp: paneApp,
 	cropApp: cropApp,
-	spritesheetExportApp: spritesheetExportApp
+	spritesheetExportApp: spritesheetExportApp,
+	framesExportApp: framesExportApp,
+	GIFExportApp: GIFExportApp
 };
 
 module.exports = apps;

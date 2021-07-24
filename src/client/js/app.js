@@ -15,8 +15,9 @@ const extractKeyframes = require("../lib/extract.keyframes.js");
 events.emit("loadedApps", vue);
 
 //Adding joint affects all frames
-//Animate skin offset
 //Export spritesheet images not follwing angle, pos
+//Mirror keyframes?
+
 
 window.rigModel = rigModel;
 
@@ -432,6 +433,7 @@ events.on("removeOverlay", () => {
 	vue.optionApp.overlayConfigHidden = true;
 });
 
+
 events.on("exportSpritesheet", options => {
 	let canvas = document.createElement("canvas");
 	canvas.width = options.cellWidth * options.cols;
@@ -443,8 +445,10 @@ events.on("exportSpritesheet", options => {
 		let x = Math.floor(index % options.cols) * options.cellWidth;
 		let y = Math.floor(index / options.cols) * options.cellHeight;
 
-		if (rigModel.keyframes[frame]) {
+		let keyframe = rigModel.keyframes[frame];
+		if (keyframe) {
 			lastExistingFrame = frame;
+			rigModel.updateSkin(keyframe.joints);
 		}
 
 		rigModel.renderTo(ctx, {
@@ -463,6 +467,103 @@ events.on("exportSpritesheet", options => {
 	link.download = options.name;
 	link.href = img;
 	link.click();
+});
+
+events.on("exportFrames", options => {
+	const fileStream = streamSaver.createWriteStream(options.name + ".zip");
+	let counter = 0;
+	const readableZipStream = new ZIP({
+		start(ctrl) {
+			let lastExistingFrame;
+			for (var frame = options.start - 1; frame <= options.end - 1; frame++) {
+				let canvas = document.createElement("canvas");
+				canvas.width = options.frameWidth;
+				canvas.height = options.frameHeight;
+				let ctx = canvas.getContext("2d");
+
+				let index = frame - options.start + 1;
+				let keyframe = rigModel.keyframes[frame];
+				if (keyframe) {
+					lastExistingFrame = frame;
+					rigModel.updateSkin(keyframe.joints);
+				}
+
+				rigModel.renderTo(ctx, {
+					frame: rigModel.keyframes[frame] ? frame : lastExistingFrame,
+					showSkin: options.showSkin,
+					showBones: options.showBones
+				});
+
+				canvas.toBlob(blob => {
+					let file = {
+						name: `frames/${index}.png`,
+						stream: () => blob.stream()
+					};
+
+					ctrl.enqueue(file);
+
+					counter++;
+
+					if (counter >= options.totalFrames) {
+						ctrl.close();
+					}
+				}, "image/png");
+			}
+		}
+	});
+
+	readableZipStream.pipeTo(fileStream);
+});
+
+events.on("exportGIF", options => {
+	const gif = new GIF({
+		workers: 2,
+		quality: 10,
+		repeat: 0,
+		width: options.width,
+		height: options.height,
+		dither: true
+	});
+
+	let lastExistingFrame;
+	for (var frame = options.start - 1; frame <= options.end - 1; frame++) {
+		let canvas = document.createElement("canvas");
+		canvas.width = options.width;
+		canvas.height = options.height;
+		let ctx = canvas.getContext("2d");
+		let keyframe = rigModel.keyframes[frame];
+		if (keyframe) {
+			lastExistingFrame = frame;
+			rigModel.updateSkin(keyframe.joints);
+		}
+
+		ctx.fillStyle = options.background;
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+		rigModel.renderTo(ctx, {
+			frame: rigModel.keyframes[frame] ? frame : lastExistingFrame,
+			showSkin: options.showSkin,
+			showBones: options.showBones
+		});
+
+		gif.addFrame(canvas, {
+			delay: 1000 / vue.timeline.app.animationSpeed
+		});
+	}
+
+	gif.render();
+
+	gif.on("finished", blob => {
+		try {
+			const fileStream = streamSaver.createWriteStream(`${options.name}.gif`);
+			const readableStream = blob.stream();
+			if (window.WritableStream && readableStream.pipeTo) {
+				return readableStream.pipeTo(fileStream);
+			}
+		} catch (e) {
+			console.warn(e);
+		}
+	});
 });
 
 const rigModeBtns = dom.query("#riggingMode button", true);
@@ -564,7 +665,7 @@ dom.query("#resetOffset").on("click", () => {
 
 					rigModel.editJoint(activeJoint.id, {
 						skin: skin
-					});
+					}, true);
 
 					setJointProperties(activeJoint);
 
@@ -583,33 +684,32 @@ dom.query("#resetOffset").on("click", () => {
 });
 
 events.on("crop", (crop, _vueCrop) => {
-	let skin = JSON.parse(JSON.stringify(jointCrop.skin));
+	rigModel.editJoints((joint, frame) => {
+		if (joint.id === jointCrop.id) {
+			joint.skin.crop = JSON.parse(JSON.stringify(crop));
+			joint.skin._vueCrop = {
+				from: {
+					x: _vueCrop.from.x,
+					y: _vueCrop.from.y
+				},
+				to: {
+					x: _vueCrop.to.x,
+					y: _vueCrop.to.y
+				}
+			}
 
-	skin.crop = JSON.parse(JSON.stringify(crop));
-
-	skin._vueCrop = {
-		from: {
-			x: _vueCrop.from.x,
-			y: _vueCrop.from.y
-		},
-		to: {
-			x: _vueCrop.to.x,
-			y: _vueCrop.to.y
+			rigModel.updateSkin(frame.joints);
 		}
-	};
-
-	rigModel.editJoint(jointCrop.id, {
-		skin: skin
 	});
+
+	rigModel.updateSubKeyframes();
+	rigModel.updateBounds();
 
 	history.add({
 		label: "Crop skin",
 		value: rigModel.clone(),
 		group: "keyframe"
 	});
-
-	rigModel.updateSkin();
-	rigModel.updateBounds();
 });
 
 events.on("materialChange", url => {
@@ -647,31 +747,39 @@ events.on("materialChange", url => {
 					crop.to.x = activeJoint.skin.crop.to.x;
 					crop.to.y = activeJoint.skin.crop.to.y;
 				}
-			}
 
-			let _skin = {
-				imageSrc: res.url,
-				crop: crop,
-				_vueCrop: activeJoint.skin._vueCrop || null,
-				offset: {
+				activeJoint.skin.offset = {
 					x: x || 0,
 					y: y || 0,
 					scaleX: scaleX || 0,
 					scaleY: scaleY || 0,
 					angle: utils.radians(utils.map(angle, 0, 360, -180, 180)) + Math.PI || 0
-				}
-			};
+				};
+			}
 
-			rigModel.editJoint(activeJoint.id, {
-				skin: _skin
-			}, true);
+			rigModel.editJoints((joint, frame) => {
+				if (joint.id === activeJoint.id) {
+					joint.skin.imageSrc = res.url;
+					joint.skin.image = new Image();
+					joint.skin.image.src = res.url;
+					joint.skin.crop = JSON.parse(JSON.stringify(crop));
+
+					if (typeof activeJoint.skin._vueCrop == "object" && activeJoint.skin._vueCrop) {
+						joint.skin._vueCrop = JSON.parse(JSON.stringify()) || null;
+					}
+					
+					rigModel.updateSkin(frame.joints);
+				}
+			});
+
+			rigModel.updateSubKeyframes();
+			rigModel.updateBounds();
 
 			history.add({
 				label: "Change skin",
 				value: rigModel.clone(),
 				group: "keyframe"
 			});
-
 		}
 	});
 });
@@ -966,7 +1074,6 @@ events.on("jointSkinningInputChange", ignoreHistory => {
 		}
 
 		rigModel.updateSubKeyframes();
-		rigModel.updateSkin();
 		rigModel.updateBounds();
 	}
 });
