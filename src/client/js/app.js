@@ -1,4 +1,5 @@
 const streamSaver = require("streamsaver");
+const yj = require("yieldable-json");
 const renderer = require("../lib/renderer.js");
 const dom = require("../../../lib/dom.js");
 const events = require("../../../lib/events.js");
@@ -15,8 +16,7 @@ const extractKeyframes = require("../lib/extract.keyframes.js");
 events.emit("loadedApps", vue);
 
 //Adding joint affects all frames
-//Export spritesheet images not follwing angle, pos
-//Mirror keyframes?
+//Fix lag when loading a project
 
 
 window.rigModel = rigModel;
@@ -251,7 +251,11 @@ materialApp.on("mousedown", event => {
 
 let overlayFrames = [];
 events.on("saveProject", filename => {
-	let model = rigModel.toJSON();
+	let btn = dom.query("#download");
+	btn.addClass("disabled");
+	btn.text("Processing...", true);
+
+	let model = rigModel.toJSON(null, true);
 	let config = {
 		frameCount: vue.timeline.app.totalFrames,
 		animationSpeed: vue.timeline.app.animationSpeed,
@@ -280,22 +284,25 @@ events.on("saveProject", filename => {
 		overlay: overlay
 	};
 
-	let str = JSON.stringify(data);
+	yj.stringifyAsync(data, (err, str) => {
+		try {
+			const uInt8 = new TextEncoder().encode(str);
+			const fileStream = streamSaver.createWriteStream(`${filename}.rigme`);
 
-	try {
-		const uInt8 = new TextEncoder().encode(str);
-		const fileStream = streamSaver.createWriteStream(`${filename}.rigme`);
+			new Response(str).body
+				.pipeTo(fileStream)
+				.then(success => {
 
-		new Response(str).body
-			.pipeTo(fileStream)
-			.then(success => {
+				}, error => {
+					console.warn(error);
+				});
+		} catch (e) {
+			console.warn(e);
+		}
 
-			}, error => {
-				console.warn(error);
-			});
-	} catch (e) {
-		console.warn(e);
-	}
+		dom.query("#download").removeClass("disabled");
+		btn.text("Save", true);
+	});
 });
 
 window.onunload = () => {
@@ -305,6 +312,7 @@ window.onunload = () => {
 events.on("loadProject", data => {
 	if (data.model) {
 		let model = rigModel.fromJSON(data.model);
+		rigModel.reset();
 		rigModel.import(model);
 	} else {
 		console.warn("Couldn't load model.");
@@ -470,8 +478,11 @@ events.on("exportSpritesheet", options => {
 });
 
 events.on("exportFrames", options => {
-	const fileStream = streamSaver.createWriteStream(options.name + ".zip");
-	let counter = 0;
+	let btn = dom.query("#exportFrames");
+	btn.text("Processing...", true);
+	btn.addClass("disabled");
+	let counter = 0,
+		totalSize = 0;
 	const readableZipStream = new ZIP({
 		start(ctrl) {
 			let lastExistingFrame;
@@ -503,26 +514,37 @@ events.on("exportFrames", options => {
 					ctrl.enqueue(file);
 
 					counter++;
+					totalSize += blob.size;
 
 					if (counter >= options.totalFrames) {
 						ctrl.close();
+
+						const fileStream = streamSaver.createWriteStream(options.name + ".zip", {
+							size: totalSize
+						});
+
+						readableZipStream.pipeTo(fileStream);
+						btn.text("Export", true);
+						btn.removeClass("disabled");
 					}
 				}, "image/png");
 			}
 		}
 	});
-
-	readableZipStream.pipeTo(fileStream);
 });
 
 events.on("exportGIF", options => {
+	let btn = dom.query("#exportGIF");
+	btn.text("Processing...", true);
+	btn.addClass("disabled");
 	const gif = new GIF({
-		workers: 2,
+		workers: 3,
 		quality: 10,
 		repeat: 0,
 		width: options.width,
 		height: options.height,
-		dither: true
+		dither: true,
+		workerScript: "lib/gif.worker.js"
 	});
 
 	let lastExistingFrame;
@@ -555,7 +577,13 @@ events.on("exportGIF", options => {
 
 	gif.on("finished", blob => {
 		try {
-			const fileStream = streamSaver.createWriteStream(`${options.name}.gif`);
+			gif.abort();
+			btn.text("Export", true);
+			btn.removeClass("disabled");
+
+			const fileStream = streamSaver.createWriteStream(`${options.name}.gif`, {
+				size: blob.size
+			});
 			const readableStream = blob.stream();
 			if (window.WritableStream && readableStream.pipeTo) {
 				return readableStream.pipeTo(fileStream);
@@ -764,10 +792,11 @@ events.on("materialChange", url => {
 					joint.skin.image.src = res.url;
 					joint.skin.crop = JSON.parse(JSON.stringify(crop));
 
-					if (typeof activeJoint.skin._vueCrop == "object" && activeJoint.skin._vueCrop) {
-						joint.skin._vueCrop = JSON.parse(JSON.stringify()) || null;
+					let _vc = activeJoint.skin._vueCrop;
+					if (typeof _vc == "object" && _vc) {
+						joint.skin._vueCrop = JSON.parse(JSON.stringify(_vc)) || null;
 					}
-					
+
 					rigModel.updateSkin(frame.joints);
 				}
 			});
@@ -912,6 +941,10 @@ events.on("timelineSeeked", () => {
 	let activeJoint = rigModel.activeJoint;
 	if (activeJoint) {
 		setJointProperties(activeJoint);
+	}
+
+	if (!vue.timeline.graph.state.isPlaying) {
+		events.emit("jointChange", rigModel.joints);
 	}
 
 	activePane = "timeline";

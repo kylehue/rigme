@@ -48,7 +48,6 @@ const saveApp = new Vue({
 			}
 
 			events.emit("saveProject", filename);
-			this.hide();
 		}
 	}
 });

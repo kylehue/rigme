@@ -1,3 +1,4 @@
+const yj = require("yieldable-json");
 const events = require("../../../../lib/events.js");
 const dom = require("../../../../lib/dom.js");
 
@@ -27,21 +28,23 @@ const loadApp = new Vue({
 			currentJSON = undefined;
 			events.emit("renderFocus");
 
-			let importButton = document.getElementById("import");
-			importButton.classList.add("disabled");
+			dom.query("#import").addClass("disabled");
 
 			this.fileError = false;
 			this.hidden = true;
 		},
 		checkFile: function() {
-			let fileEl = document.getElementById("importInput");
-			let filenameEl = document.getElementById("loadFilename");
-			let file = fileEl.files[0];
+			let fileEl = dom.query("#importInput");
+			let filenameEl = dom.query("#loadFilename");
+			let file = fileEl.node.files[0];
 			if (!file) return;
 			let filename = file.name;
 			let fileExtension = filename.split(".")[filename.split(".").length - 1];
+			let importButton = dom.query("#import");
+			importButton.addClass("disabled");
+			importButton.text("Processing...", true);
 			if (fileExtension == "rigme") {
-				filenameEl.innerText = filename;
+				filenameEl.text(filename, true);
 				let fileURL = URL.createObjectURL(file);
 				if (fileURL) {
 					fetch(fileURL).then(res => {
@@ -49,20 +52,21 @@ const loadApp = new Vue({
 							let json;
 							let error = false;
 							try {
-								json = JSON.parse(text);
-								error = false;
-							} catch (e) {
-								error = true;
-							}
+								yj.parseAsync(text, (err, res) => {
+									if (err) {
+										error = true;
+										return;
+									}
 
-							if (!error) {
-								currentJSON = json;
-								let importButton = document.getElementById("import");
-								importButton.classList.remove("disabled");
-								this.fileError = false;
-							} else {
-								let importButton = document.getElementById("import");
-								importButton.classList.add("disabled");
+									json = res;
+									error = false;
+									currentJSON = json;
+									importButton.text("Load", true);
+									importButton.removeClass("disabled");
+									this.fileError = false;
+								});
+							} catch (e) {
+								importButton.addClass("disabled");
 								this.errorMessage = "This file is corrupted.";
 								this.fileError = true;
 							}
