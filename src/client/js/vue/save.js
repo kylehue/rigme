@@ -23,10 +23,12 @@ const saveApp = new Vue({
 					root: this.$el
 				});
 
-				events.emit("renderSleep");
+				setTimeout(() => {
+					let filenameInput = document.getElementById("saveFilename");
+					filenameInput.focus();
+				}, 100);
 
-				let filenameInput = document.getElementById("saveFilename");
-				filenameInput.focus();
+				events.emit("renderSleep");
 			});
 		},
 		hide: function() {
@@ -37,11 +39,11 @@ const saveApp = new Vue({
 			let downloadButton = document.getElementById("download");
 			if (!e.target.value.length) {
 				downloadButton.classList.add("disabled");
-			}else{
+			} else {
 				downloadButton.classList.remove("disabled");
 			}
 		},
-		validate: function () {
+		validate: function() {
 			let filename = document.getElementById("saveFilename").value;
 			if (!filename.length) {
 				return;

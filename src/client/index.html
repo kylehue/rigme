@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Rigme - Animator App</title>
+		<title>Rigme</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="icon" href="assets/svg/rigme-full.svg">
 		<link rel="preconnect" href="https://fonts.gstatic.com">
 		<link href="https://fonts.googleapis.com/css2?family=Catamaran:wght@400;700;800&display=swap" rel="stylesheet">
 		<link rel="stylesheet" type="text/css" href="css/main.css">
@@ -478,19 +479,19 @@
 				</div>
 				<div class="canvas-container">
 					<div id="toolApp">
-						<button id="panCamera" class="active-tool" title="Pan camera">
+						<button id="panCamera" class="active-tool" title="Pan camera [Q]">
 						<img src="assets/svg/quad-arrow.svg" class="" />
 						</button>
-						<button id="selectJoint" class="" title="Select joint">
+						<button id="selectJoint" class="" title="Select joint [W]">
 						<img src="assets/svg/joint-click.svg" class="" />
 						</button>
-						<button id="moveJoint" class="" title="Move joint">
+						<button id="moveJoint" class="" title="Move joint [E]">
 						<img src="assets/svg/joint-arrow.svg" class="" />
 						</button>
-						<button id="addJoint" class="" title="Add joint">
+						<button id="addJoint" class="" title="Add joint [R]">
 						<img src="assets/svg/joint-plus.svg" class="" />
 						</button>
-						<button id="removeJoint" class="" title="Remove joint">
+						<button id="removeJoint" class="" title="Remove joint [T]">
 						<img src="assets/svg/joint-trash.svg" class="" />
 						</button>
 					</div>
@@ -695,7 +696,7 @@
 		<script src="lib/canvas-toBlob.js"></script>
 		<script src="lib/zip-stream.js"></script>
 		<script src="lib/gif.js"></script>
-		<script src="lib/gif.worker.js"></script>
+		<!-- <script src="lib/gif.worker.js"></script> -->
 		<script src="js/app.js"></script>
 	</body>
 </html>

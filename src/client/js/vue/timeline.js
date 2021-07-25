@@ -586,10 +586,8 @@ class Timeline {
 		this.buttons.play.addEventListener("click", () => {
 			if (this.state.isPlaying) {
 				this.stop();
-				this.buttons.play.firstChild.src = "assets/svg/play.svg";
 			} else {
 				this.play();
-				this.buttons.play.firstChild.src = "assets/svg/round-square.svg";
 			}
 
 			this.redraw();
@@ -891,11 +889,16 @@ class Timeline {
 			this.setCurrentMark(pos);
 		}, 1000 / timelineApp.animationSpeed);
 		this.state.isPlaying = true;
+		this.buttons.play.firstChild.src = "assets/svg/round-square.svg";
+		document.getElementById("propertyApp").classList.add("disabled");
 	}
 
 	stop() {
 		clearInterval(this.loop);
 		this.state.isPlaying = false;
+		this.buttons.play.firstChild.src = "assets/svg/play.svg";
+		document.getElementById("propertyApp").classList.remove("disabled");
+		events.emit("timelineSeeked");
 	}
 
 	updateSize() {

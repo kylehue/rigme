@@ -36,6 +36,11 @@ const GIFExportApp = new Vue({
 				dom.query("#GIFExportWidth").value(frameWidth.toFixed(2));
 				dom.query("#GIFExportHeight").value(frameHeight.toFixed(2));
 
+				setTimeout(() => {
+					let title = document.getElementById("GIFExportName");
+					title.focus();
+				}, 100);
+
 				events.emit("renderSleep");
 			});
 		},

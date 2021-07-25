@@ -38,6 +38,11 @@ const spritesheetExportApp = new Vue({
 				dom.query("#spritesheetCellHeight").value(cellHeight.toFixed(2));
 				dom.query("#spritesheetRowCount").value(rowCount);
 
+				setTimeout(() => {
+					let title = document.getElementById("spritesheetName");
+					title.focus();
+				}, 100);
+
 				events.emit("renderSleep");
 			});
 		},

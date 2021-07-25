@@ -36,6 +36,11 @@ const framesExportApp = new Vue({
 				dom.query("#framesExportWidth").value(frameWidth.toFixed(2));
 				dom.query("#framesExportHeight").value(frameHeight.toFixed(2));
 
+				setTimeout(() => {
+					let title = document.getElementById("framesExportName");
+					title.focus();
+				}, 100);
+
 				events.emit("renderSleep");
 			});
 		},

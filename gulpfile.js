@@ -33,29 +33,29 @@ const babelConfig = {
 
 gulp.task("client:entry", function() {
 	return gulp.src([paths.client.entry])
-		//.pipe(babel(babelConfig))
+		.pipe(babel(babelConfig))
 		.pipe(webpack(require("./webpack.config.js")))
-		//.pipe(jsuglify())
+		.pipe(jsuglify())
 		.pipe(gulp.dest("dist/client/js/"));
 });
 
 gulp.task("client:js", function() {
 	return gulp.src([paths.client.js, `!${paths.client.entry}`])
-		//.pipe(babel(babelConfig))
-		//.pipe(jsuglify())
+		.pipe(babel(babelConfig))
+		.pipe(jsuglify())
 		.pipe(gulp.dest("dist/client/"));
 });
 
 gulp.task("client:css", function() {
 	return gulp.src([paths.client.css])
 		.pipe(autoprefixer())
-		//.pipe(cssuglify())
+		.pipe(cssuglify())
 		.pipe(gulp.dest("dist/client/"));
 });
 
 gulp.task("client:img", function() {
 	return gulp.src([paths.client.img])
-		//.pipe(imgminify())
+		.pipe(imgminify())
 		.pipe(gulp.dest("dist/client/assets/images/"));
 });
 
@@ -66,21 +66,21 @@ gulp.task("client:svg", function() {
 
 gulp.task("client:html", function() {
 	return gulp.src([paths.client.html])
-		//.pipe(htmlminify())
+		.pipe(htmlminify())
 		.pipe(gulp.dest("dist/client/"));
 });
 
 gulp.task("server:js", function() {
 	return gulp.src([paths.server.js])
-		//.pipe(babel(babelConfig))
-		//.pipe(jsuglify())
+		.pipe(babel(babelConfig))
+		.pipe(jsuglify())
 		.pipe(gulp.dest("dist/server/"));
 });
 
 gulp.task("lib:js", function() {
 	return gulp.src([paths.lib.js])
-		//.pipe(babel(babelConfig))
-		//.pipe(jsuglify())
+		.pipe(babel(babelConfig))
+		.pipe(jsuglify())
 		.pipe(gulp.dest("dist/lib/"));
 });
 

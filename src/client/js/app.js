@@ -538,7 +538,7 @@ events.on("exportGIF", options => {
 	btn.text("Processing...", true);
 	btn.addClass("disabled");
 	const gif = new GIF({
-		workers: 3,
+		workers: 4,
 		quality: 10,
 		repeat: 0,
 		width: options.width,
@@ -852,6 +852,10 @@ function createJointElement(id, name) {
 			}
 		}
 
+		if (vue.timeline.graph.state.isPlaying) {
+			vue.timeline.graph.stop();
+		}
+
 		activePane = "joints";
 	});
 
@@ -863,14 +867,16 @@ function createJointElement(id, name) {
 }
 
 function setJointProperties(joint) {
-	let propertyPane = dom.query("#propertyApp");
+	let propertyApp = dom.query("#propertyApp");
 	if (joint) {
-		propertyPane.removeClass("disabled");
+		if (!vue.timeline.graph.state.isPlaying) {
+			propertyApp.removeClass("disabled");
+		}
 
 		//Prop
-		let nameEl = propertyPane.query("#jointName");
-		let lengthEl = propertyPane.query("#jointLength");
-		let zIndexEl = propertyPane.query("#jointZIndex");
+		let nameEl = propertyApp.query("#jointName");
+		let lengthEl = propertyApp.query("#jointLength");
+		let zIndexEl = propertyApp.query("#jointZIndex");
 		nameEl.value(joint.name);
 		lengthEl.value(joint.length.toFixed(2));
 		zIndexEl.value(parseInt(joint.zIndex));
@@ -884,9 +890,9 @@ function setJointProperties(joint) {
 		}
 
 		//Transform
-		let xEl = propertyPane.query("#jointX");
-		let yEl = propertyPane.query("#jointY");
-		let angleEl = propertyPane.query("#jointAngle");
+		let xEl = propertyApp.query("#jointX");
+		let yEl = propertyApp.query("#jointY");
+		let angleEl = propertyApp.query("#jointAngle");
 
 		xEl.value(joint.position.x.toFixed(2));
 		yEl.value(joint.position.y.toFixed(2));
@@ -933,19 +939,18 @@ function setJointProperties(joint) {
 			}
 		}
 	} else {
-		propertyPane.addClass("disabled");
+		propertyApp.addClass("disabled");
 	}
 }
 
 events.on("timelineSeeked", () => {
+	if (vue.timeline.graph.state.isPlaying) return;
 	let activeJoint = rigModel.activeJoint;
 	if (activeJoint) {
 		setJointProperties(activeJoint);
 	}
 
-	if (!vue.timeline.graph.state.isPlaying) {
-		events.emit("jointChange", rigModel.joints);
-	}
+	events.emit("jointChange", rigModel.joints);
 
 	activePane = "timeline";
 });
@@ -1164,6 +1169,11 @@ function addHistoryEl(event) {
 			vue.timeline.graph.redraw();
 
 			setJointProperties(rigModel.activeJoint);
+
+
+			if (vue.timeline.graph.state.isPlaying) {
+				vue.timeline.graph.stop();
+			}
 		}
 	});
 }
