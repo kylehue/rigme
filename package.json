@@ -5,7 +5,7 @@
 	"main": "server.js",
 	"scripts": {
 		"start": "node dist/server/server.js",
-    "postinstall": "gulp build"
+		"postinstall": "gulp build"
 	},
 	"author": "kylehue",
 	"license": "MIT",
