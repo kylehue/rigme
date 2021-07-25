@@ -1,12 +1,9 @@
 const path = require("path");
 
 module.exports = {
-	mode: "development",
+	mode: "production",
 	output: {
-		path: path.resolve(__dirname, "dist/"),
+		path: path.resolve(__dirname, "dist/client/js/"),
 		filename: "app.js",
-	},
-	node: {
-		fs: 'empty'
 	}
 };

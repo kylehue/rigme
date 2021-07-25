@@ -132,6 +132,4 @@ const paneApp = new Vue({
 	}
 });
 
-console.log(paneApp)
-
 module.exports = paneApp;

@@ -16,8 +16,6 @@ const extractKeyframes = require("../lib/extract.keyframes.js");
 events.emit("loadedApps", vue);
 
 //Adding joint affects all frames
-//Fix lag when loading a project
-
 
 window.rigModel = rigModel;
 
@@ -1618,9 +1616,9 @@ renderer.render(() => {
 	renderer.redraw();
 });
 
-key.on("keyup", function() {
+/*key.on("keyup", function() {
 	if (key.code === 16) {
 		console.log(history);
 		console.log(rigModel);
 	}
-});
+});*/
