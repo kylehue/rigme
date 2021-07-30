@@ -1,5 +1,3 @@
-"use strict";
-
 var events = require("../../lib/events.js");
 
 var utils = require("../../lib/utils.js");
