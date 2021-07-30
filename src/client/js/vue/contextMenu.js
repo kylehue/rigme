@@ -1,5 +1,5 @@
 const clonedeep = require("lodash.clonedeep");
-const rigModel = require("../../lib/rig.model.js");
+const rigModel = require("../rig.model.js");
 const config = require("../../../lib/config.js");
 const utils = require("../../../lib/utils.js");
 const vector = require("../../../lib/vector.js");

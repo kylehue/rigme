@@ -7,6 +7,7 @@ const history = require("./history.js");
 
 let timeline;
 
+let showSkeleton = document.getElementById("showSkeleton")
 class RigModel {
 	constructor() {
 		this.joints = [];
@@ -1015,6 +1016,7 @@ class RigModel {
 	}
 
 	render(renderer) {
+		let showBones = showSkeleton.checked;
 		if (timeline.graph) {
 			let previousFrame = timeline.graph.state.previousFrame;
 			let currentFrame = timeline.graph.state.currentFrame;
@@ -1029,7 +1031,7 @@ class RigModel {
 					x: this.bounds.min.x,
 					y: this.bounds.min.y
 				},
-				showBones: true
+				showBones: showBones
 			});
 
 			this.renderTo(renderer.context, {
@@ -1038,7 +1040,7 @@ class RigModel {
 					x: this.bounds.min.x,
 					y: this.bounds.min.y
 				},
-				showBones: true
+				showBones: showBones
 			});
 
 			this.renderTo(renderer.context, {
@@ -1047,7 +1049,7 @@ class RigModel {
 					x: this.bounds.min.x,
 					y: this.bounds.min.y
 				},
-				showBones: true
+				showBones: showBones
 			});
 			renderer.restore();
 
@@ -1061,7 +1063,7 @@ class RigModel {
 					x: this.bounds.min.x,
 					y: this.bounds.min.y
 				},
-				showBones: true,
+				showBones: showBones,
 				showSkin: true,
 				workColor: true
 			});

@@ -1,6 +1,6 @@
 const events = require("../../../lib/events.js");
 const dom = require("../../../lib/dom.js");
-const randomTitle = require("../../lib/random.title.js");
+const randomTitle = require("../random.title.js");
 
 const saveApp = new Vue({
 	el: "#saveApp",

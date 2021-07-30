@@ -11,15 +11,16 @@ module.exports = {
 			img.onload = () => {
 				const _canvas = document.createElement("canvas");
 				const _context = _canvas.getContext("2d");
-				_canvas.width = img.width;
-				_canvas.height = img.height;
-				_context.drawImage(img, 0, 0);
+				let size = this.scaleSize(img.width, img.height, 360, 240);
+				_canvas.width = size.width;
+				_canvas.height = size.height;
+				_context.drawImage(img, 0, 0, _canvas.width, _canvas.height);
 				let dataURL = _canvas.toDataURL("image/png");
 
 				resolve({
 					url: dataURL,
-					width: img.width,
-					height: img.height,
+					width: _canvas.width,
+					height: _canvas.height,
 					image: _canvas
 				});
 			}

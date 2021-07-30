@@ -1,6 +1,6 @@
 const streamSaver = require("streamsaver");
 const yj = require("yieldable-json");
-const renderer = require("../lib/renderer.js");
+const renderer = require("./renderer.js");
 const dom = require("../../lib/dom.js");
 const events = require("../../lib/events.js");
 const vector = require("../../lib/vector.js");
@@ -9,14 +9,14 @@ const key = require("../../lib/key.js");
 const utils = require("../../lib/utils.js");
 const config = require("../../lib/config.js");
 const vue = require("./vue/vue.js");
-const rigModel = require("../lib/rig.model.js");
-const history = require("../lib/history.js");
-const extractKeyframes = require("../lib/extract.keyframes.js");
+const rigModel = require("./rig.model.js");
+const history = require("./history.js");
+const extractKeyframes = require("./extract.keyframes.js");
 events.emit("loadedApps", vue);
 
-//Adding joint affects all frames
-
 window.rigModel = rigModel;
+
+const __development = true;
 
 let jointCrop,
 	activePane,
@@ -1903,10 +1903,12 @@ renderer.render(() => {
 	renderer.redraw();
 });
 
-key.on("keyup", function() {
-	if (key.code === 16) {
-		console.log(history);
-		console.log(rigModel);
-		console.log(overlayFrames)
-	}
-});
+if (__development) {
+	key.on("keyup", function() {
+		if (key.code === 16) {
+			console.log(history);
+			console.log(rigModel);
+			console.log(overlayFrames)
+		}
+	});
+}
