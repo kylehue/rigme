@@ -140,7 +140,7 @@ var overlayConfigApp = new Vue({
           value = _this.angle;
         }
 
-        handle.style.left = "".concat(utils.map(value, min, max, positionMin, positionMax), "px");
+        handle.style.left = utils.map(value, min, max, positionMin, positionMax) + "px";
 
         slider.onmousemove = function () {
           if (mouse.dragged && !activeSliderDrag) {
@@ -229,7 +229,7 @@ function handleSliders() {
     var positionMax = trackBounds.width - handleBounds.width;
     var position = mouse.x - trackBounds.x - handleBounds.width / 2;
     position = utils.clamp(position, positionMin, positionMax);
-    handle.style.left = "".concat(position, "px");
+    handle.style.left = position + "px";
     var min, max, target;
 
     if (activeSliderDrag.dataset.label == "opacity") {

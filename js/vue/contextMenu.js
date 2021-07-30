@@ -32,8 +32,8 @@ var contextMenuApp = new Vue({
         _this.height = _this.$el.offsetHeight;
         _this.position.x = x;
         _this.position.y = y;
-        _this.$el.style.left = "".concat(_this.position.x, "px");
-        _this.$el.style.top = "".concat(_this.position.y, "px");
+        _this.$el.style.left = _this.position.x + "px";
+        _this.$el.style.top = _this.position.y + "px";
       });
     },
     hide: function hide() {

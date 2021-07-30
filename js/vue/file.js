@@ -27,8 +27,8 @@ var fileApp = new Vue({
       this.hidden = false;
       this.$nextTick(function () {
         var fileButtonBounds = document.getElementById("fileButton").getBoundingClientRect();
-        _this.$el.style.left = "".concat(fileButtonBounds.x, "px");
-        _this.$el.style.top = "".concat(fileButtonBounds.y + fileButtonBounds.height + 3, "px");
+        _this.$el.style.left = fileButtonBounds.x + "px";
+        _this.$el.style.top = fileButtonBounds.y + fileButtonBounds.height + 3 + "px";
       });
     },
     hide: function hide() {
