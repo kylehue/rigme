@@ -4,7 +4,7 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e78) { throw _e78; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e79) { didErr = true; err = _e79; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e78) { throw _e78; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e79) { didErr = true; err = _e79; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
@@ -79,7 +79,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     return n;
   }, i.n = function (e) {
     var t = e && e.__esModule ? function () {
-      return e["default"];
+      return e.default;
     } : function () {
       return e;
     };
@@ -703,7 +703,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
         color: {
           selected: "#ff565a",
           moving: "#b5babe",
-          "default": "#dce0e4"
+          default: "#dce0e4"
         }
       },
       segment: {
@@ -713,7 +713,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       keyframe: {
         size: 6,
         color: {
-          "default": "#ff4258",
+          default: "#ff4258",
           hovered: "#ee2b47",
           active: "#e31d42"
         }
@@ -721,7 +721,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       timeline: {
         scrollbar: {
           color: {
-            "default": "rgba(240, 230, 250, 0.045)",
+            default: "rgba(240, 230, 250, 0.045)",
             hovered: "rgba(240, 230, 250, 0.06)",
             active: "rgba(240, 230, 250, 0.075)"
           }
@@ -870,7 +870,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
         play: document.getElementById("playStop"),
         next: document.getElementById("nextFrame"),
         add: document.getElementById("addKeyframe"),
-        "delete": document.getElementById("deleteKeyframe"),
+        delete: document.getElementById("deleteKeyframe"),
         zoomIn: document.getElementById("zoomInTimeline"),
         zoomOut: document.getElementById("zoomOutTimeline"),
         minimize: document.getElementById("minimize"),
@@ -907,7 +907,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
         y: 0,
         width: this.canvas.width,
         height: void 0,
-        color: o.render.timeline.scrollbar.color["default"],
+        color: o.render.timeline.scrollbar.color.default,
         left: 0,
         right: this.canvas.width,
         minWidth: 50,
@@ -1012,7 +1012,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
             });
           }
 
-          _this5.scrollbar.color = o.render.timeline.scrollbar.color["default"], _this5.snap(), _this5.state.isDragging = !1, _this5.playbackHandle.start.isDragging = !1, _this5.playbackHandle.end.isDragging = !1, e = null, _this5.canvas.style.cursor = "default", _this5.redraw();
+          _this5.scrollbar.color = o.render.timeline.scrollbar.color.default, _this5.snap(), _this5.state.isDragging = !1, _this5.playbackHandle.start.isDragging = !1, _this5.playbackHandle.end.isDragging = !1, e = null, _this5.canvas.style.cursor = "default", _this5.redraw();
         }), addEventListener("mousedown", function () {
           if (f(_this5.canvas)) {
             if (y = !0, r.emit("renderSleep"), _this5.playbackHandle.end.mark >= p.totalFrames && 1 != p.totalFrames && (_this5.playbackHandle.end.mark = p.totalFrames - 1, _this5.playbackHandle.end._x = _this5.markToX(_this5.playbackHandle.end.mark), _this5.redraw()), y && !v) if (n) b = _this5.scrollbar.left - t, v = "scrollbar";else if (l) {
@@ -1055,12 +1055,12 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
                 var _e13 = _n10.render.position.x,
                     _r4 = _n10.render.position.y,
                     _a = _n10.render.size;
-                t <= _e13 + _a && t >= _e13 - _a && i <= _r4 + _a && i && i >= _r4 - _a ? (_n10.hovered = !0, _n10.render.color = o.render.keyframe.color.hovered, _this5.canvas.style.cursor = "pointer", _this5.redraw()) : (_n10.hovered = !1, _n10.render.color = o.render.keyframe.color["default"], _this5.redraw());
+                t <= _e13 + _a && t >= _e13 - _a && i <= _r4 + _a && i && i >= _r4 - _a ? (_n10.hovered = !0, _n10.render.color = o.render.keyframe.color.hovered, _this5.canvas.style.cursor = "pointer", _this5.redraw()) : (_n10.hovered = !1, _n10.render.color = o.render.keyframe.color.default, _this5.redraw());
               }
             }
           }
 
-          if (n && t >= _this5.scrollbar.left && t <= _this5.scrollbar.right ? (_this5.scrollbar.color = o.render.timeline.scrollbar.color.hovered, _this5.redraw()) : (_this5.scrollbar.color = o.render.timeline.scrollbar.color["default"], _this5.redraw()), y) {
+          if (n && t >= _this5.scrollbar.left && t <= _this5.scrollbar.right ? (_this5.scrollbar.color = o.render.timeline.scrollbar.color.hovered, _this5.redraw()) : (_this5.scrollbar.color = o.render.timeline.scrollbar.color.default, _this5.redraw()), y) {
             if ("scrollbar" == v && (u ? (_this5.scrollbar.left = s.clamp(t, 0, _this5.scrollbar.right - _this5.scrollbar.minWidth), _this5.scrollbar.width = _this5.scrollbar.right - _this5.scrollbar.left, _this5.canvas.style.cursor = "ew-resize") : g && (_this5.scrollbar.right = s.clamp(t, _this5.scrollbar.left + _this5.scrollbar.minWidth, _this5.canvas.width), _this5.scrollbar.width = _this5.scrollbar.right - _this5.scrollbar.left, _this5.canvas.style.cursor = "ew-resize"), u || g || (_this5.scrollbar.left = s.clamp(t + b, 0, _this5.canvas.width - _this5.scrollbar.width), _this5.scrollbar.right = _this5.scrollbar.left + _this5.scrollbar.width, _this5.canvas.style.cursor = "default"), _this5.snap()), "timeline" == v || "keyframe" == v) {
               _this5.state.isDragging = !0, _this5.state._x = s.clamp(t, _this5.hatchMark.spacing / 2, _this5.canvas.width - _this5.hatchMark.spacing / 2);
 
@@ -1122,7 +1122,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
             locked: 0 == _this6.state.currentMark,
             joints: e
           });
-        }), this.buttons["delete"].addEventListener("click", function () {
+        }), this.buttons.delete.addEventListener("click", function () {
           r.emit("deleteKeyframe");
         }), this.buttons.zoomIn.addEventListener("mousedown", function () {
           r.emit("checkMouseHold", "zoomIn");
@@ -1747,7 +1747,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
           joints: t.joints,
           render: {
             size: a.render.keyframe.size,
-            color: a.render.keyframe.color["default"],
+            color: a.render.keyframe.color.default,
             position: t.position || r(e * l.graph.hatchMark.spacing + l.graph.hatchMark.spacing / 2, 0)
           },
           locked: t.locked || !1
@@ -2244,9 +2244,9 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 
           for (o = 0; o < i.joints.length; o++) {
             var _s5 = i.joints[o],
-                _h3 = _s5 === this.activeJoint ? a.render.joint.color.selected : a.render.joint.color["default"];
+                _h3 = _s5 === this.activeJoint ? a.render.joint.color.selected : a.render.joint.color.default;
 
-            l.graph && (this.activeJoint && !l.graph.state.isPlaying && (this.activeJoint.children.length && (_h3 = this.activeJoint.children.includes(_s5) ? "#5bff85" : _h3), this.activeJoint.parent && (_h3 = this.activeJoint.parent === _s5 ? "#9b68e1" : _h3)), l.graph.state.isPlaying && (_h3 = a.render.joint.color["default"])), e.beginPath(), e.arc(_s5.position.x + n, _s5.position.y + r, a.render.joint.radius, 0, 2 * Math.PI), e.closePath(), e.fillStyle = t.workColor ? _h3 : a.render.joint.color["default"], e.fill();
+            l.graph && (this.activeJoint && !l.graph.state.isPlaying && (this.activeJoint.children.length && (_h3 = this.activeJoint.children.includes(_s5) ? "#5bff85" : _h3), this.activeJoint.parent && (_h3 = this.activeJoint.parent === _s5 ? "#9b68e1" : _h3)), l.graph.state.isPlaying && (_h3 = a.render.joint.color.default)), e.beginPath(), e.arc(_s5.position.x + n, _s5.position.y + r, a.render.joint.radius, 0, 2 * Math.PI), e.closePath(), e.fillStyle = t.workColor ? _h3 : a.render.joint.color.default, e.fill();
           }
         }
       }
@@ -2792,7 +2792,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 
     re.prototype.clear = function () {
       this.__data__ = V ? V(null) : {};
-    }, re.prototype["delete"] = function (e) {
+    }, re.prototype.delete = function (e) {
       return this.has(e) && delete this.__data__[e];
     }, re.prototype.get = function (e) {
       var t = this.__data__;
@@ -2810,7 +2810,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       return this.__data__[e] = V && void 0 === t ? "__lodash_hash_undefined__" : t, this;
     }, ae.prototype.clear = function () {
       this.__data__ = [];
-    }, ae.prototype["delete"] = function (e) {
+    }, ae.prototype.delete = function (e) {
       var t = this.__data__,
           i = ce(t, e);
       return !(i < 0) && (i == t.length - 1 ? t.pop() : H.call(t, i, 1), !0);
@@ -2830,8 +2830,8 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
         map: new (Y || ae)(),
         string: new re()
       };
-    }, oe.prototype["delete"] = function (e) {
-      return ge(this, e)["delete"](e);
+    }, oe.prototype.delete = function (e) {
+      return ge(this, e).delete(e);
     }, oe.prototype.get = function (e) {
       return ge(this, e).get(e);
     }, oe.prototype.has = function (e) {
@@ -2840,8 +2840,8 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       return ge(this, e).set(e, t), this;
     }, se.prototype.clear = function () {
       this.__data__ = new ae();
-    }, se.prototype["delete"] = function (e) {
-      return this.__data__["delete"](e);
+    }, se.prototype.delete = function (e) {
+      return this.__data__.delete(e);
     }, se.prototype.get = function (e) {
       return this.__data__.get(e);
     }, se.prototype.has = function (e) {
@@ -3866,7 +3866,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     if (e.model) {
       var _t30 = f.fromJSON(e.model);
 
-      f.reset(), f["import"](_t30);
+      f.reset(), f.import(_t30);
     } else console.warn("Couldn't load model.");
 
     if (e.config ? ("number" == typeof e.config.frameCount && (document.getElementById("frameCount").value = e.config.frameCount), "number" == typeof e.config.animationSpeed && (document.getElementById("animationSpeed").value = e.config.animationSpeed), p.timeline.app.fixData(), "number" == typeof e.config.start && (p.timeline.graph.playbackHandle.start.mark = e.config.start), "number" == typeof e.config.end && (p.timeline.graph.playbackHandle.end.mark = e.config.end), p.timeline.graph.redraw(), "number" == typeof e.config.overlay.opacity && (p.overlayConfigApp.opacity = e.config.overlay.opacity), "number" == typeof e.config.overlay.scale && (p.overlayConfigApp.scale = e.config.overlay.scale), "number" == typeof e.config.overlay.angle && (p.overlayConfigApp.angle = e.config.overlay.angle), p.overlayConfigApp.updateSliders(), "number" == typeof e.config.overlay.trimStart && (p.overlayConfigApp.trimStart = e.config.overlay.trimStart), "number" == typeof e.config.overlay.trimEnd && (p.overlayConfigApp.trimEnd = e.config.overlay.trimEnd), "number" == typeof e.config.overlay.start && (p.overlayConfigApp.start = e.config.overlay.start)) : console.warn("Couldn't load configurations."), e.overlay) {
@@ -4641,13 +4641,13 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
   }), s.on("undo", function () {
     var e = g.getPrevious();
     if (!e) return;
-    "keyframe" == e.group && (f["import"](e.value), g.backward(), p.timeline.graph.updateState(), p.timeline.graph.redraw(), G(f.activeJoint)), o.query(".history.current", !0).removeClass("current");
+    "keyframe" == e.group && (f.import(e.value), g.backward(), p.timeline.graph.updateState(), p.timeline.graph.redraw(), G(f.activeJoint)), o.query(".history.current", !0).removeClass("current");
     var t = o.query("#" + e.id);
     t.addClass("current"), o.query("#historyApp").node.scrollTop = t.node.offsetTop;
   }), s.on("redo", function () {
     var e = g.getNext();
     if (!e) return;
-    "keyframe" == e.group && (f["import"](e.value), g.forward(), p.timeline.graph.updateState(), p.timeline.graph.redraw(), G(f.activeJoint)), o.query(".history.current", !0).removeClass("current");
+    "keyframe" == e.group && (f.import(e.value), g.forward(), p.timeline.graph.updateState(), p.timeline.graph.redraw(), G(f.activeJoint)), o.query(".history.current", !0).removeClass("current");
     var t = o.query("#" + e.id);
     t.addClass("current"), o.query("#historyApp").node.scrollTop = t.node.offsetTop;
   }), s.on("historyChange", function () {
@@ -4675,11 +4675,11 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       t.query(".history.current", !0).removeClass("current");
       var i = t.create("div");
       i.attr("id", e.id), i.addClass("history", "current"), i.create("p").text(e.label), t.node.scrollTop = t.node.scrollHeight, i.on("click", function () {
-        "keyframe" == e.group && (t.query(".history.current", !0).removeClass("current"), i.addClass("current"), g.jump(e.id), f["import"](e.value), p.timeline.graph.updateState(), p.timeline.graph.redraw(), G(f.activeJoint), p.timeline.graph.state.isPlaying && p.timeline.graph.stop());
+        "keyframe" == e.group && (t.query(".history.current", !0).removeClass("current"), i.addClass("current"), g.jump(e.id), f.import(e.value), p.timeline.graph.updateState(), p.timeline.graph.redraw(), G(f.activeJoint), p.timeline.graph.state.isPlaying && p.timeline.graph.stop());
       });
     }(g.getLatest());
   }), d.loadJSONData(u.autosave.label, function (e) {
-    f["import"](f.fromJSON(e)), g.add({
+    f.import(f.fromJSON(e)), g.add({
       label: "Load autosave",
       value: f.clone(),
       group: "keyframe"
