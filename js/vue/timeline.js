@@ -59,11 +59,7 @@ var timelineApp = new Vue({
     },
     validateFormat: function validateFormat(e) {
       timeline.redraw();
-      var num = new RegExp("[^0-9.-]", "g");
-      var sym_a = new RegExp("(\..*)\.", "g");
-      var sym_b = new RegExp("^0+", "g");
-      var sym_c = new RegExp("(?<!^)-", "g");
-      e.target.value = e.target.value.replace(num, "").replace(sym_a, "$1").replace(sym_b, "").replace(sym_c, "");
+      e.target.value = e.target.value.replace(/[^0-9.-]/g, "").replace(/(\..*)\./g, "$1").replace(/^0+/g, "").replace(/(?<!^)-/g, "");
       this.validateMax(e);
       this.fixData();
     },
@@ -215,7 +211,7 @@ var Timeline = /*#__PURE__*/function () {
       play: document.getElementById("playStop"),
       next: document.getElementById("nextFrame"),
       add: document.getElementById("addKeyframe"),
-      delete: document.getElementById("deleteKeyframe"),
+      "delete": document.getElementById("deleteKeyframe"),
       zoomIn: document.getElementById("zoomInTimeline"),
       zoomOut: document.getElementById("zoomOutTimeline"),
       minimize: document.getElementById("minimize"),
@@ -273,7 +269,7 @@ var Timeline = /*#__PURE__*/function () {
       y: 0,
       width: this.canvas.width,
       height: undefined,
-      color: config.render.timeline.scrollbar.color.default,
+      color: config.render.timeline.scrollbar.color["default"],
       left: 0,
       right: this.canvas.width,
       minWidth: 50,
@@ -445,7 +441,7 @@ var Timeline = /*#__PURE__*/function () {
           });
         }
 
-        _this3.scrollbar.color = config.render.timeline.scrollbar.color.default;
+        _this3.scrollbar.color = config.render.timeline.scrollbar.color["default"];
 
         _this3.snap();
 
@@ -514,7 +510,7 @@ var Timeline = /*#__PURE__*/function () {
                 _this3.redraw();
               } else {
                 frame.hovered = false;
-                frame.render.color = config.render.keyframe.color.default;
+                frame.render.color = config.render.keyframe.color["default"];
 
                 _this3.redraw();
               }
@@ -529,12 +525,12 @@ var Timeline = /*#__PURE__*/function () {
 
             _this3.redraw();
           } else {
-            _this3.scrollbar.color = config.render.timeline.scrollbar.color.default;
+            _this3.scrollbar.color = config.render.timeline.scrollbar.color["default"];
 
             _this3.redraw();
           }
         } else {
-          _this3.scrollbar.color = config.render.timeline.scrollbar.color.default;
+          _this3.scrollbar.color = config.render.timeline.scrollbar.color["default"];
 
           _this3.redraw();
         }
@@ -672,7 +668,7 @@ var Timeline = /*#__PURE__*/function () {
         });
       }); //Delete keyframe button
 
-      this.buttons.delete.addEventListener("click", function () {
+      this.buttons["delete"].addEventListener("click", function () {
         events.emit("deleteKeyframe");
       });
       var holdInterval; //Zoom in

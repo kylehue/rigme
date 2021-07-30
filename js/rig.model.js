@@ -328,7 +328,7 @@ var RigModel = /*#__PURE__*/function () {
         joints: options.joints,
         render: {
           size: config.render.keyframe.size,
-          color: config.render.keyframe.color.default,
+          color: config.render.keyframe.color["default"],
           position: options.position || vector(index * timeline.graph.hatchMark.spacing + timeline.graph.hatchMark.spacing / 2, 0)
         },
         locked: options.locked || false
@@ -1078,7 +1078,7 @@ var RigModel = /*#__PURE__*/function () {
 
         for (var i = 0; i < frame.joints.length; i++) {
           var _joint3 = frame.joints[i];
-          var jointColor = _joint3 === this.activeJoint ? config.render.joint.color.selected : config.render.joint.color.default;
+          var jointColor = _joint3 === this.activeJoint ? config.render.joint.color.selected : config.render.joint.color["default"];
 
           if (timeline.graph) {
             if (this.activeJoint && !timeline.graph.state.isPlaying) {
@@ -1087,14 +1087,14 @@ var RigModel = /*#__PURE__*/function () {
             }
 
             if (timeline.graph.state.isPlaying) {
-              jointColor = config.render.joint.color.default;
+              jointColor = config.render.joint.color["default"];
             }
           }
 
           ctx.beginPath();
           ctx.arc(_joint3.position.x + offset.x, _joint3.position.y + offset.y, config.render.joint.radius, 0, Math.PI * 2);
           ctx.closePath();
-          ctx.fillStyle = options.workColor ? jointColor : config.render.joint.color.default;
+          ctx.fillStyle = options.workColor ? jointColor : config.render.joint.color["default"];
           ctx.fill();
         }
       }
