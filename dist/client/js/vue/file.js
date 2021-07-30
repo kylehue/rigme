@@ -1,1 +1,48 @@
-"use strict";var saveApp=require("./save.js"),loadApp=require("./load.js"),spritesheetExportApp=require("./export.spritesheet.js"),framesExportApp=require("./export.frames.js"),GIFExportApp=require("./export.gif.js"),fileApp=new Vue({el:"#fileApp",data:{showExportFormats:!1,hidden:!0,position:{x:0,y:0}},methods:{show:function(e,p){var t=this;this.hidden=!1,this.$nextTick(function(){var e=document.getElementById("fileButton").getBoundingClientRect();t.$el.style.left="".concat(e.x,"px"),t.$el.style.top="".concat(e.y+e.height+3,"px")})},hide:function(){this.hidden=!0,this.showExportFormats=!1},showSaveApp:function(){saveApp.show()},showLoadApp:function(){loadApp.show()},showSpritesheetExportApp:function(){spritesheetExportApp.show()},showFrameExportApp:function(){framesExportApp.show()},showGIFExportApp:function(){GIFExportApp.show()}}});module.exports=fileApp;
+const saveApp = require("./save.js");
+const loadApp = require("./load.js");
+const spritesheetExportApp = require("./export.spritesheet.js");
+const framesExportApp = require("./export.frames.js");
+const GIFExportApp = require("./export.gif.js");
+
+const fileApp = new Vue({
+	el: "#fileApp",
+	data: {
+		showExportFormats: false,
+		hidden: true,
+		position: {
+			x: 0,
+			y: 0
+		}
+	},
+	methods: {
+		show: function(x, y) {
+			this.hidden = false;
+			this.$nextTick(() => {
+				let fileButtonBounds = document.getElementById("fileButton").getBoundingClientRect();
+				this.$el.style.left = `${fileButtonBounds.x}px`;
+				this.$el.style.top = `${fileButtonBounds.y + fileButtonBounds.height + 3}px`;
+			});
+		},
+		hide: function() {
+			this.hidden = true;
+			this.showExportFormats = false;
+		},
+		showSaveApp: function () {
+			saveApp.show();
+		},
+		showLoadApp: function () {
+			loadApp.show();
+		},
+		showSpritesheetExportApp: function () {
+			spritesheetExportApp.show();
+		},
+		showFrameExportApp: function () {
+			framesExportApp.show();
+		},
+		showGIFExportApp: function () {
+			GIFExportApp.show();
+		}
+	}
+});
+
+module.exports = fileApp;

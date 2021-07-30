@@ -18,6 +18,7 @@
 		"gulp-autoprefixer": "^8.0.0",
 		"gulp-babel": "^8.0.0",
 		"gulp-cli": "^2.3.0",
+		"gulp-gh-pages": "^0.5.4",
 		"gulp-imagemin": "^7.1.0",
 		"gulp-minify-html": "^1.0.6",
 		"gulp-nodemon": "^2.5.0",

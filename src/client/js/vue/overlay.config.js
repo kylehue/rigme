@@ -1,9 +1,9 @@
-const events = require("../../../../lib/events.js");
-const mouse = require("../../../../lib/mouse.js");
-const config = require("../../../../lib/config.js");
-const utils = require("../../../../lib/utils.js");
+const events = require("../../../lib/events.js");
+const mouse = require("../../../lib/mouse.js");
+const config = require("../../../lib/config.js");
+const utils = require("../../../lib/utils.js");
+const dom = require("../../../lib/dom.js");
 const timeline = require("./timeline.js");
-const dom = require("../../../../lib/dom.js");
 
 let minOpacity = 0;
 let maxOpacity = 1;

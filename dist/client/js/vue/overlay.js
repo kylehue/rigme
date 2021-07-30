@@ -1,1 +1,163 @@
-"use strict";function _createForOfIteratorHelper(e,t){var r="undefined"!=typeof Symbol&&e[Symbol.iterator]||e["@@iterator"];if(!r){if(Array.isArray(e)||(r=_unsupportedIterableToArray(e))||t&&e&&"number"==typeof e.length){r&&(e=r);var a=0,t=function(){};return{s:t,n:function(){return a>=e.length?{done:!0}:{done:!1,value:e[a++]}},e:function(e){throw e},f:t}}throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}var n,o=!0,l=!1;return{s:function(){r=r.call(e)},n:function(){var e=r.next();return o=e.done,e},e:function(e){l=!0,n=e},f:function(){try{o||null==r.return||r.return()}finally{if(l)throw n}}}}function _unsupportedIterableToArray(e,t){if(e){if("string"==typeof e)return _arrayLikeToArray(e,t);var r=Object.prototype.toString.call(e).slice(8,-1);return"Map"===(r="Object"===r&&e.constructor?e.constructor.name:r)||"Set"===r?Array.from(e):"Arguments"===r||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(r)?_arrayLikeToArray(e,t):void 0}}function _arrayLikeToArray(e,t){(null==t||t>e.length)&&(t=e.length);for(var r=0,a=new Array(t);r<t;r++)a[r]=e[r];return a}var currentFileURL,videoDuration,events=require("../../../../lib/events.js"),utils=require("../../../../lib/utils.js"),dom=require("../../../../lib/dom.js"),overlayApp=new Vue({el:"#overlayApp",data:{hidden:!0,closeMsg:"Close"},methods:{show:function(){var e=this;this.hidden=!1,this.$nextTick(function(){e.$el.style.opacity="1",dom.query("#overlayApp .drag").draggable({restrict:!0,root:e.$el}),events.emit("renderSleep")})},hide:function(){videoDuration=currentFileURL=void 0,document.getElementById("overlayFilename").innerText="Choose a file...";var e,t=_createForOfIteratorHelper(document.querySelectorAll("#overlayApp .section.disabled"));try{for(t.s();!(e=t.n()).done;)e.value.classList.add("disabled")}catch(e){t.e(e)}finally{t.f()}document.getElementById("addOverlay").classList.add("disabled"),this.hidden=!0,events.emit("renderFocus")},validateFormat:function(e){e.target.value=e.target.value.replace(/[^0-9.-]/g,"").replace(/(\..*)\./g,"$1").replace(/^0+/g,"").replace(/(?<!^)-/g,""),this.validateMax(e)},validateAmount:function(e){this.validateMin(e),this.validateMax(e)},validateMax:function(e){var t=e.target.value,r=e.target.dataset.max;"number"==typeof videoDuration&&("overlayStart"==e.target.id&&(r=videoDuration),"overlayEnd"==e.target.id&&(r=videoDuration)),parseInt(t)>r&&(e.target.value=r.toString())},validateMin:function(e){var t=e.target.value,r=e.target.dataset.min;"overlayEnd"==e.target.id&&(r=parseInt(document.getElementById("overlayStart").value)),parseInt(t)<r&&(e.target.value=r.toString())},toggleAmount:function(e){var t,r;e.target==document.activeElement&&(e.target.value.length||(e.target.value=1),t=e.wheelDeltaY<0,r=parseInt(e.target.value),t?r--:r++,e.target.value=r.toString(),this.validateAmount(e))},checkFile:function(){var e=document.getElementById("overlayInput"),t=document.getElementById("overlayFilename"),e=e.files[0];if(e){t.innerText=e.name;e=URL.createObjectURL(e);if(e){currentFileURL=e;var r=document.createElement("video");r.crossOrigin="anonymous",r.controls=!0,r.muted=!0,r.src=e,r.load(),r.addEventListener("loadedmetadata",function(){videoDuration=r.duration,r.remove()});var a,n=_createForOfIteratorHelper(document.querySelectorAll("#overlayApp .section.disabled"));try{for(n.s();!(a=n.n()).done;)a.value.classList.remove("disabled")}catch(e){n.e(e)}finally{n.f()}document.getElementById("addOverlay").classList.remove("disabled")}}},validate:function(){var e,t,r,a,n;currentFileURL&&(e=document.getElementById("overlayFrameCount").value,t=document.getElementById("overlayFrameRate").value,r=document.getElementById("overlayStart").value,a=document.getElementById("overlayEnd").value,n=document.getElementById("overlayQuality").value,e=e.length?parseInt(e):void 0,t=t.length?parseInt(t):void 0,r=r.length?parseInt(r):void 0,a=a.length?parseInt(a):void 0,n=n.length?parseInt(n)/100:void 0,events.emit("extractFrames",currentFileURL,{frameCount:e,frameRate:t,start:r,end:a,quality:n}),this.hide())}}});module.exports=overlayApp;
+const events = require("../../../lib/events.js");
+const utils = require("../../../lib/utils.js");
+const dom = require("../../../lib/dom.js");
+var currentFileURL, videoDuration;
+const overlayApp = new Vue({
+	el: "#overlayApp",
+	data: {
+		hidden: true,
+		closeMsg: "Close"
+	},
+	methods: {
+		show: function() {
+			this.hidden = false;
+			this.$nextTick(() => {
+				this.$el.style.opacity = "1";
+				dom.query("#overlayApp .drag").draggable({
+					restrict: true,
+					root: this.$el
+				});
+
+				events.emit("renderSleep");
+			});
+		},
+		hide: function() {
+			currentFileURL = undefined;
+			videoDuration = undefined;
+
+			let filenameEl = document.getElementById("overlayFilename");
+			filenameEl.innerText = "Choose a file...";
+
+			let sections = document.querySelectorAll("#overlayApp .section.disabled");
+
+			for (let section of sections) {
+				section.classList.add("disabled");
+			}
+
+			let addButton = document.getElementById("addOverlay");
+			addButton.classList.add("disabled");
+
+			this.hidden = true;
+			events.emit("renderFocus");
+		},
+		validateFormat: function(e) {
+			e.target.value = e.target.value.replace(/[^0-9.-]/g, "").replace(/(\..*)\./g, "$1").replace(/^0+/g, "").replace(/(?<!^)-/g, "");
+			this.validateMax(e);
+		},
+		validateAmount: function(e) {
+			this.validateMin(e);
+			this.validateMax(e);
+		},
+		validateMax: function(e) {
+			let value = e.target.value;
+			let max = e.target.dataset.max;
+
+			if (typeof videoDuration == "number") {
+				if (e.target.id == "overlayStart") {
+					max = videoDuration;
+				}
+
+				if (e.target.id == "overlayEnd") {
+					max = videoDuration;
+				}
+			}
+
+			if (parseInt(value) > max) {
+				e.target.value = max.toString();
+			}
+		},
+		validateMin: function(e) {
+			let value = e.target.value;
+			let min = e.target.dataset.min;
+
+			if (e.target.id == "overlayEnd") {
+				let start = parseInt(document.getElementById("overlayStart").value);
+
+				min = start;
+			}
+
+			if (parseInt(value) < min) {
+				e.target.value = min.toString();
+			}
+		},
+		toggleAmount: function(e) {
+			if (e.target != document.activeElement) return;
+			if (!e.target.value.length) {
+				e.target.value = 1;
+			}
+
+			let isDown = e.wheelDeltaY < 0;
+			let value = parseInt(e.target.value);
+			if (isDown) {
+				value--;
+			} else {
+				value++;
+			}
+
+			e.target.value = value.toString();
+			this.validateAmount(e);
+		},
+		checkFile: function() {
+			let fileEl = document.getElementById("overlayInput");
+			let filenameEl = document.getElementById("overlayFilename");
+			let file = fileEl.files[0];
+			if (!file) return;
+			filenameEl.innerText = file.name;
+			let fileURL = URL.createObjectURL(file);
+			if (fileURL) {
+				currentFileURL = fileURL;
+
+				//Get data
+				const video = document.createElement("video");
+				video.crossOrigin = "anonymous"
+				video.controls = true;
+				video.muted = true;
+				video.src = fileURL;
+				video.load();
+				video.addEventListener("loadedmetadata", () => {
+					videoDuration = video.duration;
+					video.remove();
+				});
+
+				let sections = document.querySelectorAll("#overlayApp .section.disabled");
+
+				for (let section of sections) {
+					section.classList.remove("disabled");
+				}
+
+				let addButton = document.getElementById("addOverlay");
+				addButton.classList.remove("disabled");
+			}
+		},
+		validate: function() {
+			if (!currentFileURL) {
+				return;
+			}
+
+			let frameCount = document.getElementById("overlayFrameCount").value;
+			let frameRate = document.getElementById("overlayFrameRate").value;
+			let start = document.getElementById("overlayStart").value;
+			let end = document.getElementById("overlayEnd").value;
+			let quality = document.getElementById("overlayQuality").value;
+
+			frameCount = frameCount.length ? parseInt(frameCount) : undefined;
+			frameRate = frameRate.length ? parseInt(frameRate) : undefined;
+			start = start.length ? parseInt(start) : undefined;
+			end = end.length ? parseInt(end) : undefined;
+			quality = quality.length ? parseInt(quality) / 100 : undefined;
+
+			let options = {
+				frameCount: frameCount,
+				frameRate: frameRate,
+				start: start,
+				end: end,
+				quality: quality
+			};
+
+			events.emit("extractFrames", currentFileURL, options);
+			this.hide();
+		}
+	}
+});
+
+module.exports = overlayApp;

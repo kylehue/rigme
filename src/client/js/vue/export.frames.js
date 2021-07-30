@@ -1,6 +1,6 @@
-const events = require("../../../../lib/events.js");
-const utils = require("../../../../lib/utils.js");
-const dom = require("../../../../lib/dom.js");
+const events = require("../../../lib/events.js");
+const utils = require("../../../lib/utils.js");
+const dom = require("../../../lib/dom.js");
 const timeline = require("./timeline.js");
 const randomTitle = require("../../lib/random.title.js");
 

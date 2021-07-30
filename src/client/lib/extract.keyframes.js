@@ -1,5 +1,5 @@
-const events = require("../../../lib/events.js");
-const utils = require("../../../lib/utils.js");
+const events = require("../../lib/events.js");
+const utils = require("../../lib/utils.js");
 const HAVE_ENOUGH_DATA = 4;
 let pct;
 

@@ -1,7 +1,7 @@
-const events = require("../../../../lib/events.js");
-const utils = require("../../../../lib/utils.js");
-const dom = require("../../../../lib/dom.js");
-const config = require("../../../../lib/config.js");
+const events = require("../../../lib/events.js");
+const utils = require("../../../lib/utils.js");
+const dom = require("../../../lib/dom.js");
+const config = require("../../../lib/config.js");
 
 const skinningInputIds = ["skinPositionX", "skinPositionY", "skinScaleX", "skinScaleY", "skinAngle"];
 

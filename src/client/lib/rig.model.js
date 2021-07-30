@@ -1,8 +1,8 @@
-const events = require("../../../lib/events.js");
-const mouse = require("../../../lib/mouse.js");
-const vector = require("../../../lib/vector.js");
-const config = require("../../../lib/config.js");
-const utils = require("../../../lib/utils.js");
+const events = require("../../lib/events.js");
+const mouse = require("../../lib/mouse.js");
+const vector = require("../../lib/vector.js");
+const config = require("../../lib/config.js");
+const utils = require("../../lib/utils.js");
 const history = require("./history.js");
 
 let timeline;

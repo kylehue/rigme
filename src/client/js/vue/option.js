@@ -1,5 +1,5 @@
-const events = require("../../../../lib/events.js");
-const mouse = require("../../../../lib/mouse.js");
+const events = require("../../../lib/events.js");
+const mouse = require("../../../lib/mouse.js");
 const overlayApp = require("./overlay.js");
 const overlayConfig = require("./overlay.config.js");
 

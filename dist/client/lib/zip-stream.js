@@ -1,1 +1,198 @@
-"use strict";function _classCallCheck(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function _defineProperties(e,t){for(var r=0;r<t.length;r++){var n=t[r];n.enumerable=n.enumerable||!1,n.configurable=!0,"value"in n&&(n.writable=!0),Object.defineProperty(e,n.key,n)}}function _createClass(e,t,r){return t&&_defineProperties(e.prototype,t),r&&_defineProperties(e,r),e}var Crc32=function(){function e(){_classCallCheck(this,e),this.crc=-1}return _createClass(e,[{key:"append",value:function(e){for(var t=0|this.crc,r=this.table,n=0,a=0|e.length;n<a;n++)t=t>>>8^r[255&(t^e[n])];this.crc=t}},{key:"get",value:function(){return~this.crc}}]),e}();Crc32.prototype.table=function(){for(var e,t,r=[],n=0;n<256;n++){for(t=n,e=0;e<8;e++)t=1&t?t>>>1^3988292384:t>>>1;r[n]=t}return r}();var getDataHelper=function(e){e=new Uint8Array(e);return{array:e,view:new DataView(e.buffer)}},pump=function(t){return t.reader.read().then(function(e){if(e.done)return t.writeFooter();e=e.value;t.crc.append(e),t.uncompressedLength+=e.length,t.compressedLength+=e.length,t.ctrl.enqueue(e)})};function createWriter(t){var i,o,s,c=Object.create(null),l=[],u=new TextEncoder,d=0,e=0;function f(){(o=c[l[++e]])?h():s&&n()}var r={enqueue:function(e){if(s)throw new TypeError("Cannot enqueue a chunk into a readable stream that is closed or has been requested to be closed");var t=e.name.trim(),r=new Date(void 0===e.lastModified?Date.now():e.lastModified);if(e.directory&&!t.endsWith("/")&&(t+="/"),c[t])throw new Error("File already exists.");var n=u.encode(t);l.push(t);var a=c[t]={level:0,ctrl:i,directory:!!e.directory,nameBuf:n,comment:u.encode(e.comment||""),compressedLength:0,uncompressedLength:0,writeHeader:function(){var e=getDataHelper(26),t=getDataHelper(30+n.length);a.offset=d,a.header=e,0===a.level||a.directory||e.view.setUint16(4,2048),e.view.setUint32(0,335546376),e.view.setUint16(6,(r.getHours()<<6|r.getMinutes())<<5|r.getSeconds()/2,!0),e.view.setUint16(8,(r.getFullYear()-1980<<4|r.getMonth()+1)<<5|r.getDate(),!0),e.view.setUint16(22,n.length,!0),t.view.setUint32(0,1347093252),t.array.set(e.array,4),t.array.set(n,30),d+=t.array.length,i.enqueue(t.array)},writeFooter:function(){var e=getDataHelper(16);e.view.setUint32(0,1347094280),a.crc&&(a.header.view.setUint32(10,a.crc.get(),!0),a.header.view.setUint32(14,a.compressedLength,!0),a.header.view.setUint32(18,a.uncompressedLength,!0),e.view.setUint32(4,a.crc.get(),!0),e.view.setUint32(8,a.compressedLength,!0),e.view.setUint32(12,a.uncompressedLength,!0)),i.enqueue(e.array),d+=a.compressedLength+16,f()},fileLike:e};o||(o=a,h())},close:function(){if(s)throw new TypeError("Cannot close a readable stream that has already been requested to be closed");o||n(),s=!0}};function n(){for(var e,t=0,r=0,n=0;n<l.length;n++)t+=46+(e=c[l[n]]).nameBuf.length+e.comment.length;var a=getDataHelper(t+22);for(n=0;n<l.length;n++)e=c[l[n]],a.view.setUint32(r,1347092738),a.view.setUint16(r+4,5120),a.array.set(e.header.array,r+6),a.view.setUint16(r+32,e.comment.length,!0),e.directory&&a.view.setUint8(r+38,16),a.view.setUint32(r+42,e.offset,!0),a.array.set(e.nameBuf,r+46),a.array.set(e.comment,r+46+e.nameBuf.length),r+=46+e.nameBuf.length+e.comment.length;a.view.setUint32(r,1347093766),a.view.setUint16(r+8,l.length,!0),a.view.setUint16(r+10,l.length,!0),a.view.setUint32(r+12,t,!0),a.view.setUint32(r+16,d,!0),i.enqueue(a.array),i.close()}function h(){if(o)return o.directory?o.writeFooter(o.writeHeader()):o.reader?pump(o):void(o.fileLike.stream?(o.crc=new Crc32,o.reader=o.fileLike.stream().getReader(),o.writeHeader()):f())}return new ReadableStream({start:function(e){i=e,t.start&&Promise.resolve(t.start(r))},pull:function(){return h()||t.pull&&Promise.resolve(t.pull(r))}})}window.ZIP=createWriter;
+class Crc32 {
+  constructor () {
+    this.crc = -1
+  }
+
+  append (data) {
+    var crc = this.crc | 0; var table = this.table
+    for (var offset = 0, len = data.length | 0; offset < len; offset++) {
+      crc = (crc >>> 8) ^ table[(crc ^ data[offset]) & 0xFF]
+    }
+    this.crc = crc
+  }
+
+  get () {
+    return ~this.crc
+  }
+}
+Crc32.prototype.table = (() => {
+  var i; var j; var t; var table = []
+  for (i = 0; i < 256; i++) {
+    t = i
+    for (j = 0; j < 8; j++) {
+      t = (t & 1)
+        ? (t >>> 1) ^ 0xEDB88320
+        : t >>> 1
+    }
+    table[i] = t
+  }
+  return table
+})()
+
+const getDataHelper = byteLength => {
+  var uint8 = new Uint8Array(byteLength)
+  return {
+    array: uint8,
+    view: new DataView(uint8.buffer)
+  }
+}
+
+const pump = zipObj => zipObj.reader.read().then(chunk => {
+  if (chunk.done) return zipObj.writeFooter()
+  const outputData = chunk.value
+  zipObj.crc.append(outputData)
+  zipObj.uncompressedLength += outputData.length
+  zipObj.compressedLength += outputData.length
+  zipObj.ctrl.enqueue(outputData)
+})
+
+/**
+ * [createWriter description]
+ * @param  {Object} underlyingSource [description]
+ * @return {Boolean}                  [description]
+ */
+function createWriter (underlyingSource) {
+  const files = Object.create(null)
+  const filenames = []
+  const encoder = new TextEncoder()
+  let offset = 0
+  let activeZipIndex = 0
+  let ctrl
+  let activeZipObject, closed
+
+  function next () {
+    activeZipIndex++
+    activeZipObject = files[filenames[activeZipIndex]]
+    if (activeZipObject) processNextChunk()
+    else if (closed) closeZip()
+  }
+
+  var zipWriter = {
+    enqueue (fileLike) {
+      if (closed) throw new TypeError('Cannot enqueue a chunk into a readable stream that is closed or has been requested to be closed')
+
+      let name = fileLike.name.trim()
+      const date = new Date(typeof fileLike.lastModified === 'undefined' ? Date.now() : fileLike.lastModified)
+
+      if (fileLike.directory && !name.endsWith('/')) name += '/'
+      if (files[name]) throw new Error('File already exists.')
+
+      const nameBuf = encoder.encode(name)
+      filenames.push(name)
+
+      const zipObject = files[name] = {
+        level: 0,
+        ctrl,
+        directory: !!fileLike.directory,
+        nameBuf,
+        comment: encoder.encode(fileLike.comment || ''),
+        compressedLength: 0,
+        uncompressedLength: 0,
+        writeHeader () {
+          var header = getDataHelper(26)
+          var data = getDataHelper(30 + nameBuf.length)
+
+          zipObject.offset = offset
+          zipObject.header = header
+          if (zipObject.level !== 0 && !zipObject.directory) {
+            header.view.setUint16(4, 0x0800)
+          }
+          header.view.setUint32(0, 0x14000808)
+          header.view.setUint16(6, (((date.getHours() << 6) | date.getMinutes()) << 5) | date.getSeconds() / 2, true)
+          header.view.setUint16(8, ((((date.getFullYear() - 1980) << 4) | (date.getMonth() + 1)) << 5) | date.getDate(), true)
+          header.view.setUint16(22, nameBuf.length, true)
+          data.view.setUint32(0, 0x504b0304)
+          data.array.set(header.array, 4)
+          data.array.set(nameBuf, 30)
+          offset += data.array.length
+          ctrl.enqueue(data.array)
+        },
+        writeFooter () {
+          var footer = getDataHelper(16)
+          footer.view.setUint32(0, 0x504b0708)
+
+          if (zipObject.crc) {
+            zipObject.header.view.setUint32(10, zipObject.crc.get(), true)
+            zipObject.header.view.setUint32(14, zipObject.compressedLength, true)
+            zipObject.header.view.setUint32(18, zipObject.uncompressedLength, true)
+            footer.view.setUint32(4, zipObject.crc.get(), true)
+            footer.view.setUint32(8, zipObject.compressedLength, true)
+            footer.view.setUint32(12, zipObject.uncompressedLength, true)
+          }
+
+          ctrl.enqueue(footer.array)
+          offset += zipObject.compressedLength + 16
+          next()
+        },
+        fileLike
+      }
+
+      if (!activeZipObject) {
+        activeZipObject = zipObject
+        processNextChunk()
+      }
+    },
+    close () {
+      if (closed) throw new TypeError('Cannot close a readable stream that has already been requested to be closed')
+      if (!activeZipObject) closeZip()
+      closed = true
+    }
+  }
+
+  function closeZip () {
+    var length = 0
+    var index = 0
+    var indexFilename, file
+    for (indexFilename = 0; indexFilename < filenames.length; indexFilename++) {
+      file = files[filenames[indexFilename]]
+      length += 46 + file.nameBuf.length + file.comment.length
+    }
+    const data = getDataHelper(length + 22)
+    for (indexFilename = 0; indexFilename < filenames.length; indexFilename++) {
+      file = files[filenames[indexFilename]]
+      data.view.setUint32(index, 0x504b0102)
+      data.view.setUint16(index + 4, 0x1400)
+      data.array.set(file.header.array, index + 6)
+      data.view.setUint16(index + 32, file.comment.length, true)
+      if (file.directory) {
+        data.view.setUint8(index + 38, 0x10)
+      }
+      data.view.setUint32(index + 42, file.offset, true)
+      data.array.set(file.nameBuf, index + 46)
+      data.array.set(file.comment, index + 46 + file.nameBuf.length)
+      index += 46 + file.nameBuf.length + file.comment.length
+    }
+    data.view.setUint32(index, 0x504b0506)
+    data.view.setUint16(index + 8, filenames.length, true)
+    data.view.setUint16(index + 10, filenames.length, true)
+    data.view.setUint32(index + 12, length, true)
+    data.view.setUint32(index + 16, offset, true)
+    ctrl.enqueue(data.array)
+    ctrl.close()
+  }
+
+  function processNextChunk () {
+    if (!activeZipObject) return
+    if (activeZipObject.directory) return activeZipObject.writeFooter(activeZipObject.writeHeader())
+    if (activeZipObject.reader) return pump(activeZipObject)
+    if (activeZipObject.fileLike.stream) {
+      activeZipObject.crc = new Crc32()
+      activeZipObject.reader = activeZipObject.fileLike.stream().getReader()
+      activeZipObject.writeHeader()
+    } else next()
+  }
+  return new ReadableStream({
+    start: c => {
+      ctrl = c
+      underlyingSource.start && Promise.resolve(underlyingSource.start(zipWriter))
+    },
+    pull () {
+      return processNextChunk() || (
+        underlyingSource.pull &&
+        Promise.resolve(underlyingSource.pull(zipWriter))
+      )
+    }
+  })
+}
+
+window.ZIP = createWriter

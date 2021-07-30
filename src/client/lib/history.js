@@ -1,6 +1,6 @@
-const utils = require("../../../lib/utils.js");
-const config = require("../../../lib/config.js");
-const events = require("../../../lib/events.js");
+const utils = require("../../lib/utils.js");
+const config = require("../../lib/config.js");
+const events = require("../../lib/events.js");
 
 class History {
 	constructor() {

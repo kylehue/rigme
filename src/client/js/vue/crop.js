@@ -1,7 +1,7 @@
-const events = require("../../../../lib/events.js");
-const dom = require("../../../../lib/dom.js");
-const utils = require("../../../../lib/utils.js");
-const config = require("../../../../lib/config.js");
+const events = require("../../../lib/events.js");
+const dom = require("../../../lib/dom.js");
+const utils = require("../../../lib/utils.js");
+const config = require("../../../lib/config.js");
 
 function createRect(ctx, x, y, width, height) {
 	ctx.beginPath();

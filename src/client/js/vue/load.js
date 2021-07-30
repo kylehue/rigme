@@ -1,6 +1,6 @@
 const yj = require("yieldable-json");
-const events = require("../../../../lib/events.js");
-const dom = require("../../../../lib/dom.js");
+const events = require("../../../lib/events.js");
+const dom = require("../../../lib/dom.js");
 
 var currentJSON;
 const loadApp = new Vue({

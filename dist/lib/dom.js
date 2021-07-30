@@ -1,1 +1,504 @@
-"use strict";function _inherits(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function");e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,writable:!0,configurable:!0}}),t&&_setPrototypeOf(e,t)}function _setPrototypeOf(e,t){return(_setPrototypeOf=Object.setPrototypeOf||function(e,t){return e.__proto__=t,e})(e,t)}function _createSuper(n){var r=_isNativeReflectConstruct();return function(){var e,t=_getPrototypeOf(n);return _possibleConstructorReturn(this,r?(e=_getPrototypeOf(this).constructor,Reflect.construct(t,arguments,e)):t.apply(this,arguments))}}function _possibleConstructorReturn(e,t){return!t||"object"!==_typeof(t)&&"function"!=typeof t?_assertThisInitialized(e):t}function _assertThisInitialized(e){if(void 0===e)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return e}function _isNativeReflectConstruct(){if("undefined"==typeof Reflect||!Reflect.construct)return!1;if(Reflect.construct.sham)return!1;if("function"==typeof Proxy)return!0;try{return Boolean.prototype.valueOf.call(Reflect.construct(Boolean,[],function(){})),!0}catch(e){return!1}}function _getPrototypeOf(e){return(_getPrototypeOf=Object.setPrototypeOf?Object.getPrototypeOf:function(e){return e.__proto__||Object.getPrototypeOf(e)})(e)}function _typeof(e){return(_typeof="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e})(e)}function _classCallCheck(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function _defineProperties(e,t){for(var n=0;n<t.length;n++){var r=t[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(e,r.key,r)}}function _createClass(e,t,n){return t&&_defineProperties(e.prototype,t),n&&_defineProperties(e,n),e}var _activeDragElBounds,mouse=require("./mouse.js"),utils=require("./utils.js"),_draggableElements=[],_isDragging=!1,_activeDragEl=null,_dragStartPosition={},_drag=function(e){var t,n;_isDragging&&_activeDragEl&&(e.preventDefault(),t=_dragStartPosition.x-e.clientX,n=_dragStartPosition.y-e.clientY,n={x:_activeDragEl.offsetLeft-t,y:_activeDragEl.offsetTop-n},_activeDragEl._restrictDrag&&(n.x=utils.clamp(n.x,0,innerWidth-_activeDragElBounds.width),n.y=utils.clamp(n.y,0,innerHeight-_activeDragElBounds.height)),n.x<innerWidth-_activeDragElBounds.width&&0<n.x&&(_dragStartPosition.x=e.clientX,_activeDragEl.style.left=n.x+"px"),n.x>=innerWidth-_activeDragElBounds.width&&(_activeDragEl.style.left=innerWidth-_activeDragElBounds.width+"px"),n.x<=0&&(_activeDragEl.style.left="0px"),n.y<innerHeight-_activeDragElBounds.height&&0<n.y&&(_dragStartPosition.y=e.clientY,_activeDragEl.style.top=n.y+"px"),n.y>=innerHeight-_activeDragElBounds.height&&(_activeDragEl.style.top=innerHeight-_activeDragElBounds.height+"px"),n.y<=0&&(_activeDragEl.style.top="0px"),"function"==typeof _activeDragEl._drag&&_activeDragEl._drag(e)),mouse.pressed||_dragEnd()},_dragStart=function(e){_draggableElements.includes(e.target._dragRoot)&&(e.preventDefault(),_isDragging=!0,_activeDragEl=e.target._dragRoot,_activeDragElBounds=_activeDragEl.getBoundingClientRect(),_dragStartPosition.x=e.clientX,_dragStartPosition.y=e.clientY,"function"==typeof _activeDragEl._dragStart&&_activeDragEl._dragStart(e))},_dragEnd=function(e){_activeDragEl&&"function"==typeof _activeDragEl._dragEnd&&_activeDragEl._dragEnd(e),_isDragging=!1,_activeDragEl=null};addEventListener("mousemove",_drag),addEventListener("mousedown",_dragStart),addEventListener("mouseup",_dragEnd);var DOM=function(){function e(){_classCallCheck(this,e)}return _createClass(e,[{key:"query",value:function(e,t){if("object"==_typeof(e))return new Element(e);var n=this.node||document;if(!t)return new Element(n.querySelector(e));for(var r=n.querySelectorAll(e),o=[],i=0;i<r.length;i++){var s=new Element(r[i]);o.push(s)}return new NodeList(o)}},{key:"create",value:function(e){var t=document.createElement(e),e=new Element(t);return this.node&&this.node.appendChild(t),e}}]),e}(),NodeList=function(){function i(e){_classCallCheck(this,i),this.elements=e||[]}return _createClass(i,[{key:"on",value:function(e,t){for(var n=0;n<this.elements.length;n++)this.elements[n].on(e,t)}},{key:"append",value:function(e){if(e instanceof i)for(var t=0;t<this.elements.length;t++)for(var n=this.elements[t],r=0;r<e.elements.length;r++)n.append(e.elements[r]);else for(t=0;t<this.elements.length;t++)this.elements[t].append(e)}},{key:"value",value:function(e){for(var t=0;t<this.elements.length;t++)this.elements[t].value(e)}},{key:"query",value:function(e){var t,n=[];if("string"==typeof e)for(var r=0;r<this.elements.length;r++){var o=this.elements[r];o.node.matches(e)&&n.push(o)}else"object"==_typeof(e)&&(t=new Element(e),n.push(t));return new i(n)}},{key:"text",value:function(e,t){for(var n=0;n<this.elements.length;n++)this.elements[n].text(e,t);return this}},{key:"html",value:function(e,t){for(var n=0;n<this.elements.length;n++)this.elements[n].html(e,t);return this}},{key:"addClass",value:function(){for(var e=[],t=0;t<arguments.length;t++)e.push(arguments[t]);for(t=0;t<this.elements.length;t++){var n=this.elements[t];n.addClass.apply(n,e)}return this}},{key:"removeClass",value:function(){for(var e=[],t=0;t<arguments.length;t++)e.push(arguments[t]);for(t=0;t<this.elements.length;t++){var n=this.elements[t];n.removeClass.apply(n,e)}return this}},{key:"toggleClass",value:function(){for(var e=[],t=0;t<arguments.length;t++)e.push(arguments[t]);for(t=0;t<this.elements.length;t++){var n=this.elements[t];n.toggleClass.apply(n,e)}return this}},{key:"except",value:function(e){for(var t=[],n=0;n<this.elements.length;n++){var r=this.elements[n];r.node.matches(e)||t.push(r)}return new i(t)}},{key:"draggable",value:function(e){e=e||{};for(var t=0;t<this.elements.length;t++)this.elements[t].node.draggable(e)}},{key:"css",value:function(){for(var e=[],t=0;t<arguments.length;t++)e.push(arguments[t]);for(t=0;t<this.elements.length;t++){var n=this.elements[t];n.css.apply(n,e)}return this}},{key:"prop",value:function(){for(var e=[],t=0;t<arguments.length;t++)e.push(arguments[t]);for(t=0;t<this.elements.length;t++){var n=this.elements[t];n.prop.apply(n,e)}return this}},{key:"attr",value:function(){for(var e=[],t=0;t<arguments.length;t++)e.push(arguments[t]);for(t=0;t<this.elements.length;t++){var n=this.elements[t];n.attr.apply(n,e)}return this}},{key:"remove",value:function(){for(var e=0;e<this.elements.length;e++){var t=this.elements[e];this.elements.splice(this.elements.indexOf(t),1),t.remove()}}}]),i}(),Element=function(){_inherits(r,DOM);var n=_createSuper(r);function r(e){var t;return _classCallCheck(this,r),(t=n.call(this)).node=e,t}return _createClass(r,[{key:"draggable",value:function(e){this.node._dragRoot=(e=e||{}).root||this.node,this.node._dragRoot._restrictDrag=e.restrict,this.node._dragRoot._dragStart=e.dragStart,this.node._dragRoot._dragEnd=e.dragEnd,this.node._dragRoot._drag=e.drag,_draggableElements.includes(this.node._dragRoot)||_draggableElements.push(this.node._dragRoot)}},{key:"remove",value:function(){if(this.node.parentNode)this.node.parentNode.removeChild(this.node);else try{this.node.remove()}catch(e){console.warn("Couldn't remove element")}}},{key:"text",value:function(e,t){return e&&(t?this.node.innerText=e:this.node.innerText+=e),this.node.innerText}},{key:"html",value:function(e,t){return e&&(t?this.node.innerHTML=e:this.node.innerHTML+=e),this.node.innerHTML}},{key:"addClass",value:function(){for(var e,t=[],n=0;n<arguments.length;n++)t.push(arguments[n]);(e=this.node.classList).add.apply(e,t)}},{key:"removeClass",value:function(){for(var e,t=[],n=0;n<arguments.length;n++)t.push(arguments[n]);(e=this.node.classList).remove.apply(e,t)}},{key:"toggleClass",value:function(){for(var e,t=[],n=0;n<arguments.length;n++)t.push(arguments[n]);(e=this.node.classList).toggle.apply(e,t)}},{key:"hasClass",value:function(e){return this.node.classList.contains(e)}},{key:"css",value:function(e){if("object"==_typeof(e))for(var t=Object.keys(e),n=0;n<t.length;n++){var r=t[n],o=e[r];this.node.style[r]=o}else 2==arguments.length&&(this.node.style[e]=arguments[1]);return this}},{key:"prop",value:function(e){if("object"==_typeof(e))for(var t=Object.keys(e),n=0;n<t.length;n++){var r=t[n],o=e[r];this.node[r]=o}else if(arguments.length){var i=e,s=arguments[1];return void 0!==s&&(this.node[i]=s),this.node[i]}return this}},{key:"attr",value:function(e){if("object"==_typeof(e))for(var t=Object.keys(e),n=0;n<t.length;n++){var r=t[n],o=e[r];this.node.setAttribute(r,o)}else if(arguments.length){var i=e,s=arguments[1];return void 0!==s&&this.node.setAttribute(i,s),this.node.getAttribute(i)}return this}},{key:"append",value:function(e){if(e instanceof NodeList)for(var t=0;t<e.elements.length;t++)this.node.appendChild(e.elements[t].node);else e.node?this.node.appendChild(e.node):this.node.appendChild(e);return this}},{key:"value",value:function(e){return e&&this.prop("value",e),this.node.value}},{key:"on",value:function(e,t){this.node.addEventListener(e,t)}}]),r}(),dom=new DOM;module.exports=dom;
+const mouse = require("./mouse.js");
+const utils = require("./utils.js");
+
+let _draggableElements = [];
+
+let _isDragging = false;
+let _activeDragEl = null,
+	_activeDragElBounds;
+let _dragStartPosition = {};
+
+var _drag = event => {
+	if (_isDragging) {
+		if (_activeDragEl) {
+			event.preventDefault();
+			let movement = {
+				x: _dragStartPosition.x - event.clientX,
+				y: _dragStartPosition.y - event.clientY
+			};
+
+			let pos = {
+				x: _activeDragEl.offsetLeft - movement.x,
+				y: _activeDragEl.offsetTop - movement.y
+			}
+
+			if (_activeDragEl._restrictDrag) {
+				pos.x = utils.clamp(pos.x, 0, innerWidth - _activeDragElBounds.width);
+
+				pos.y = utils.clamp(pos.y, 0, innerHeight - _activeDragElBounds.height);
+			}
+
+			if (pos.x < innerWidth - _activeDragElBounds.width && pos.x > 0) {
+				_dragStartPosition.x = event.clientX;
+				_activeDragEl.style.left = pos.x + "px";
+			}
+
+			if (pos.x >= innerWidth - _activeDragElBounds.width) {
+				_activeDragEl.style.left = (innerWidth - _activeDragElBounds.width) + "px";
+			}
+
+			if (pos.x <= 0) {
+				_activeDragEl.style.left = "0px";
+			}
+
+			if (pos.y < innerHeight - _activeDragElBounds.height && pos.y > 0) {
+				_dragStartPosition.y = event.clientY;
+				_activeDragEl.style.top = pos.y + "px";
+			}
+
+			if (pos.y >= innerHeight - _activeDragElBounds.height) {
+				_activeDragEl.style.top = (innerHeight - _activeDragElBounds.height) + "px";
+			}
+
+			if (pos.y <= 0) {
+				_activeDragEl.style.top = "0px";
+			}
+
+			if (typeof _activeDragEl._drag == "function") _activeDragEl._drag(event);
+		}
+	}
+
+	if (!mouse.pressed) {
+		_dragEnd();
+	}
+};
+
+var _dragStart = event => {
+	if (!_draggableElements.includes(event.target._dragRoot)) return;
+	event.preventDefault();
+
+	_isDragging = true;
+	_activeDragEl = event.target._dragRoot;
+	_activeDragElBounds = _activeDragEl.getBoundingClientRect();
+
+	_dragStartPosition.x = event.clientX;
+	_dragStartPosition.y = event.clientY;
+
+	/*let children = _activeDragEl.querySelectorAll("*");
+	for (var i = 0; i < children.length; i++) {
+		let child = children[i];
+		let style = getComputedStyle(child);
+		child._userSelect = style.getPropertyValue("user-select");
+		child._pointerEvents = style.getPropertyValue("pointer-events");
+		if (child.getAttribute("disabled")) child._disabled = true;
+	}
+
+	for (var i = 0; i < children.length; i++) {
+		let child = children[i];
+		child.style.pointerEvents = "none";
+		child.style.userSelect = "none";
+	}*/
+
+	if (typeof _activeDragEl._dragStart == "function") _activeDragEl._dragStart(event);
+};
+
+var _dragEnd = event => {
+	if (_activeDragEl) {
+		if (typeof _activeDragEl._dragEnd == "function") _activeDragEl._dragEnd(event);
+
+		/*let children = _activeDragEl.querySelectorAll("*");
+		for (var i = 0; i < children.length; i++) {
+			let child = children[i];
+			child.style.pointerEvents = child._pointerEvents;
+			child.style.userSelect = child._userSelect;
+			if (child._disabled) child.setAttribute("disabled", "");
+		}*/
+	}
+
+	_isDragging = false;
+	_activeDragEl = null;
+};
+
+addEventListener("mousemove", _drag);
+addEventListener("mousedown", _dragStart);
+addEventListener("mouseup", _dragEnd);
+
+class DOM {
+	query(selector, multiple) {
+		if (typeof selector == "object") {
+			return new Element(selector);
+		}
+
+		let searchEl = !this.node ? document : this.node;
+
+		if (!multiple) {
+			return new Element(searchEl.querySelector(selector));
+		}
+
+		let el = searchEl.querySelectorAll(selector);
+		let res = [];
+
+		for (var i = 0; i < el.length; i++) {
+			let element = new Element(el[i]);
+			res.push(element);
+		}
+
+		let nodeList = new NodeList(res);
+
+		return nodeList;
+	}
+
+	create(tag) {
+		let el = document.createElement(tag);
+		let element = new Element(el);
+		if (this.node) {
+			this.node.appendChild(el);
+		}
+
+		return element;
+	}
+}
+
+class NodeList {
+	constructor(elements) {
+		this.elements = elements || [];
+	}
+
+	on(event, f) {
+		for (var i = 0; i < this.elements.length; i++) {
+			let el = this.elements[i];
+			el.on(event, f);
+		}
+	}
+
+	append(_el) {
+		if (_el instanceof NodeList) {
+			for (var i = 0; i < this.elements.length; i++) {
+				let el = this.elements[i];
+				for (var j = 0; j < _el.elements.length; j++) {
+					el.append(_el.elements[j]);
+				}
+			}
+		} else {
+			for (var i = 0; i < this.elements.length; i++) {
+				let el = this.elements[i];
+				el.append(_el);
+			}
+		}
+	}
+
+	value(str) {
+		for (var i = 0; i < this.elements.length; i++) {
+			let el = this.elements[i];
+			el.value(str);
+		}
+	}
+
+	query(selector) {
+		let res = [];
+		if (typeof selector == "string") {
+			for (var i = 0; i < this.elements.length; i++) {
+				let el = this.elements[i];
+				if (el.node.matches(selector)) {
+					res.push(el);
+				}
+			}
+		} else if (typeof selector == "object") {
+			let element = new Element(selector);
+			res.push(element);
+		}
+
+		let nodeList = new NodeList(res);
+
+		return nodeList;
+	}
+
+	text(txt, overwrite) {
+		for (var i = 0; i < this.elements.length; i++) {
+			let el = this.elements[i];
+			el.text(txt, overwrite);
+		}
+
+		return this;
+	}
+
+	html(html, overwrite) {
+		for (var i = 0; i < this.elements.length; i++) {
+			let el = this.elements[i];
+			el.html(html, overwrite);
+		}
+
+		return this;
+	}
+
+	addClass() {
+		let args = [];
+		for (var i = 0; i < arguments.length; i++) {
+			args.push(arguments[i]);
+		}
+
+		for (var i = 0; i < this.elements.length; i++) {
+			let el = this.elements[i];
+			el.addClass(...args);
+		}
+
+		return this;
+	}
+
+	removeClass() {
+		let args = [];
+		for (var i = 0; i < arguments.length; i++) {
+			args.push(arguments[i]);
+		}
+
+		for (var i = 0; i < this.elements.length; i++) {
+			let el = this.elements[i];
+			el.removeClass(...args);
+		}
+
+		return this;
+	}
+
+	toggleClass() {
+		let args = [];
+		for (var i = 0; i < arguments.length; i++) {
+			args.push(arguments[i]);
+		}
+
+		for (var i = 0; i < this.elements.length; i++) {
+			let el = this.elements[i];
+			el.toggleClass(...args);
+		}
+
+		return this;
+	}
+
+	except(selector) {
+		let res = [];
+		for (var i = 0; i < this.elements.length; i++) {
+			let el = this.elements[i];
+			if (!el.node.matches(selector)) {
+				res.push(el);
+			}
+		}
+
+		let nodeList = new NodeList(res);
+
+		return nodeList;
+	}
+
+	draggable(options) {
+		options = options || {};
+		for (var i = 0; i < this.elements.length; i++) {
+			let el = this.elements[i].node;
+			el.draggable(options);
+		}
+	}
+
+	css() {
+		let args = [];
+		for (var i = 0; i < arguments.length; i++) {
+			args.push(arguments[i]);
+		}
+
+		for (var i = 0; i < this.elements.length; i++) {
+			let el = this.elements[i];
+			el.css(...args);
+		}
+
+		return this;
+	}
+
+	prop() {
+		let args = [];
+		for (var i = 0; i < arguments.length; i++) {
+			args.push(arguments[i]);
+		}
+
+		for (var i = 0; i < this.elements.length; i++) {
+			let el = this.elements[i];
+			el.prop(...args);
+		}
+
+		return this;
+	}
+
+	attr() {
+		let args = [];
+		for (var i = 0; i < arguments.length; i++) {
+			args.push(arguments[i]);
+		}
+
+		for (var i = 0; i < this.elements.length; i++) {
+			let el = this.elements[i];
+			el.attr(...args);
+		}
+
+		return this;
+	}
+
+	remove() {
+		for (var i = 0; i < this.elements.length; i++) {
+			let el = this.elements[i];
+			this.elements.splice(this.elements.indexOf(el), 1);
+			el.remove();
+		}
+	}
+}
+
+class Element extends DOM {
+	constructor(el) {
+		super();
+		this.node = el;
+	}
+
+	draggable(options) {
+		options = options || {};
+		this.node._dragRoot = options.root || this.node;
+		this.node._dragRoot._restrictDrag = options.restrict;
+		this.node._dragRoot._dragStart = options.dragStart;
+		this.node._dragRoot._dragEnd = options.dragEnd;
+		this.node._dragRoot._drag = options.drag;
+
+		if (!_draggableElements.includes(this.node._dragRoot)) {
+			_draggableElements.push(this.node._dragRoot);
+		}
+	}
+
+	remove() {
+		if (this.node.parentNode) {
+			this.node.parentNode.removeChild(this.node);
+		} else {
+			try {
+				this.node.remove();
+			} catch (e) {
+				console.warn("Couldn't remove element");
+			}
+		}
+	}
+
+	text(txt, overwrite) {
+		if (txt) {
+			if (overwrite) this.node.innerText = txt;
+			else this.node.innerText += txt;
+		}
+
+		return this.node.innerText;
+	}
+
+	html(html, overwrite) {
+		if (html) {
+			if (overwrite) this.node.innerHTML = html;
+			else this.node.innerHTML += html;
+		}
+
+		return this.node.innerHTML;
+	}
+
+	addClass() {
+		let args = [];
+		for (var i = 0; i < arguments.length; i++) {
+			args.push(arguments[i]);
+		}
+
+		this.node.classList.add(...args);
+	}
+
+	removeClass() {
+		let args = [];
+		for (var i = 0; i < arguments.length; i++) {
+			args.push(arguments[i]);
+		}
+
+		this.node.classList.remove(...args);
+	}
+
+	toggleClass() {
+		let args = [];
+		for (var i = 0; i < arguments.length; i++) {
+			args.push(arguments[i]);
+		}
+
+		this.node.classList.toggle(...args);
+	}
+
+	hasClass(token) {
+		return this.node.classList.contains(token);
+	}
+
+	css(styleObject) {
+		if (typeof styleObject == "object") {
+			let keys = Object.keys(styleObject);
+			for (var j = 0; j < keys.length; j++) {
+				let key = keys[j];
+				let value = styleObject[key];
+				this.node.style[key] = value;
+			}
+		} else {
+			if (arguments.length == 2) {
+				this.node.style[arguments[0]] = arguments[1];
+			}
+		}
+
+		return this;
+	}
+
+	prop(propsObject) {
+		if (typeof propsObject == "object") {
+			let keys = Object.keys(propsObject);
+			for (var j = 0; j < keys.length; j++) {
+				let key = keys[j];
+				let value = propsObject[key];
+				this.node[key] = value;
+			}
+		} else {
+			if (arguments.length) {
+				let arg1 = arguments[0];
+				let arg2 = arguments[1];
+				if (typeof arg2 != "undefined") this.node[arg1] = arg2;
+				return this.node[arg1];
+			}
+		}
+
+		return this;
+	}
+
+	attr(attributesObject) {
+		if (typeof attributesObject == "object") {
+			let keys = Object.keys(attributesObject);
+			for (var j = 0; j < keys.length; j++) {
+				let key = keys[j];
+				let value = attributesObject[key];
+				this.node.setAttribute(key, value);
+			}
+		} else {
+			if (arguments.length) {
+				let arg1 = arguments[0];
+				let arg2 = arguments[1];
+				if (typeof arg2 != "undefined") this.node.setAttribute(arg1, arg2);
+				return this.node.getAttribute(arg1);
+			}
+		}
+
+		return this;
+	}
+
+	append(el) {
+		if (el instanceof NodeList) {
+			for (var i = 0; i < el.elements.length; i++) {
+				this.node.appendChild(el.elements[i].node);
+			}
+		} else {
+			if (el.node) {
+				this.node.appendChild(el.node);
+			} else {
+				this.node.appendChild(el);
+			}
+		}
+
+		return this;
+	}
+
+	value(str) {
+		if (str) this.prop("value", str);
+		return this.node.value;
+	}
+
+	on(event, f) {
+		this.node.addEventListener(event, f);
+	}
+}
+
+const dom = new DOM;
+
+module.exports = dom;

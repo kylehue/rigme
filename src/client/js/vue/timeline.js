@@ -1,10 +1,10 @@
 const clonedeep = require("lodash.clonedeep");
-const events = require("../../../../lib/events.js");
-const mouse = require("../../../../lib/mouse.js");
-const config = require("../../../../lib/config.js");
-const utils = require("../../../../lib/utils.js");
+const events = require("../../../lib/events.js");
+const mouse = require("../../../lib/mouse.js");
+const config = require("../../../lib/config.js");
+const utils = require("../../../lib/utils.js");
+const vector = require("../../../lib/vector.js");
 const rigModel = require("../../lib/rig.model.js");
-const vector = require("../../../../lib/vector.js");
 const contextMenuApp = require("./contextMenu.js");
 const history = require("../../lib/history.js");
 var lastActiveJointId, lastActiveJointSub;
