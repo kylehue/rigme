@@ -1,31 +1,39 @@
 "use strict";
 
-var saveApp = require("./save.js"),
-    loadApp = require("./load.js"),
-    spritesheetExportApp = require("./export.spritesheet.js"),
-    framesExportApp = require("./export.frames.js"),
-    GIFExportApp = require("./export.gif.js"),
-    fileApp = new Vue({
+var saveApp = require("./save.js");
+
+var loadApp = require("./load.js");
+
+var spritesheetExportApp = require("./export.spritesheet.js");
+
+var framesExportApp = require("./export.frames.js");
+
+var GIFExportApp = require("./export.gif.js");
+
+var fileApp = new Vue({
   el: "#fileApp",
   data: {
-    showExportFormats: !1,
-    hidden: !0,
+    showExportFormats: false,
+    hidden: true,
     position: {
       x: 0,
       y: 0
     }
   },
   methods: {
-    show: function show(e, p) {
+    show: function show(x, y) {
       var _this = this;
 
-      this.hidden = !1, this.$nextTick(function () {
-        var e = document.getElementById("fileButton").getBoundingClientRect();
-        _this.$el.style.left = "".concat(e.x, "px"), _this.$el.style.top = "".concat(e.y + e.height + 3, "px");
+      this.hidden = false;
+      this.$nextTick(function () {
+        var fileButtonBounds = document.getElementById("fileButton").getBoundingClientRect();
+        _this.$el.style.left = "".concat(fileButtonBounds.x, "px");
+        _this.$el.style.top = "".concat(fileButtonBounds.y + fileButtonBounds.height + 3, "px");
       });
     },
     hide: function hide() {
-      this.hidden = !0, this.showExportFormats = !1;
+      this.hidden = true;
+      this.showExportFormats = false;
     },
     showSaveApp: function showSaveApp() {
       saveApp.show();
@@ -44,5 +52,4 @@ var saveApp = require("./save.js"),
     }
   }
 });
-
 module.exports = fileApp;

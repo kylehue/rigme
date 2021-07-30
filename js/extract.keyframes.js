@@ -1,54 +1,81 @@
 "use strict";
 
-var events = require("../../lib/events.js"),
-    utils = require("../../lib/utils.js"),
-    HAVE_ENOUGH_DATA = 4;
+var events = require("../../lib/events.js");
 
+var utils = require("../../lib/utils.js");
+
+var HAVE_ENOUGH_DATA = 4;
 var pct;
 
-function extractFrames(e, c) {
-  if (!(c = c || {}).drop) {
-    var d = document.createElement("canvas"),
-        g = d.getContext("2d"),
-        l = document.createElement("video");
-    l.crossOrigin = "anonymous", l.controls = !0, l.muted = !0, l.src = e, l.load();
-    var i = [],
-        r = c.start || 1,
-        n = c.frameRate || 24,
-        a = c.quality || .1,
-        s = c.width || 640,
-        o = c.height || 480;
-    l.addEventListener("loadedmetadata", function () {
-      var e = c.end || l.duration;
-      var t = c.frameCount || (e - r) * n;
-      e = utils.scaleSize(l.videoWidth, l.videoHeight, s, o);
-      d.width = e.width, d.height = e.height, l.currentTime = r, l.addEventListener("seeked", function () {
-        !c.drop && i.length < t ? (events.emit("extractKeyframeProgress", t), l.currentTime += 1 / n) : events.emit("extractKeyframeDone", i);
-      });
-    });
-    var m = events.on("extractKeyframeProgress", function (e) {
-      g.drawImage(l, 0, 0, d.width, d.height);
-      var t = d.toDataURL("image/jpeg", a);
-      var r = new Image();
-      r.crossOrigin = "anonymous", r.src = t;
-      t = {
-        image: r,
-        time: l.currentTime
-      };
-      i.push(t), g.clearRect(0, 0, d.width, d.height), "function" == typeof c.progress && (pct = i.length / e * 100, c.progress(t.image, pct));
-    });
-    events.once("extractKeyframeDone", function (e) {
-      e.sort(function (e, t) {
-        return e.time - t.time;
-      });
-
-      for (var t = 0; t < e.length; t++) {
-        e[t] = e[t].image;
+function extractFrames(url, options) {
+  options = options || {};
+  if (options.drop) return;
+  var canvas = document.createElement("canvas");
+  var context = canvas.getContext("2d");
+  var video = document.createElement("video");
+  video.crossOrigin = "anonymous";
+  video.controls = true;
+  video.muted = true;
+  video.src = url;
+  video.load();
+  var frames = [];
+  var start = options.start || 1;
+  var frameRate = options.frameRate || 24;
+  var quality = options.quality || 0.1;
+  var width = options.width || 640;
+  var height = options.height || 480;
+  video.addEventListener("loadedmetadata", function () {
+    var end = options.end || video.duration;
+    var frameCount = options.frameCount || (end - start) * frameRate;
+    var size = utils.scaleSize(video.videoWidth, video.videoHeight, width, height);
+    canvas.width = size.width;
+    canvas.height = size.height;
+    video.currentTime = start;
+    video.addEventListener("seeked", function () {
+      if (options.drop) {
+        events.emit("extractKeyframeDone", frames);
+      } else {
+        if (frames.length < frameCount) {
+          events.emit("extractKeyframeProgress", frameCount);
+          video.currentTime += 1 / frameRate;
+        } else {
+          events.emit("extractKeyframeDone", frames);
+        }
       }
-
-      c.done(e), events.removeListener(m), d.remove();
     });
-  }
+  });
+  var extract = events.on("extractKeyframeProgress", function (frameCount) {
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    var dataURL = canvas.toDataURL("image/jpeg", quality);
+    var img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = dataURL;
+    var data = {
+      image: img,
+      time: video.currentTime
+    };
+    frames.push(data);
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (typeof options.progress == "function") {
+      pct = frames.length / frameCount * 100;
+      options.progress(data.image, pct);
+    }
+  });
+  events.once("extractKeyframeDone", function (frames) {
+    frames.sort(function (a, b) {
+      return a.time - b.time;
+    });
+
+    for (var i = 0; i < frames.length; i++) {
+      frames[i] = frames[i].image;
+    }
+
+    options.done(frames);
+    events.removeListener(extract);
+    canvas.remove();
+  });
 }
 
+;
 module.exports = extractFrames;

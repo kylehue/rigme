@@ -1,19 +1,32 @@
 "use strict";
 
-var timeline = require("./timeline.js"),
-    contextMenu = require("./contextMenu.js"),
-    overlayApp = require("./overlay.js"),
-    overlayConfigApp = require("./overlay.config.js"),
-    fileApp = require("./file.js"),
-    saveApp = require("./save.js"),
-    loadApp = require("./load.js"),
-    optionApp = require("./option.js"),
-    paneApp = require("./pane.js"),
-    cropApp = require("./crop.js"),
-    spritesheetExportApp = require("./export.spritesheet.js"),
-    framesExportApp = require("./export.frames.js"),
-    GIFExportApp = require("./export.gif.js"),
-    apps = {
+var timeline = require("./timeline.js");
+
+var contextMenu = require("./contextMenu.js");
+
+var overlayApp = require("./overlay.js");
+
+var overlayConfigApp = require("./overlay.config.js");
+
+var fileApp = require("./file.js");
+
+var saveApp = require("./save.js");
+
+var loadApp = require("./load.js");
+
+var optionApp = require("./option.js");
+
+var paneApp = require("./pane.js");
+
+var cropApp = require("./crop.js");
+
+var spritesheetExportApp = require("./export.spritesheet.js");
+
+var framesExportApp = require("./export.frames.js");
+
+var GIFExportApp = require("./export.gif.js");
+
+var apps = {
   timeline: timeline,
   contextMenuApp: contextMenu,
   fileApp: fileApp,
@@ -28,5 +41,4 @@ var timeline = require("./timeline.js"),
   framesExportApp: framesExportApp,
   GIFExportApp: GIFExportApp
 };
-
 module.exports = apps;

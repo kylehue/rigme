@@ -1,12 +1,15 @@
 "use strict";
 
-var events = require("../../../lib/events.js"),
-    dom = require("../../../lib/dom.js"),
-    randomTitle = require("../random.title.js"),
-    saveApp = new Vue({
+var events = require("../../../lib/events.js");
+
+var dom = require("../../../lib/dom.js");
+
+var randomTitle = require("../random.title.js");
+
+var saveApp = new Vue({
   el: "#saveApp",
   data: {
-    hidden: !0,
+    hidden: true,
     closeMsg: "Close",
     defaultTitle: randomTitle.generate()
   },
@@ -14,28 +17,43 @@ var events = require("../../../lib/events.js"),
     show: function show() {
       var _this = this;
 
-      this.defaultTitle = randomTitle.generate(), this.hidden = !1, this.$nextTick(function () {
-        _this.$el.style.opacity = "1", dom.query("#saveApp .drag").draggable({
-          restrict: !0,
+      this.defaultTitle = randomTitle.generate();
+      this.hidden = false;
+      this.$nextTick(function () {
+        _this.$el.style.opacity = "1";
+        dom.query("#saveApp .drag").draggable({
+          restrict: true,
           root: _this.$el
-        }), setTimeout(function () {
-          var e = document.getElementById("saveFilename");
-          e.focus();
-        }, 100), events.emit("renderSleep");
+        });
+        setTimeout(function () {
+          var filenameInput = document.getElementById("saveFilename");
+          filenameInput.focus();
+        }, 100);
+        events.emit("renderSleep");
       });
     },
     hide: function hide() {
-      this.hidden = !0, events.emit("renderFocus");
+      this.hidden = true;
+      events.emit("renderFocus");
     },
     checkFilename: function checkFilename(e) {
-      var t = document.getElementById("download");
-      e.target.value.length ? t.classList.remove("disabled") : t.classList.add("disabled");
+      var downloadButton = document.getElementById("download");
+
+      if (!e.target.value.length) {
+        downloadButton.classList.add("disabled");
+      } else {
+        downloadButton.classList.remove("disabled");
+      }
     },
     validate: function validate() {
-      var e = document.getElementById("saveFilename").value;
-      e.length && events.emit("saveProject", e);
+      var filename = document.getElementById("saveFilename").value;
+
+      if (!filename.length) {
+        return;
+      }
+
+      events.emit("saveProject", filename);
     }
   }
 });
-
 module.exports = saveApp;

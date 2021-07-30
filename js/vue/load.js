@@ -1,61 +1,95 @@
 "use strict";
 
-var yj = require("yieldable-json"),
-    events = require("../../../lib/events.js"),
-    dom = require("../../../lib/dom.js");
+var yj = require("yieldable-json");
+
+var events = require("../../../lib/events.js");
+
+var dom = require("../../../lib/dom.js");
 
 var currentJSON;
 var loadApp = new Vue({
   el: "#loadApp",
   data: {
-    hidden: !0,
+    hidden: true,
     closeMsg: "Close",
     errorMessage: "",
-    fileError: !1
+    fileError: false
   },
   methods: {
     show: function show() {
       var _this = this;
 
-      this.hidden = !1, this.$nextTick(function () {
-        _this.$el.style.opacity = "1", dom.query("#loadApp .drag").draggable({
-          restrict: !0,
+      this.hidden = false;
+      this.$nextTick(function () {
+        _this.$el.style.opacity = "1";
+        dom.query("#loadApp .drag").draggable({
+          restrict: true,
           root: _this.$el
-        }), events.emit("renderSleep");
+        });
+        events.emit("renderSleep");
       });
     },
     hide: function hide() {
-      currentJSON = void 0, events.emit("renderFocus"), dom.query("#import").addClass("disabled"), this.fileError = !1, this.hidden = !0;
+      currentJSON = undefined;
+      events.emit("renderFocus");
+      dom.query("#import").addClass("disabled");
+      this.fileError = false;
+      this.hidden = true;
     },
     checkFile: function checkFile() {
       var _this2 = this;
 
-      var t = dom.query("#importInput");
-      var r = dom.query("#loadFilename");
-      var i = t.node.files[0];
+      var fileEl = dom.query("#importInput");
+      var filenameEl = dom.query("#loadFilename");
+      var file = fileEl.node.files[0];
+      if (!file) return;
+      var filename = file.name;
+      var fileExtension = filename.split(".")[filename.split(".").length - 1];
+      var importButton = dom.query("#import");
+      importButton.addClass("disabled");
+      importButton.text("Processing...", true);
 
-      if (i) {
-        var e = i.name;
-        t = e.split(".")[e.split(".").length - 1];
-        var s = dom.query("#import");
-        s.addClass("disabled"), s.text("Processing...", !0), "rigme" == t && (r.text(e, !0), (i = URL.createObjectURL(i)) && fetch(i).then(function (e) {
-          e.text().then(function (e) {
-            var r,
-                i = !1;
+      if (fileExtension == "rigme") {
+        filenameEl.text(filename, true);
+        var fileURL = URL.createObjectURL(file);
 
-            try {
-              yj.parseAsync(e, function (e, t) {
-                e ? i = !0 : (r = t, i = !1, currentJSON = r, s.text("Load", !0), s.removeClass("disabled"), _this2.fileError = !1);
-              });
-            } catch (e) {
-              s.addClass("disabled"), _this2.errorMessage = "This file is corrupted.", _this2.fileError = !0;
-            }
+        if (fileURL) {
+          fetch(fileURL).then(function (res) {
+            res.text().then(function (text) {
+              var json;
+              var error = false;
+
+              try {
+                yj.parseAsync(text, function (err, res) {
+                  if (err) {
+                    error = true;
+                    return;
+                  }
+
+                  json = res;
+                  error = false;
+                  currentJSON = json;
+                  importButton.text("Load", true);
+                  importButton.removeClass("disabled");
+                  _this2.fileError = false;
+                });
+              } catch (e) {
+                importButton.addClass("disabled");
+                _this2.errorMessage = "This file is corrupted.";
+                _this2.fileError = true;
+              }
+            });
           });
-        }));
+        }
       }
     },
     validate: function validate() {
-      currentJSON && (events.emit("loadProject", currentJSON), this.hide());
+      if (!currentJSON) {
+        return;
+      }
+
+      events.emit("loadProject", currentJSON);
+      this.hide();
     }
   }
 });

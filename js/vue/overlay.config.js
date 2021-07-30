@@ -1,24 +1,29 @@
 "use strict";
 
-var events = require("../../../lib/events.js"),
-    mouse = require("../../../lib/mouse.js"),
-    config = require("../../../lib/config.js"),
-    utils = require("../../../lib/utils.js"),
-    dom = require("../../../lib/dom.js"),
-    timeline = require("./timeline.js");
+var events = require("../../../lib/events.js");
 
-var minOpacity = 0,
-    maxOpacity = 1,
-    minScale = 0,
-    maxScale = 6,
-    minAngle = -Math.PI,
-    maxAngle = Math.PI,
-    activeSliderDrag,
-    overlayFrames = [];
+var mouse = require("../../../lib/mouse.js");
+
+var config = require("../../../lib/config.js");
+
+var utils = require("../../../lib/utils.js");
+
+var dom = require("../../../lib/dom.js");
+
+var timeline = require("./timeline.js");
+
+var minOpacity = 0;
+var maxOpacity = 1;
+var minScale = 0;
+var maxScale = 6;
+var minAngle = -Math.PI;
+var maxAngle = Math.PI;
+var activeSliderDrag;
+var overlayFrames = [];
 var overlayConfigApp = new Vue({
   el: "#overlayConfigApp",
   data: {
-    hidden: !0,
+    hidden: true,
     closeMsg: "Close",
     opacity: maxOpacity,
     scale: 1,
@@ -29,131 +34,245 @@ var overlayConfigApp = new Vue({
   },
   methods: {
     fixData: function fixData() {
-      var e = document.getElementById("overlayConfigTrimStart"),
-          t = document.getElementById("overlayConfigTrimEnd"),
-          a = document.getElementById("overlayConfigStart"),
-          e = parseInt(e.value),
-          t = parseInt(t.value),
-          a = parseInt(a.value);
-      this.trimStart = e || 1, this.trimEnd = t || overlayFrames.length, this.start = a || 1;
+      var fromEl = document.getElementById("overlayConfigTrimStart");
+      var toEl = document.getElementById("overlayConfigTrimEnd");
+      var startEl = document.getElementById("overlayConfigStart");
+      var from = parseInt(fromEl.value);
+      var to = parseInt(toEl.value);
+      var start = parseInt(startEl.value);
+      this.trimStart = from ? from : 1;
+      this.trimEnd = to ? to : overlayFrames.length;
+      this.start = start ? start : 1;
     },
     validateFormat: function validateFormat(e) {
-      e.target.value = e.target.value.replace(/[^0-9.-]/g, "").replace(/(\..*)\./g, "$1").replace(/^0+/g, "").replace(/(?<!^)-/g, ""), this.validateMax(e), this.fixData();
+      e.target.value = e.target.value.replace(/[^0-9.-]/g, "").replace(/(\..*)\./g, "$1").replace(/^0+/g, "").replace(/(?<!^)-/g, "");
+      this.validateMax(e);
+      this.fixData();
     },
     validateAmount: function validateAmount(e) {
-      this.validateMin(e), this.validateMax(e);
+      this.validateMin(e);
+      this.validateMax(e);
     },
     validateMax: function validateMax(e) {
-      var t = e.target.value;
-      var a = e.target.dataset.max;
-      "overlayConfigTrimStart" == e.target.id && (a = this.trimEnd), "overlayConfigTrimEnd" == e.target.id && (a = overlayFrames.length), "overlayConfigStart" == e.target.id && (a = timeline.app.totalFrames), parseInt(t) > a && (e.target.value = a.toString()), this.fixData();
+      var value = e.target.value;
+      var max = e.target.dataset.max;
+
+      if (e.target.id == "overlayConfigTrimStart") {
+        max = this.trimEnd;
+      }
+
+      if (e.target.id == "overlayConfigTrimEnd") {
+        max = overlayFrames.length;
+      }
+
+      if (e.target.id == "overlayConfigStart") {
+        max = timeline.app.totalFrames;
+      }
+
+      if (parseInt(value) > max) {
+        e.target.value = max.toString();
+      }
+
+      this.fixData();
     },
     validateMin: function validateMin(e) {
-      var t = e.target.value;
-      var a = e.target.dataset.min;
-      "overlayConfigTrimEnd" == e.target.id && (a = this.trimStart), parseInt(t) < a && (e.target.value = a.toString()), this.fixData();
-    },
-    toggleAmount: function toggleAmount(t) {
-      if (t.target == document.activeElement) {
-        t.target.value.length || (t.target.value = 1);
-        var a = t.wheelDeltaY < 0;
-        var e = parseInt(t.target.value);
-        a ? e-- : e++, t.target.value = e.toString(), this.validateAmount(t), this.fixData();
+      var value = e.target.value;
+      var min = e.target.dataset.min;
+
+      if (e.target.id == "overlayConfigTrimEnd") {
+        min = this.trimStart;
       }
+
+      if (parseInt(value) < min) {
+        e.target.value = min.toString();
+      }
+
+      this.fixData();
+    },
+    toggleAmount: function toggleAmount(e) {
+      if (e.target != document.activeElement) return;
+
+      if (!e.target.value.length) {
+        e.target.value = 1;
+      }
+
+      var isDown = e.wheelDeltaY < 0;
+      var value = parseInt(e.target.value);
+
+      if (isDown) {
+        value--;
+      } else {
+        value++;
+      }
+
+      e.target.value = value.toString();
+      this.validateAmount(e);
+      this.fixData();
     },
     updateSliders: function updateSliders() {
       var _this = this;
 
+      var sliders = document.querySelectorAll(".slider-wrapper");
+
       var _loop = function _loop() {
-        var e = n[o],
-            t = e.querySelector(".handle");
-        s = t.getBoundingClientRect();
-        var a = e.querySelector(".track");
-        s = a.getBoundingClientRect().width - s.width;
-        var i = void 0,
-            l = void 0,
-            r = void 0;
-        "opacity" == e.dataset.label ? (i = minOpacity, l = maxOpacity, r = _this.opacity) : "scale" == e.dataset.label ? (i = minScale, l = maxScale, r = _this.scale) : "rotate" == e.dataset.label && (i = minAngle, l = maxAngle, r = _this.angle), t.style.left = "".concat(utils.map(r, i, l, 0, s), "px"), e.onmousemove = function () {
-          mouse.dragged && !activeSliderDrag && (activeSliderDrag = e);
-        }, e.onmousedown = function () {
-          activeSliderDrag = e;
+        var slider = sliders[i];
+        var handle = slider.querySelector(".handle");
+        var handleBounds = handle.getBoundingClientRect();
+        var track = slider.querySelector(".track");
+        var trackBounds = track.getBoundingClientRect();
+        var positionMin = 0;
+        var positionMax = trackBounds.width - handleBounds.width;
+        var min = void 0,
+            max = void 0,
+            value = void 0;
+
+        if (slider.dataset.label == "opacity") {
+          min = minOpacity;
+          max = maxOpacity;
+          value = _this.opacity;
+        } else if (slider.dataset.label == "scale") {
+          min = minScale;
+          max = maxScale;
+          value = _this.scale;
+        } else if (slider.dataset.label == "rotate") {
+          min = minAngle;
+          max = maxAngle;
+          value = _this.angle;
+        }
+
+        handle.style.left = "".concat(utils.map(value, min, max, positionMin, positionMax), "px");
+
+        slider.onmousemove = function () {
+          if (mouse.dragged && !activeSliderDrag) {
+            activeSliderDrag = slider;
+          }
+        };
+
+        slider.onmousedown = function () {
+          activeSliderDrag = slider;
         };
       };
 
-      for (var n = document.querySelectorAll(".slider-wrapper"), o = 0; o < n.length; o++) {
-        var s;
-
+      for (var i = 0; i < sliders.length; i++) {
         _loop();
       }
 
-      var e = {
+      var configData = {
         opacity: this.opacity,
         scale: this.scale,
         angle: this.angle
       };
-      localStorage.setItem(config.autosave.label + ".overlay.config", JSON.stringify(e));
+      localStorage.setItem(config.autosave.label + ".overlay.config", JSON.stringify(configData));
     },
     show: function show() {
       var _this2 = this;
 
-      this.hidden = !1, this.$nextTick(function () {
-        _this2.$el.style.opacity = "1", dom.query("#overlayConfigApp .drag").draggable({
-          restrict: !0,
+      this.hidden = false;
+      this.$nextTick(function () {
+        _this2.$el.style.opacity = "1";
+        dom.query("#overlayConfigApp .drag").draggable({
+          restrict: true,
           root: _this2.$el
-        }), events.emit("renderSleep");
-        var e = document.getElementById("overlayConfigTrimStart"),
-            t = document.getElementById("overlayConfigTrimEnd"),
-            a = document.getElementById("overlayConfigStart");
-        e.value = _this2.trimStart, t.value = _this2.trimEnd, a.value = _this2.start, _this2.updateSliders(), _this2.fixData();
+        });
+        events.emit("renderSleep");
+        var fromEl = document.getElementById("overlayConfigTrimStart");
+        var toEl = document.getElementById("overlayConfigTrimEnd");
+        var startEl = document.getElementById("overlayConfigStart");
+        fromEl.value = _this2.trimStart;
+        toEl.value = _this2.trimEnd;
+        startEl.value = _this2.start;
+
+        _this2.updateSliders();
+
+        _this2.fixData();
       });
     },
     hide: function hide() {
-      events.emit("renderFocus"), this.hidden = !0;
+      events.emit("renderFocus");
+      this.hidden = true;
     },
     reset: function reset() {
-      this.opacity = maxOpacity, this.scale = 1, this.angle = 0;
-      var e = document.getElementById("overlayConfigTrimStart"),
-          t = document.getElementById("overlayConfigTrimEnd"),
-          a = document.getElementById("overlayConfigStart");
-      e.value = 1, t.value = overlayFrames.length, a.value = 1, this.fixData(), this.updateSliders();
+      this.opacity = maxOpacity;
+      this.scale = 1;
+      this.angle = 0;
+      var fromEl = document.getElementById("overlayConfigTrimStart");
+      var toEl = document.getElementById("overlayConfigTrimEnd");
+      var startEl = document.getElementById("overlayConfigStart");
+      fromEl.value = 1;
+      toEl.value = overlayFrames.length;
+      startEl.value = 1;
+      this.fixData();
+      this.updateSliders();
     },
     removeOverlay: function removeOverlay() {
-      confirm("Are you sure you want to remove the overlay?") && (events.emit("removeOverlay"), this.hide());
+      var con = confirm("Are you sure you want to remove the overlay?");
+
+      if (con) {
+        events.emit("removeOverlay");
+        this.hide();
+      }
     }
   }
+});
+events.on("overlayFrames", function (_overlayFrames) {
+  overlayFrames = _overlayFrames;
+  overlayConfigApp.trimEnd = overlayFrames.length;
 });
 
 function handleSliders() {
   if (activeSliderDrag) {
-    var e = activeSliderDrag.querySelector(".handle");
-    var r = e.getBoundingClientRect();
-    var t = activeSliderDrag.querySelector(".track");
-    var n = t.getBoundingClientRect(),
-        o = n.width - r.width,
-        r = mouse.x - n.x - r.width / 2,
-        r = utils.clamp(r, 0, o);
-    e.style.left = "".concat(r, "px");
-    var a, i, l;
-    "opacity" == activeSliderDrag.dataset.label ? (a = minOpacity, i = maxOpacity, l = "opacity") : "scale" == activeSliderDrag.dataset.label ? (a = minScale, i = maxScale, l = "scale") : "rotate" == activeSliderDrag.dataset.label && (a = minAngle, i = maxAngle, l = "angle");
-    o = utils.map(r, 0, o, a, i);
-    overlayConfigApp[l] = o;
-    o = {
+    var handle = activeSliderDrag.querySelector(".handle");
+    var handleBounds = handle.getBoundingClientRect();
+    var track = activeSliderDrag.querySelector(".track");
+    var trackBounds = track.getBoundingClientRect();
+    var positionMin = 0;
+    var positionMax = trackBounds.width - handleBounds.width;
+    var position = mouse.x - trackBounds.x - handleBounds.width / 2;
+    position = utils.clamp(position, positionMin, positionMax);
+    handle.style.left = "".concat(position, "px");
+    var min, max, target;
+
+    if (activeSliderDrag.dataset.label == "opacity") {
+      min = minOpacity;
+      max = maxOpacity;
+      target = "opacity";
+    } else if (activeSliderDrag.dataset.label == "scale") {
+      min = minScale;
+      max = maxScale;
+      target = "scale";
+    } else if (activeSliderDrag.dataset.label == "rotate") {
+      min = minAngle;
+      max = maxAngle;
+      target = "angle";
+    }
+
+    var value = utils.map(position, positionMin, positionMax, min, max);
+    overlayConfigApp[target] = value;
+    var configData = {
       opacity: overlayConfigApp.opacity,
       scale: overlayConfigApp.scale,
       angle: overlayConfigApp.angle
     };
-    localStorage.setItem(config.autosave.label + ".overlay.config", JSON.stringify(o));
+    localStorage.setItem(config.autosave.label + ".overlay.config", JSON.stringify(configData));
   }
-}
+} //Autosave config
 
-events.on("overlayFrames", function (e) {
-  overlayFrames = e, overlayConfigApp.trimEnd = overlayFrames.length;
-}), utils.loadJSONData(config.autosave.label + ".overlay.config", function (e) {
-  "number" == typeof e.opacity && (overlayConfigApp.opacity = e.opacity), "number" == typeof e.scale && (overlayConfigApp.scale = e.scale), "number" == typeof e.angle && (overlayConfigApp.angle = e.angle), overlayConfigApp.updateSliders();
-}), mouse.on("mouseup", function (e) {
+
+utils.loadJSONData(config.autosave.label + ".overlay.config", function (data) {
+  if (typeof data.opacity == "number") overlayConfigApp.opacity = data.opacity;
+  if (typeof data.scale == "number") overlayConfigApp.scale = data.scale;
+  if (typeof data.angle == "number") overlayConfigApp.angle = data.angle;
+  overlayConfigApp.updateSliders();
+});
+mouse.on("mouseup", function (event) {
   activeSliderDrag = null;
-}), mouse.on("mousedown", function (e) {
+});
+mouse.on("mousedown", function (event) {
   handleSliders();
-}), mouse.on("mousemove", function (e) {
-  mouse.dragged && handleSliders();
-}), module.exports = overlayConfigApp;
+});
+mouse.on("mousemove", function (event) {
+  if (mouse.dragged) {
+    handleSliders();
+  }
+});
+module.exports = overlayConfigApp;
