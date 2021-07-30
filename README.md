@@ -1,7 +1,7 @@
 <img style="text-align:center" alt="Logo" src="src/client/assets/svg/rigme.svg" width="140">
 
 # Rigme
-An easy to use and very simple animator web application.
+An easy to use and very simple animator web application. [Try it here](https://kylehue.github.io/rigme/)
 
 <img alt="Sample gif" src="sample.gif" width="640">
 
