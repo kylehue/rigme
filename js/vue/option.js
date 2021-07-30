@@ -27,8 +27,8 @@ var optionApp = new Vue({
       this.hidden = false;
       this.$nextTick(function () {
         var optionButtonBounds = document.getElementById("optionButton").getBoundingClientRect();
-        _this.$el.style.left = optionButtonBounds.x + "px";
-        _this.$el.style.top = optionButtonBounds.y + optionButtonBounds.height + 3 + "px";
+        _this.$el.style.left = "".concat(optionButtonBounds.x, "px");
+        _this.$el.style.top = "".concat(optionButtonBounds.y + optionButtonBounds.height + 3, "px");
       });
     },
     toggleOverlayActions: function toggleOverlayActions(b) {

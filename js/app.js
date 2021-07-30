@@ -4,15 +4,41 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
-function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e78) { throw _e78; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e79) { didErr = true; err = _e79; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; _setPrototypeOf(subClass, superClass); }
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 !function (e) {
   var t = {};
@@ -40,7 +66,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
     });
   }, i.t = function (e, t) {
     if (1 & t && (e = i(e)), 8 & t) return e;
-    if (4 & t && "object" == typeof e && e && e.__esModule) return e;
+    if (4 & t && "object" == _typeof(e) && e && e.__esModule) return e;
     var n = Object.create(null);
     if (i.r(n), Object.defineProperty(n, "default", {
       enumerable: !0,
@@ -170,65 +196,72 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
   var r = !1;
   var a = new ( /*#__PURE__*/function () {
     function _class() {
+      _classCallCheck(this, _class);
+
       this.emits = {}, this.listeners = [], this.maxListeners = 100;
     }
 
-    var _proto = _class.prototype;
-
-    _proto.setMaxListeners = function setMaxListeners(e) {
-      this.maxListeners = e;
-    };
-
-    _proto.removeListener = function removeListener(e, t) {
-      var i = this.listeners.find(function (i) {
-        return i[e] === t;
-      });
-      if (t || (i = e), i) for (var n = 0; n < this.listeners.length; n++) {
-        if (this.listeners[n].id === i.id) {
-          this.listeners.splice(n, 1);
-          break;
+    _createClass(_class, [{
+      key: "setMaxListeners",
+      value: function setMaxListeners(e) {
+        this.maxListeners = e;
+      }
+    }, {
+      key: "removeListener",
+      value: function removeListener(e, t) {
+        var i = this.listeners.find(function (i) {
+          return i[e] === t;
+        });
+        if (t || (i = e), i) for (var n = 0; n < this.listeners.length; n++) {
+          if (this.listeners[n].id === i.id) {
+            this.listeners.splice(n, 1);
+            break;
+          }
         }
       }
-    };
+    }, {
+      key: "emit",
+      value: function emit(e) {
+        if (!e) return;
+        var t = [];
 
-    _proto.emit = function emit(e) {
-      if (!e) return;
-      var t = [];
+        for (var i = 0; i < arguments.length; i++) {
+          t.push(arguments[i]);
+        }
 
-      for (var i = 0; i < arguments.length; i++) {
-        t.push(arguments[i]);
+        t.shift(), this.emits[e] = t;
+        var n = [];
+
+        for (i = 0; i < this.listeners.length; i++) {
+          var _t = this.listeners[i];
+          _t.name === e && n.push(_t);
+        }
+
+        for (i = 0; i < n.length; i++) {
+          var _e3 = n[i];
+          "function" == typeof _e3.method && (_e3.method.apply(_e3, t), _e3.once && this.removeListener("id", _e3.id));
+        }
       }
-
-      t.shift(), this.emits[e] = t;
-      var n = [];
-
-      for (i = 0; i < this.listeners.length; i++) {
-        var _t = this.listeners[i];
-        _t.name === e && n.push(_t);
+    }, {
+      key: "on",
+      value: function on(e, t) {
+        if (!e || !t || "function" != typeof t) return;
+        var i = {
+          id: n.uid(),
+          name: e,
+          method: t,
+          once: r
+        };
+        return this.listeners.push(i), this.listeners.length >= this.maxListeners && (this.listeners.shift(), console.warn("Reached the max number of listeners.")), i;
       }
-
-      for (i = 0; i < n.length; i++) {
-        var _e3 = n[i];
-        "function" == typeof _e3.method && (_e3.method.apply(_e3, t), _e3.once && this.removeListener("id", _e3.id));
+    }, {
+      key: "once",
+      value: function once(e, t) {
+        r = !0;
+        var i = this.on(e, t);
+        return r = !1, i;
       }
-    };
-
-    _proto.on = function on(e, t) {
-      if (!e || !t || "function" != typeof t) return;
-      var i = {
-        id: n.uid(),
-        name: e,
-        method: t,
-        once: r
-      };
-      return this.listeners.push(i), this.listeners.length >= this.maxListeners && (this.listeners.shift(), console.warn("Reached the max number of listeners.")), i;
-    };
-
-    _proto.once = function once(e, t) {
-      r = !0;
-      var i = this.on(e, t);
-      return r = !1, i;
-    };
+    }]);
 
     return _class;
   }())();
@@ -266,356 +299,395 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
   }), addEventListener("mouseup", c);
 
   var d = /*#__PURE__*/function () {
-    function d() {}
+    function d() {
+      _classCallCheck(this, d);
+    }
 
-    var _proto2 = d.prototype;
+    _createClass(d, [{
+      key: "query",
+      value: function query(e, t) {
+        if ("object" == _typeof(e)) return new p(e);
+        var i = this.node ? this.node : document;
+        if (!t) return new p(i.querySelector(e));
+        var n = i.querySelectorAll(e),
+            r = [];
 
-    _proto2.query = function query(e, t) {
-      if ("object" == typeof e) return new p(e);
-      var i = this.node ? this.node : document;
-      if (!t) return new p(i.querySelector(e));
-      var n = i.querySelectorAll(e),
-          r = [];
+        for (var a = 0; a < n.length; a++) {
+          var _e4 = new p(n[a]);
 
-      for (var a = 0; a < n.length; a++) {
-        var _e4 = new p(n[a]);
+          r.push(_e4);
+        }
 
-        r.push(_e4);
+        return new u(r);
       }
-
-      return new u(r);
-    };
-
-    _proto2.create = function create(e) {
-      var t = document.createElement(e),
-          i = new p(t);
-      return this.node && this.node.appendChild(t), i;
-    };
+    }, {
+      key: "create",
+      value: function create(e) {
+        var t = document.createElement(e),
+            i = new p(t);
+        return this.node && this.node.appendChild(t), i;
+      }
+    }]);
 
     return d;
   }();
 
   var u = /*#__PURE__*/function () {
     function u(e) {
+      _classCallCheck(this, u);
+
       this.elements = e || [];
     }
 
-    var _proto3 = u.prototype;
-
-    _proto3.on = function on(e, t) {
-      for (var i = 0; i < this.elements.length; i++) {
-        this.elements[i].on(e, t);
-      }
-    };
-
-    _proto3.append = function append(e) {
-      if (e instanceof u) for (var t = 0; t < this.elements.length; t++) {
-        var _n2 = this.elements[t];
-
-        for (var i = 0; i < e.elements.length; i++) {
-          _n2.append(e.elements[i]);
+    _createClass(u, [{
+      key: "on",
+      value: function on(e, t) {
+        for (var i = 0; i < this.elements.length; i++) {
+          this.elements[i].on(e, t);
         }
-      } else for (t = 0; t < this.elements.length; t++) {
-        this.elements[t].append(e);
       }
-    };
+    }, {
+      key: "append",
+      value: function append(e) {
+        if (e instanceof u) for (var t = 0; t < this.elements.length; t++) {
+          var _n2 = this.elements[t];
 
-    _proto3.value = function value(e) {
-      for (var t = 0; t < this.elements.length; t++) {
-        this.elements[t].value(e);
+          for (var i = 0; i < e.elements.length; i++) {
+            _n2.append(e.elements[i]);
+          }
+        } else for (t = 0; t < this.elements.length; t++) {
+          this.elements[t].append(e);
+        }
       }
-    };
-
-    _proto3.query = function query(e) {
-      var t = [];
-      if ("string" == typeof e) for (var i = 0; i < this.elements.length; i++) {
-        var _n3 = this.elements[i];
-        _n3.node.matches(e) && t.push(_n3);
-      } else if ("object" == typeof e) {
-        var _i2 = new p(e);
-
-        t.push(_i2);
+    }, {
+      key: "value",
+      value: function value(e) {
+        for (var t = 0; t < this.elements.length; t++) {
+          this.elements[t].value(e);
+        }
       }
-      return new u(t);
-    };
+    }, {
+      key: "query",
+      value: function query(e) {
+        var t = [];
+        if ("string" == typeof e) for (var i = 0; i < this.elements.length; i++) {
+          var _n3 = this.elements[i];
+          _n3.node.matches(e) && t.push(_n3);
+        } else if ("object" == _typeof(e)) {
+          var _i2 = new p(e);
 
-    _proto3.text = function text(e, t) {
-      for (var i = 0; i < this.elements.length; i++) {
-        this.elements[i].text(e, t);
+          t.push(_i2);
+        }
+        return new u(t);
       }
+    }, {
+      key: "text",
+      value: function text(e, t) {
+        for (var i = 0; i < this.elements.length; i++) {
+          this.elements[i].text(e, t);
+        }
 
-      return this;
-    };
-
-    _proto3.html = function html(e, t) {
-      for (var i = 0; i < this.elements.length; i++) {
-        this.elements[i].html(e, t);
+        return this;
       }
+    }, {
+      key: "html",
+      value: function html(e, t) {
+        for (var i = 0; i < this.elements.length; i++) {
+          this.elements[i].html(e, t);
+        }
 
-      return this;
-    };
-
-    _proto3.addClass = function addClass() {
-      var e = [];
-
-      for (var t = 0; t < arguments.length; t++) {
-        e.push(arguments[t]);
+        return this;
       }
+    }, {
+      key: "addClass",
+      value: function addClass() {
+        var e = [];
 
-      for (t = 0; t < this.elements.length; t++) {
-        var _this$elements$t;
+        for (var t = 0; t < arguments.length; t++) {
+          e.push(arguments[t]);
+        }
 
-        (_this$elements$t = this.elements[t]).addClass.apply(_this$elements$t, e);
+        for (t = 0; t < this.elements.length; t++) {
+          var _this$elements$t;
+
+          (_this$elements$t = this.elements[t]).addClass.apply(_this$elements$t, e);
+        }
+
+        return this;
       }
+    }, {
+      key: "removeClass",
+      value: function removeClass() {
+        var e = [];
 
-      return this;
-    };
+        for (var t = 0; t < arguments.length; t++) {
+          e.push(arguments[t]);
+        }
 
-    _proto3.removeClass = function removeClass() {
-      var e = [];
+        for (t = 0; t < this.elements.length; t++) {
+          var _this$elements$t2;
 
-      for (var t = 0; t < arguments.length; t++) {
-        e.push(arguments[t]);
+          (_this$elements$t2 = this.elements[t]).removeClass.apply(_this$elements$t2, e);
+        }
+
+        return this;
       }
+    }, {
+      key: "toggleClass",
+      value: function toggleClass() {
+        var e = [];
 
-      for (t = 0; t < this.elements.length; t++) {
-        var _this$elements$t2;
+        for (var t = 0; t < arguments.length; t++) {
+          e.push(arguments[t]);
+        }
 
-        (_this$elements$t2 = this.elements[t]).removeClass.apply(_this$elements$t2, e);
+        for (t = 0; t < this.elements.length; t++) {
+          var _this$elements$t3;
+
+          (_this$elements$t3 = this.elements[t]).toggleClass.apply(_this$elements$t3, e);
+        }
+
+        return this;
       }
+    }, {
+      key: "except",
+      value: function except(e) {
+        var t = [];
 
-      return this;
-    };
+        for (var i = 0; i < this.elements.length; i++) {
+          var _n4 = this.elements[i];
+          _n4.node.matches(e) || t.push(_n4);
+        }
 
-    _proto3.toggleClass = function toggleClass() {
-      var e = [];
-
-      for (var t = 0; t < arguments.length; t++) {
-        e.push(arguments[t]);
+        return new u(t);
       }
+    }, {
+      key: "draggable",
+      value: function draggable(e) {
+        e = e || {};
 
-      for (t = 0; t < this.elements.length; t++) {
-        var _this$elements$t3;
-
-        (_this$elements$t3 = this.elements[t]).toggleClass.apply(_this$elements$t3, e);
+        for (var t = 0; t < this.elements.length; t++) {
+          this.elements[t].node.draggable(e);
+        }
       }
+    }, {
+      key: "css",
+      value: function css() {
+        var e = [];
 
-      return this;
-    };
+        for (var t = 0; t < arguments.length; t++) {
+          e.push(arguments[t]);
+        }
 
-    _proto3.except = function except(e) {
-      var t = [];
+        for (t = 0; t < this.elements.length; t++) {
+          var _this$elements$t4;
 
-      for (var i = 0; i < this.elements.length; i++) {
-        var _n4 = this.elements[i];
-        _n4.node.matches(e) || t.push(_n4);
+          (_this$elements$t4 = this.elements[t]).css.apply(_this$elements$t4, e);
+        }
+
+        return this;
       }
+    }, {
+      key: "prop",
+      value: function prop() {
+        var e = [];
 
-      return new u(t);
-    };
+        for (var t = 0; t < arguments.length; t++) {
+          e.push(arguments[t]);
+        }
 
-    _proto3.draggable = function draggable(e) {
-      e = e || {};
+        for (t = 0; t < this.elements.length; t++) {
+          var _this$elements$t5;
 
-      for (var t = 0; t < this.elements.length; t++) {
-        this.elements[t].node.draggable(e);
+          (_this$elements$t5 = this.elements[t]).prop.apply(_this$elements$t5, e);
+        }
+
+        return this;
       }
-    };
+    }, {
+      key: "attr",
+      value: function attr() {
+        var e = [];
 
-    _proto3.css = function css() {
-      var e = [];
+        for (var t = 0; t < arguments.length; t++) {
+          e.push(arguments[t]);
+        }
 
-      for (var t = 0; t < arguments.length; t++) {
-        e.push(arguments[t]);
+        for (t = 0; t < this.elements.length; t++) {
+          var _this$elements$t6;
+
+          (_this$elements$t6 = this.elements[t]).attr.apply(_this$elements$t6, e);
+        }
+
+        return this;
       }
-
-      for (t = 0; t < this.elements.length; t++) {
-        var _this$elements$t4;
-
-        (_this$elements$t4 = this.elements[t]).css.apply(_this$elements$t4, e);
+    }, {
+      key: "remove",
+      value: function remove() {
+        for (var e = 0; e < this.elements.length; e++) {
+          var _t3 = this.elements[e];
+          this.elements.splice(this.elements.indexOf(_t3), 1), _t3.remove();
+        }
       }
-
-      return this;
-    };
-
-    _proto3.prop = function prop() {
-      var e = [];
-
-      for (var t = 0; t < arguments.length; t++) {
-        e.push(arguments[t]);
-      }
-
-      for (t = 0; t < this.elements.length; t++) {
-        var _this$elements$t5;
-
-        (_this$elements$t5 = this.elements[t]).prop.apply(_this$elements$t5, e);
-      }
-
-      return this;
-    };
-
-    _proto3.attr = function attr() {
-      var e = [];
-
-      for (var t = 0; t < arguments.length; t++) {
-        e.push(arguments[t]);
-      }
-
-      for (t = 0; t < this.elements.length; t++) {
-        var _this$elements$t6;
-
-        (_this$elements$t6 = this.elements[t]).attr.apply(_this$elements$t6, e);
-      }
-
-      return this;
-    };
-
-    _proto3.remove = function remove() {
-      for (var e = 0; e < this.elements.length; e++) {
-        var _t3 = this.elements[e];
-        this.elements.splice(this.elements.indexOf(_t3), 1), _t3.remove();
-      }
-    };
+    }]);
 
     return u;
   }();
 
   var p = /*#__PURE__*/function (_d) {
-    _inheritsLoose(p, _d);
+    _inherits(p, _d);
+
+    var _super = _createSuper(p);
 
     function p(e) {
       var _this2;
 
-      _this2 = _d.call(this) || this, _this2.node = e;
+      _classCallCheck(this, p);
+
+      _this2 = _super.call(this), _this2.node = e;
       return _this2;
     }
 
-    var _proto4 = p.prototype;
-
-    _proto4.draggable = function draggable(e) {
-      e = e || {}, this.node._dragRoot = e.root || this.node, this.node._dragRoot._restrictDrag = e.restrict, this.node._dragRoot._dragStart = e.dragStart, this.node._dragRoot._dragEnd = e.dragEnd, this.node._dragRoot._drag = e.drag, o.includes(this.node._dragRoot) || o.push(this.node._dragRoot);
-    };
-
-    _proto4.remove = function remove() {
-      if (this.node.parentNode) this.node.parentNode.removeChild(this.node);else try {
-        this.node.remove();
-      } catch (e) {
-        console.warn("Couldn't remove element");
+    _createClass(p, [{
+      key: "draggable",
+      value: function draggable(e) {
+        e = e || {}, this.node._dragRoot = e.root || this.node, this.node._dragRoot._restrictDrag = e.restrict, this.node._dragRoot._dragStart = e.dragStart, this.node._dragRoot._dragEnd = e.dragEnd, this.node._dragRoot._drag = e.drag, o.includes(this.node._dragRoot) || o.push(this.node._dragRoot);
       }
-    };
-
-    _proto4.text = function text(e, t) {
-      return e && (t ? this.node.innerText = e : this.node.innerText += e), this.node.innerText;
-    };
-
-    _proto4.html = function html(e, t) {
-      return e && (t ? this.node.innerHTML = e : this.node.innerHTML += e), this.node.innerHTML;
-    };
-
-    _proto4.addClass = function addClass() {
-      var _this$node$classList;
-
-      var e = [];
-
-      for (var t = 0; t < arguments.length; t++) {
-        e.push(arguments[t]);
-      }
-
-      (_this$node$classList = this.node.classList).add.apply(_this$node$classList, e);
-    };
-
-    _proto4.removeClass = function removeClass() {
-      var _this$node$classList2;
-
-      var e = [];
-
-      for (var t = 0; t < arguments.length; t++) {
-        e.push(arguments[t]);
-      }
-
-      (_this$node$classList2 = this.node.classList).remove.apply(_this$node$classList2, e);
-    };
-
-    _proto4.toggleClass = function toggleClass() {
-      var _this$node$classList3;
-
-      var e = [];
-
-      for (var t = 0; t < arguments.length; t++) {
-        e.push(arguments[t]);
-      }
-
-      (_this$node$classList3 = this.node.classList).toggle.apply(_this$node$classList3, e);
-    };
-
-    _proto4.hasClass = function hasClass(e) {
-      return this.node.classList.contains(e);
-    };
-
-    _proto4.css = function css(e) {
-      if ("object" == typeof e) {
-        var _i3 = Object.keys(e);
-
-        for (var t = 0; t < _i3.length; t++) {
-          var _n5 = _i3[t],
-              _r = e[_n5];
-          this.node.style[_n5] = _r;
+    }, {
+      key: "remove",
+      value: function remove() {
+        if (this.node.parentNode) this.node.parentNode.removeChild(this.node);else try {
+          this.node.remove();
+        } catch (e) {
+          console.warn("Couldn't remove element");
         }
-      } else 2 == arguments.length && (this.node.style[arguments[0]] = arguments[1]);
-
-      return this;
-    };
-
-    _proto4.prop = function prop(e) {
-      if ("object" == typeof e) {
-        var _i4 = Object.keys(e);
-
-        for (var t = 0; t < _i4.length; t++) {
-          var _n6 = _i4[t],
-              _r2 = e[_n6];
-          this.node[_n6] = _r2;
-        }
-      } else if (arguments.length) {
-        var _e5 = arguments[0],
-            _t4 = arguments[1];
-        return void 0 !== _t4 && (this.node[_e5] = _t4), this.node[_e5];
       }
-
-      return this;
-    };
-
-    _proto4.attr = function attr(e) {
-      if ("object" == typeof e) {
-        var _i5 = Object.keys(e);
-
-        for (var t = 0; t < _i5.length; t++) {
-          var _n7 = _i5[t],
-              _r3 = e[_n7];
-          this.node.setAttribute(_n7, _r3);
-        }
-      } else if (arguments.length) {
-        var _e6 = arguments[0],
-            _t5 = arguments[1];
-        return void 0 !== _t5 && this.node.setAttribute(_e6, _t5), this.node.getAttribute(_e6);
+    }, {
+      key: "text",
+      value: function text(e, t) {
+        return e && (t ? this.node.innerText = e : this.node.innerText += e), this.node.innerText;
       }
+    }, {
+      key: "html",
+      value: function html(e, t) {
+        return e && (t ? this.node.innerHTML = e : this.node.innerHTML += e), this.node.innerHTML;
+      }
+    }, {
+      key: "addClass",
+      value: function addClass() {
+        var _this$node$classList;
 
-      return this;
-    };
+        var e = [];
 
-    _proto4.append = function append(e) {
-      if (e instanceof u) for (var t = 0; t < e.elements.length; t++) {
-        this.node.appendChild(e.elements[t].node);
-      } else e.node ? this.node.appendChild(e.node) : this.node.appendChild(e);
-      return this;
-    };
+        for (var t = 0; t < arguments.length; t++) {
+          e.push(arguments[t]);
+        }
 
-    _proto4.value = function value(e) {
-      return e && this.prop("value", e), this.node.value;
-    };
+        (_this$node$classList = this.node.classList).add.apply(_this$node$classList, e);
+      }
+    }, {
+      key: "removeClass",
+      value: function removeClass() {
+        var _this$node$classList2;
 
-    _proto4.on = function on(e, t) {
-      this.node.addEventListener(e, t);
-    };
+        var e = [];
+
+        for (var t = 0; t < arguments.length; t++) {
+          e.push(arguments[t]);
+        }
+
+        (_this$node$classList2 = this.node.classList).remove.apply(_this$node$classList2, e);
+      }
+    }, {
+      key: "toggleClass",
+      value: function toggleClass() {
+        var _this$node$classList3;
+
+        var e = [];
+
+        for (var t = 0; t < arguments.length; t++) {
+          e.push(arguments[t]);
+        }
+
+        (_this$node$classList3 = this.node.classList).toggle.apply(_this$node$classList3, e);
+      }
+    }, {
+      key: "hasClass",
+      value: function hasClass(e) {
+        return this.node.classList.contains(e);
+      }
+    }, {
+      key: "css",
+      value: function css(e) {
+        if ("object" == _typeof(e)) {
+          var _i3 = Object.keys(e);
+
+          for (var t = 0; t < _i3.length; t++) {
+            var _n5 = _i3[t],
+                _r = e[_n5];
+            this.node.style[_n5] = _r;
+          }
+        } else 2 == arguments.length && (this.node.style[arguments[0]] = arguments[1]);
+
+        return this;
+      }
+    }, {
+      key: "prop",
+      value: function prop(e) {
+        if ("object" == _typeof(e)) {
+          var _i4 = Object.keys(e);
+
+          for (var t = 0; t < _i4.length; t++) {
+            var _n6 = _i4[t],
+                _r2 = e[_n6];
+            this.node[_n6] = _r2;
+          }
+        } else if (arguments.length) {
+          var _e5 = arguments[0],
+              _t4 = arguments[1];
+          return void 0 !== _t4 && (this.node[_e5] = _t4), this.node[_e5];
+        }
+
+        return this;
+      }
+    }, {
+      key: "attr",
+      value: function attr(e) {
+        if ("object" == _typeof(e)) {
+          var _i5 = Object.keys(e);
+
+          for (var t = 0; t < _i5.length; t++) {
+            var _n7 = _i5[t],
+                _r3 = e[_n7];
+            this.node.setAttribute(_n7, _r3);
+          }
+        } else if (arguments.length) {
+          var _e6 = arguments[0],
+              _t5 = arguments[1];
+          return void 0 !== _t5 && this.node.setAttribute(_e6, _t5), this.node.getAttribute(_e6);
+        }
+
+        return this;
+      }
+    }, {
+      key: "append",
+      value: function append(e) {
+        if (e instanceof u) for (var t = 0; t < e.elements.length; t++) {
+          this.node.appendChild(e.elements[t].node);
+        } else e.node ? this.node.appendChild(e.node) : this.node.appendChild(e);
+        return this;
+      }
+    }, {
+      key: "value",
+      value: function value(e) {
+        return e && this.prop("value", e), this.node.value;
+      }
+    }, {
+      key: "on",
+      value: function on(e, t) {
+        this.node.addEventListener(e, t);
+      }
+    }]);
 
     return p;
   }(d);
@@ -684,14 +756,17 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 }, function (e, t) {
   var i = new ( /*#__PURE__*/function () {
     function _class2() {
+      _classCallCheck(this, _class2);
+
       this.x = 0, this.y = 0, this.speedX = 0, this.speedY = 0, this.pressed = !1, this.dragged = !1, this.scrolled = !1, this.scrollTop = !1;
     }
 
-    var _proto5 = _class2.prototype;
-
-    _proto5.on = function on(e, t) {
-      "function" == typeof t && addEventListener(e, t);
-    };
+    _createClass(_class2, [{
+      key: "on",
+      value: function on(e, t) {
+        "function" == typeof t && addEventListener(e, t);
+      }
+    }]);
 
     return _class2;
   }())();
@@ -788,6 +863,8 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
     function _class3() {
       var _this3 = this;
 
+      _classCallCheck(this, _class3);
+
       this.canvas = document.getElementById("timelineGraph"), this.context = this.canvas.getContext("2d"), this.buttons = {
         previous: document.getElementById("lastFrame"),
         play: document.getElementById("playStop"),
@@ -838,423 +915,444 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
       }, this._timelineHeight = void 0;
     }
 
-    var _proto6 = _class3.prototype;
+    _createClass(_class3, [{
+      key: "storeSelectedKeyframe",
+      value: function storeSelectedKeyframe() {
+        var e = Object.keys(h.keyframes);
 
-    _proto6.storeSelectedKeyframe = function storeSelectedKeyframe() {
-      var e = Object.keys(h.keyframes);
-
-      for (var t = 0; t < e.length; t++) {
-        var _i6 = e[t],
-            _n8 = h.keyframes[_i6];
-        _n8.index == this.state.currentMark ? _n8.selected = !0 : _n8.selected = !1;
+        for (var t = 0; t < e.length; t++) {
+          var _i6 = e[t],
+              _n8 = h.keyframes[_i6];
+          _n8.index == this.state.currentMark ? _n8.selected = !0 : _n8.selected = !1;
+        }
       }
-    };
+    }, {
+      key: "markToX",
+      value: function markToX(e, t) {
+        var i = s.map(this.scrollbar.left, 0, this.canvas.width, 0, this.canvas.width * this.scrollbar.zoomSensitivity),
+            n = Math.round(s.clamp(i - this.hatchMark.spacing / 2, 0, Number.MAX_SAFE_INTEGER) / this.hatchMark.spacing),
+            r = i % this.hatchMark.spacing,
+            a = (e - n) * this.hatchMark.spacing + this.hatchMark.spacing / 2 - r;
+        return t ? a : s.clamp(a, this.hatchMark.spacing / 2, this.canvas.width - this.hatchMark.spacing / 2);
+      }
+    }, {
+      key: "xToMark",
+      value: function xToMark(e) {
+        var t = s.map(this.scrollbar.left, 0, this.canvas.width, 0, this.canvas.width * this.scrollbar.zoomSensitivity),
+            i = Math.round(s.clamp(t - this.hatchMark.spacing / 2, 0, Number.MAX_SAFE_INTEGER) / this.hatchMark.spacing),
+            n = t % this.hatchMark.spacing,
+            r = Math.round((e + n + this.hatchMark.spacing / 2) / this.hatchMark.spacing) - 1 + i;
+        return s.clamp(r, 0, p.totalFrames - 1);
+      }
+    }, {
+      key: "addKeyboardEvents",
+      value: function addKeyboardEvents() {
+        var _this4 = this;
 
-    _proto6.markToX = function markToX(e, t) {
-      var i = s.map(this.scrollbar.left, 0, this.canvas.width, 0, this.canvas.width * this.scrollbar.zoomSensitivity),
-          n = Math.round(s.clamp(i - this.hatchMark.spacing / 2, 0, Number.MAX_SAFE_INTEGER) / this.hatchMark.spacing),
-          r = i % this.hatchMark.spacing,
-          a = (e - n) * this.hatchMark.spacing + this.hatchMark.spacing / 2 - r;
-      return t ? a : s.clamp(a, this.hatchMark.spacing / 2, this.canvas.width - this.hatchMark.spacing / 2);
-    };
+        addEventListener("keydown", function (e) {
+          Object.keys(h.keyframes);
 
-    _proto6.xToMark = function xToMark(e) {
-      var t = s.map(this.scrollbar.left, 0, this.canvas.width, 0, this.canvas.width * this.scrollbar.zoomSensitivity),
-          i = Math.round(s.clamp(t - this.hatchMark.spacing / 2, 0, Number.MAX_SAFE_INTEGER) / this.hatchMark.spacing),
-          n = t % this.hatchMark.spacing,
-          r = Math.round((e + n + this.hatchMark.spacing / 2) / this.hatchMark.spacing) - 1 + i;
-      return s.clamp(r, 0, p.totalFrames - 1);
-    };
-
-    _proto6.addKeyboardEvents = function addKeyboardEvents() {
-      var _this4 = this;
-
-      addEventListener("keydown", function (e) {
-        Object.keys(h.keyframes);
-
-        if (_this4.storeSelectedKeyframe(), e.ctrlKey && (67 == e.keyCode && (h.copiedKeyframe = n(h.getKeyframe("selected", !0))), 86 == e.keyCode)) {
-          var _e7 = h.copiedKeyframe;
-          _e7 && h.setKeyframe(_this4.state.currentMark, {
-            position: l(_this4.state.currentMark * _this4.hatchMark.spacing + _this4.hatchMark.spacing / 2, 0),
-            locked: 0 == _this4.state.currentMark,
-            id: s.uid(),
-            joints: _e7.joints
-          });
-        }
-      });
-    };
-
-    _proto6.addMouseEvents = function addMouseEvents() {
-      var _this5 = this;
-
-      this.canvas.addEventListener("contextmenu", function (e) {
-        a.x, _this5.bounds.x, a.y, _this5.bounds.y;
-
-        if (f(_this5.canvas)) {
-          _this5.storeSelectedKeyframe();
-
-          var _e8 = a.x + c.width > innerWidth ? -c.width : 0,
-              _t7 = a.y + c.height > innerHeight ? -c.height : 0;
-
-          c.show(a.x + _e8, a.y + _t7);
-        }
-      });
-      var e,
-          t,
-          i,
-          n,
-          l,
-          d,
-          u,
-          g,
-          m,
-          y = !1,
-          v = null,
-          b = 0;
-      this.redraw(), addEventListener("mouseup", function () {
-        if (y = !1, r.emit("renderFocus"), "playbackHandleStart" == v || "playbackHandleEnd" == v) {
-          var _e9 = {
-            start: _this5.playbackHandle.start.mark,
-            end: _this5.playbackHandle.end.mark
-          };
-          localStorage.setItem(o.autosave.label + ".playback.config", JSON.stringify(_e9));
-        }
-
-        if (v = null, e) {
-          var _t8 = _this5.xToMark(_this5.state._x);
-
-          _this5.setCurrentMark(_t8), h.deleteKeyframe(e.id);
-          h.setKeyframe(_t8, {
-            position: e.position,
-            joints: e.joints,
-            locked: 0 == _t8
-          });
-        }
-
-        _this5.scrollbar.color = o.render.timeline.scrollbar.color["default"], _this5.snap(), _this5.state.isDragging = !1, _this5.playbackHandle.start.isDragging = !1, _this5.playbackHandle.end.isDragging = !1, e = null, _this5.canvas.style.cursor = "default", _this5.redraw();
-      }), addEventListener("mousedown", function () {
-        if (f(_this5.canvas)) {
-          if (y = !0, r.emit("renderSleep"), _this5.playbackHandle.end.mark >= p.totalFrames && 1 != p.totalFrames && (_this5.playbackHandle.end.mark = p.totalFrames - 1, _this5.playbackHandle.end._x = _this5.markToX(_this5.playbackHandle.end.mark), _this5.redraw()), y && !v) if (n) b = _this5.scrollbar.left - t, v = "scrollbar";else if (l) {
-            v = "timeline";
-
-            var _e10 = _this5.markToX(_this5.playbackHandle.start.mark, !0),
-                _i7 = _this5.markToX(_this5.playbackHandle.end.mark, !0),
-                _n9 = _this5.playbackHandle.width / 2 + _this5.playbackHandle.offset / 2;
-
-            t >= _e10 - _n9 && t <= _e10 + _n9 ? v = "playbackHandleStart" : t >= _i7 - _n9 && t <= _i7 + _n9 && (v = "playbackHandleEnd");
-          } else d && (v = "keyframe");
-
-          if ("timeline" == v) {
-            _this5.state.isDragging = !0, _this5.state._x = s.clamp(t, _this5.hatchMark.spacing / 2, _this5.canvas.width - _this5.hatchMark.spacing / 2);
-
-            var _e11 = _this5.xToMark(t);
-
-            _e11 >= 0 && _e11 <= p.totalFrames && _this5.setCurrentMark(_e11);
+          if (_this4.storeSelectedKeyframe(), e.ctrlKey && (67 == e.keyCode && (h.copiedKeyframe = n(h.getKeyframe("selected", !0))), 86 == e.keyCode)) {
+            var _e7 = h.copiedKeyframe;
+            _e7 && h.setKeyframe(_this4.state.currentMark, {
+              position: l(_this4.state.currentMark * _this4.hatchMark.spacing + _this4.hatchMark.spacing / 2, 0),
+              locked: 0 == _this4.state.currentMark,
+              id: s.uid(),
+              joints: _e7.joints
+            });
           }
-
-          c.hide();
-        }
-      }), addEventListener("mousemove", function () {
-        if (t = a.x - _this5.bounds.x, i = a.y - _this5.bounds.y, !y && (i < 0 || i > _this5.canvas.height || t < 0 || t > _this5.canvas.width)) return;
-        n = i >= 0 && i <= _this5.scrollbar.height, l = i >= _this5.scrollbar.height && i <= _this5.scrollbar.height + _this5._timelineHeight, d = i >= _this5.scrollbar.height + _this5._timelineHeight && i <= _this5.canvas.height;
-        v || (u = t <= _this5.scrollbar.left + 10, g = t >= _this5.scrollbar.right - 10);
-
-        var r = t >= _this5.scrollbar.left && t <= _this5.scrollbar.right && (u || g) && n,
-            c = _this5.markToX(_this5.playbackHandle.start.mark, !0),
-            f = _this5.markToX(_this5.playbackHandle.end.mark, !0),
-            k = _this5.playbackHandle.width / 2 + _this5.playbackHandle.offset / 2;
-
-        if (m = (t >= c - k && t <= c + k || t >= f - k && t <= f + k) && l, _this5.canvas.style.cursor = r || m ? "ew-resize" : "default", d) {
-          var _e12 = Object.keys(h.keyframes);
-
-          for (var x = 0; x < _e12.length; x++) {
-            var _n10 = h.keyframes[_e12[x]];
-
-            if ("head" == _n10.type) {
-              var _e13 = _n10.render.position.x,
-                  _r4 = _n10.render.position.y,
-                  _a = _n10.render.size;
-              t <= _e13 + _a && t >= _e13 - _a && i <= _r4 + _a && i && i >= _r4 - _a ? (_n10.hovered = !0, _n10.render.color = o.render.keyframe.color.hovered, _this5.canvas.style.cursor = "pointer", _this5.redraw()) : (_n10.hovered = !1, _n10.render.color = o.render.keyframe.color["default"], _this5.redraw());
-            }
-          }
-        }
-
-        if (n && t >= _this5.scrollbar.left && t <= _this5.scrollbar.right ? (_this5.scrollbar.color = o.render.timeline.scrollbar.color.hovered, _this5.redraw()) : (_this5.scrollbar.color = o.render.timeline.scrollbar.color["default"], _this5.redraw()), y) {
-          if ("scrollbar" == v && (u ? (_this5.scrollbar.left = s.clamp(t, 0, _this5.scrollbar.right - _this5.scrollbar.minWidth), _this5.scrollbar.width = _this5.scrollbar.right - _this5.scrollbar.left, _this5.canvas.style.cursor = "ew-resize") : g && (_this5.scrollbar.right = s.clamp(t, _this5.scrollbar.left + _this5.scrollbar.minWidth, _this5.canvas.width), _this5.scrollbar.width = _this5.scrollbar.right - _this5.scrollbar.left, _this5.canvas.style.cursor = "ew-resize"), u || g || (_this5.scrollbar.left = s.clamp(t + b, 0, _this5.canvas.width - _this5.scrollbar.width), _this5.scrollbar.right = _this5.scrollbar.left + _this5.scrollbar.width, _this5.canvas.style.cursor = "default"), _this5.snap()), "timeline" == v || "keyframe" == v) {
-            _this5.state.isDragging = !0, _this5.state._x = s.clamp(t, _this5.hatchMark.spacing / 2, _this5.canvas.width - _this5.hatchMark.spacing / 2);
-
-            var _e14 = _this5.xToMark(t);
-
-            _e14 >= 0 && _e14 <= p.totalFrames && _this5.setCurrentMark(_e14);
-          }
-
-          if ("playbackHandleStart" == v) {
-            _this5.playbackHandle.start.isDragging = !0, _this5.playbackHandle.start._x = s.clamp(t, _this5.hatchMark.spacing / 2, _this5.playbackHandle.end._x - _this5.playbackHandle.width / 2 - _this5.hatchMark.spacing);
-
-            var _e15 = _this5.xToMark(t);
-
-            _e15 = s.clamp(_e15, 0, _this5.playbackHandle.end.mark - 1), _e15 >= 0 && _e15 <= p.totalFrames && (_this5.playbackHandle.start.mark = _e15), _this5.canvas.style.cursor = "ew-resize";
-          }
-
-          if ("playbackHandleEnd" == v) {
-            _this5.playbackHandle.end.isDragging = !0, _this5.playbackHandle.end._x = s.clamp(t, _this5.playbackHandle.start._x + _this5.playbackHandle.width / 2 + _this5.hatchMark.spacing, _this5.canvas.width - _this5.hatchMark.spacing / 2);
-
-            var _e16 = _this5.xToMark(t);
-
-            _e16 = s.clamp(_e16, _this5.playbackHandle.start.mark + 1, p.totalFrames - 1), _e16 >= 0 && _e16 <= p.totalFrames && (_this5.playbackHandle.end.mark = _e16), _this5.canvas.style.cursor = "ew-resize";
-          }
-
-          if ("keyframe" == v) if (e) _this5.state._x = s.clamp(t, _this5.hatchMark.spacing / 2, _this5.canvas.width - _this5.hatchMark.spacing / 2), e.render.position.x = _this5.state._x, e.dragged = !0, e.render.color = o.render.keyframe.color.active;else {
-            var _t9 = Object.keys(h.keyframes);
-
-            for (x = 0; x < _t9.length; x++) {
-              var _i8 = h.keyframes[_t9[x]];
-              _i8 && (_i8.locked || _i8.hovered && (e = _i8));
-            }
-          }
-
-          _this5.redraw();
-        }
-      });
-    };
-
-    _proto6.addButtonEvents = function addButtonEvents() {
-      var _this6 = this;
-
-      var e;
-      this.buttons.previous.addEventListener("click", function () {
-        var e = _this6.state.currentMark > 0 ? _this6.state.currentMark - 1 : _this6.state.currentMark;
-
-        _this6.setCurrentMark(e);
-      }), this.buttons.next.addEventListener("click", function () {
-        var e = _this6.state.currentMark < p.totalFrames - 1 ? _this6.state.currentMark + 1 : _this6.state.currentMark;
-
-        _this6.setCurrentMark(e);
-      }), this.buttons.play.addEventListener("click", function () {
-        _this6.state.isPlaying ? _this6.stop() : _this6.play(), _this6.redraw();
-      }), this.buttons.add.addEventListener("click", function () {
-        var e,
-            t = h.clone()[_this6.state.currentMark];
-
-        t && (e = t.joints), h.setKeyframe(_this6.state.currentMark, {
-          locked: 0 == _this6.state.currentMark,
-          joints: e
         });
-      }), this.buttons["delete"].addEventListener("click", function () {
-        r.emit("deleteKeyframe");
-      }), this.buttons.zoomIn.addEventListener("mousedown", function () {
-        r.emit("checkMouseHold", "zoomIn");
-      }), this.buttons.zoomOut.addEventListener("mousedown", function () {
-        r.emit("checkMouseHold", "zoomOut");
-      }), r.on("checkMouseHold", function (t) {
-        e = setInterval(function () {
-          a.pressed ? r.emit("mousehold", t) : (clearInterval(e), e = null);
-        }, 1e3 / 60);
-      }), r.on("mousehold", function (e) {
-        if ("zoomIn" == e) {
-          var _e17 = s.map(_this6.scrollbar.width, 0, _this6.canvas.width, .1, .001),
-              _t10 = _this6.markToX(_this6.state.currentMark, !0);
-
-          _this6.scrollbar.left = s.lerp(_this6.scrollbar.left, _t10 - _this6.scrollbar.minWidth / 2, _e17), _this6.scrollbar.right = s.lerp(_this6.scrollbar.right, _t10 + _this6.scrollbar.minWidth / 2, _e17);
-        } else if ("zoomOut" == e) {
-          var _e18 = s.map(_this6.scrollbar.width, 0, _this6.canvas.width, .001, .1);
-
-          _this6.scrollbar.left = s.lerp(_this6.scrollbar.left, 0, _e18), _this6.scrollbar.right = s.lerp(_this6.scrollbar.right, _this6.canvas.width, _e18);
-        }
-
-        _this6.scrollbar.width = _this6.scrollbar.right - _this6.scrollbar.left, _this6.snap(), _this6.redraw();
-      }), this.buttons.minimize.addEventListener("click", function () {
-        _this6.state.isMinimized ? _this6.maximize() : _this6.minimize();
-      });
-    };
-
-    _proto6.snap = function snap() {
-      var e = Object.keys(h.keyframes);
-
-      for (var t = 0; t < e.length; t++) {
-        var _i9 = e[t],
-            _n11 = h.keyframes[_i9],
-            _r5 = this.markToX(_n11.index, !0);
-
-        _n11.render.position.x = _r5;
       }
+    }, {
+      key: "addMouseEvents",
+      value: function addMouseEvents() {
+        var _this5 = this;
 
-      this.state._x = this.markToX(this.state.currentMark, !0), this.playbackHandle.start._x = this.markToX(this.playbackHandle.start.mark, !0), this.playbackHandle.end._x = this.markToX(this.playbackHandle.end.mark, !0), this.redraw();
-    };
+        this.canvas.addEventListener("contextmenu", function (e) {
+          a.x, _this5.bounds.x, a.y, _this5.bounds.y;
 
-    _proto6.updateState = function updateState(e) {
-      e = void 0 === e || e;
+          if (f(_this5.canvas)) {
+            _this5.storeSelectedKeyframe();
 
-      var t = function () {
-        var e = p.totalFrames,
-            t = u.state.currentMark,
-            i = null;
+            var _e8 = a.x + c.width > innerWidth ? -c.width : 0,
+                _t7 = a.y + c.height > innerHeight ? -c.height : 0;
 
-        for (var n = parseInt(t); n >= 0; n--) {
-          var _e19 = h.keyframes[n];
-
-          if (_e19 && "head" == _e19.type) {
-            i = _e19.index;
-            break;
+            c.show(a.x + _e8, a.y + _t7);
           }
-        }
-
-        var r = null;
-
-        for (n = parseInt(t) + 1; n < e; n++) {
-          var _e20 = h.keyframes[n];
-
-          if (_e20 && "head" == _e20.type) {
-            r = _e20.index;
-            break;
+        });
+        var e,
+            t,
+            i,
+            n,
+            l,
+            d,
+            u,
+            g,
+            m,
+            y = !1,
+            v = null,
+            b = 0;
+        this.redraw(), addEventListener("mouseup", function () {
+          if (y = !1, r.emit("renderFocus"), "playbackHandleStart" == v || "playbackHandleEnd" == v) {
+            var _e9 = {
+              start: _this5.playbackHandle.start.mark,
+              end: _this5.playbackHandle.end.mark
+            };
+            localStorage.setItem(o.autosave.label + ".playback.config", JSON.stringify(_e9));
           }
-        }
 
-        var a = null;
+          if (v = null, e) {
+            var _t8 = _this5.xToMark(_this5.state._x);
 
-        for (n = i - 1; n >= 0; n--) {
-          var _e21 = h.keyframes[n];
-
-          if (_e21 && "head" == _e21.type) {
-            a = _e21.index;
-            break;
+            _this5.setCurrentMark(_t8), h.deleteKeyframe(e.id);
+            h.setKeyframe(_t8, {
+              position: e.position,
+              joints: e.joints,
+              locked: 0 == _t8
+            });
           }
-        }
 
-        return {
-          current: i,
-          next: r,
-          previous: a
-        };
-      }();
+          _this5.scrollbar.color = o.render.timeline.scrollbar.color["default"], _this5.snap(), _this5.state.isDragging = !1, _this5.playbackHandle.start.isDragging = !1, _this5.playbackHandle.end.isDragging = !1, e = null, _this5.canvas.style.cursor = "default", _this5.redraw();
+        }), addEventListener("mousedown", function () {
+          if (f(_this5.canvas)) {
+            if (y = !0, r.emit("renderSleep"), _this5.playbackHandle.end.mark >= p.totalFrames && 1 != p.totalFrames && (_this5.playbackHandle.end.mark = p.totalFrames - 1, _this5.playbackHandle.end._x = _this5.markToX(_this5.playbackHandle.end.mark), _this5.redraw()), y && !v) if (n) b = _this5.scrollbar.left - t, v = "scrollbar";else if (l) {
+              v = "timeline";
 
-      if (this.state.currentFrame = t.current, this.state.nextFrame = t.next, this.state.previousFrame = t.previous, e) {
-        var _e22 = h.keyframes[this.state.currentMark];
+              var _e10 = _this5.markToX(_this5.playbackHandle.start.mark, !0),
+                  _i7 = _this5.markToX(_this5.playbackHandle.end.mark, !0),
+                  _n9 = _this5.playbackHandle.width / 2 + _this5.playbackHandle.offset / 2;
 
-        if (_e22 = _e22 || h.keyframes[this.state.currentFrame], "object" == typeof _e22) {
-          h.joints = _e22.joints;
+              t >= _e10 - _n9 && t <= _e10 + _n9 ? v = "playbackHandleStart" : t >= _i7 - _n9 && t <= _i7 + _n9 && (v = "playbackHandleEnd");
+            } else d && (v = "keyframe");
 
-          var _t11 = h.joints.find(function (t) {
-            return t.id === _e22.activeJointId;
+            if ("timeline" == v) {
+              _this5.state.isDragging = !0, _this5.state._x = s.clamp(t, _this5.hatchMark.spacing / 2, _this5.canvas.width - _this5.hatchMark.spacing / 2);
+
+              var _e11 = _this5.xToMark(t);
+
+              _e11 >= 0 && _e11 <= p.totalFrames && _this5.setCurrentMark(_e11);
+            }
+
+            c.hide();
+          }
+        }), addEventListener("mousemove", function () {
+          if (t = a.x - _this5.bounds.x, i = a.y - _this5.bounds.y, !y && (i < 0 || i > _this5.canvas.height || t < 0 || t > _this5.canvas.width)) return;
+          n = i >= 0 && i <= _this5.scrollbar.height, l = i >= _this5.scrollbar.height && i <= _this5.scrollbar.height + _this5._timelineHeight, d = i >= _this5.scrollbar.height + _this5._timelineHeight && i <= _this5.canvas.height;
+          v || (u = t <= _this5.scrollbar.left + 10, g = t >= _this5.scrollbar.right - 10);
+
+          var r = t >= _this5.scrollbar.left && t <= _this5.scrollbar.right && (u || g) && n,
+              c = _this5.markToX(_this5.playbackHandle.start.mark, !0),
+              f = _this5.markToX(_this5.playbackHandle.end.mark, !0),
+              k = _this5.playbackHandle.width / 2 + _this5.playbackHandle.offset / 2;
+
+          if (m = (t >= c - k && t <= c + k || t >= f - k && t <= f + k) && l, _this5.canvas.style.cursor = r || m ? "ew-resize" : "default", d) {
+            var _e12 = Object.keys(h.keyframes);
+
+            for (var x = 0; x < _e12.length; x++) {
+              var _n10 = h.keyframes[_e12[x]];
+
+              if ("head" == _n10.type) {
+                var _e13 = _n10.render.position.x,
+                    _r4 = _n10.render.position.y,
+                    _a = _n10.render.size;
+                t <= _e13 + _a && t >= _e13 - _a && i <= _r4 + _a && i && i >= _r4 - _a ? (_n10.hovered = !0, _n10.render.color = o.render.keyframe.color.hovered, _this5.canvas.style.cursor = "pointer", _this5.redraw()) : (_n10.hovered = !1, _n10.render.color = o.render.keyframe.color["default"], _this5.redraw());
+              }
+            }
+          }
+
+          if (n && t >= _this5.scrollbar.left && t <= _this5.scrollbar.right ? (_this5.scrollbar.color = o.render.timeline.scrollbar.color.hovered, _this5.redraw()) : (_this5.scrollbar.color = o.render.timeline.scrollbar.color["default"], _this5.redraw()), y) {
+            if ("scrollbar" == v && (u ? (_this5.scrollbar.left = s.clamp(t, 0, _this5.scrollbar.right - _this5.scrollbar.minWidth), _this5.scrollbar.width = _this5.scrollbar.right - _this5.scrollbar.left, _this5.canvas.style.cursor = "ew-resize") : g && (_this5.scrollbar.right = s.clamp(t, _this5.scrollbar.left + _this5.scrollbar.minWidth, _this5.canvas.width), _this5.scrollbar.width = _this5.scrollbar.right - _this5.scrollbar.left, _this5.canvas.style.cursor = "ew-resize"), u || g || (_this5.scrollbar.left = s.clamp(t + b, 0, _this5.canvas.width - _this5.scrollbar.width), _this5.scrollbar.right = _this5.scrollbar.left + _this5.scrollbar.width, _this5.canvas.style.cursor = "default"), _this5.snap()), "timeline" == v || "keyframe" == v) {
+              _this5.state.isDragging = !0, _this5.state._x = s.clamp(t, _this5.hatchMark.spacing / 2, _this5.canvas.width - _this5.hatchMark.spacing / 2);
+
+              var _e14 = _this5.xToMark(t);
+
+              _e14 >= 0 && _e14 <= p.totalFrames && _this5.setCurrentMark(_e14);
+            }
+
+            if ("playbackHandleStart" == v) {
+              _this5.playbackHandle.start.isDragging = !0, _this5.playbackHandle.start._x = s.clamp(t, _this5.hatchMark.spacing / 2, _this5.playbackHandle.end._x - _this5.playbackHandle.width / 2 - _this5.hatchMark.spacing);
+
+              var _e15 = _this5.xToMark(t);
+
+              _e15 = s.clamp(_e15, 0, _this5.playbackHandle.end.mark - 1), _e15 >= 0 && _e15 <= p.totalFrames && (_this5.playbackHandle.start.mark = _e15), _this5.canvas.style.cursor = "ew-resize";
+            }
+
+            if ("playbackHandleEnd" == v) {
+              _this5.playbackHandle.end.isDragging = !0, _this5.playbackHandle.end._x = s.clamp(t, _this5.playbackHandle.start._x + _this5.playbackHandle.width / 2 + _this5.hatchMark.spacing, _this5.canvas.width - _this5.hatchMark.spacing / 2);
+
+              var _e16 = _this5.xToMark(t);
+
+              _e16 = s.clamp(_e16, _this5.playbackHandle.start.mark + 1, p.totalFrames - 1), _e16 >= 0 && _e16 <= p.totalFrames && (_this5.playbackHandle.end.mark = _e16), _this5.canvas.style.cursor = "ew-resize";
+            }
+
+            if ("keyframe" == v) if (e) _this5.state._x = s.clamp(t, _this5.hatchMark.spacing / 2, _this5.canvas.width - _this5.hatchMark.spacing / 2), e.render.position.x = _this5.state._x, e.dragged = !0, e.render.color = o.render.keyframe.color.active;else {
+              var _t9 = Object.keys(h.keyframes);
+
+              for (x = 0; x < _t9.length; x++) {
+                var _i8 = h.keyframes[_t9[x]];
+                _i8 && (_i8.locked || _i8.hovered && (e = _i8));
+              }
+            }
+
+            _this5.redraw();
+          }
+        });
+      }
+    }, {
+      key: "addButtonEvents",
+      value: function addButtonEvents() {
+        var _this6 = this;
+
+        var e;
+        this.buttons.previous.addEventListener("click", function () {
+          var e = _this6.state.currentMark > 0 ? _this6.state.currentMark - 1 : _this6.state.currentMark;
+
+          _this6.setCurrentMark(e);
+        }), this.buttons.next.addEventListener("click", function () {
+          var e = _this6.state.currentMark < p.totalFrames - 1 ? _this6.state.currentMark + 1 : _this6.state.currentMark;
+
+          _this6.setCurrentMark(e);
+        }), this.buttons.play.addEventListener("click", function () {
+          _this6.state.isPlaying ? _this6.stop() : _this6.play(), _this6.redraw();
+        }), this.buttons.add.addEventListener("click", function () {
+          var e,
+              t = h.clone()[_this6.state.currentMark];
+
+          t && (e = t.joints), h.setKeyframe(_this6.state.currentMark, {
+            locked: 0 == _this6.state.currentMark,
+            joints: e
           });
+        }), this.buttons["delete"].addEventListener("click", function () {
+          r.emit("deleteKeyframe");
+        }), this.buttons.zoomIn.addEventListener("mousedown", function () {
+          r.emit("checkMouseHold", "zoomIn");
+        }), this.buttons.zoomOut.addEventListener("mousedown", function () {
+          r.emit("checkMouseHold", "zoomOut");
+        }), r.on("checkMouseHold", function (t) {
+          e = setInterval(function () {
+            a.pressed ? r.emit("mousehold", t) : (clearInterval(e), e = null);
+          }, 1e3 / 60);
+        }), r.on("mousehold", function (e) {
+          if ("zoomIn" == e) {
+            var _e17 = s.map(_this6.scrollbar.width, 0, _this6.canvas.width, .1, .001),
+                _t10 = _this6.markToX(_this6.state.currentMark, !0);
 
-          h.activeJoint = _t11 || h.joints[h.joints.length - 1];
+            _this6.scrollbar.left = s.lerp(_this6.scrollbar.left, _t10 - _this6.scrollbar.minWidth / 2, _e17), _this6.scrollbar.right = s.lerp(_this6.scrollbar.right, _t10 + _this6.scrollbar.minWidth / 2, _e17);
+          } else if ("zoomOut" == e) {
+            var _e18 = s.map(_this6.scrollbar.width, 0, _this6.canvas.width, .001, .1);
+
+            _this6.scrollbar.left = s.lerp(_this6.scrollbar.left, 0, _e18), _this6.scrollbar.right = s.lerp(_this6.scrollbar.right, _this6.canvas.width, _e18);
+          }
+
+          _this6.scrollbar.width = _this6.scrollbar.right - _this6.scrollbar.left, _this6.snap(), _this6.redraw();
+        }), this.buttons.minimize.addEventListener("click", function () {
+          _this6.state.isMinimized ? _this6.maximize() : _this6.minimize();
+        });
+      }
+    }, {
+      key: "snap",
+      value: function snap() {
+        var e = Object.keys(h.keyframes);
+
+        for (var t = 0; t < e.length; t++) {
+          var _i9 = e[t],
+              _n11 = h.keyframes[_i9],
+              _r5 = this.markToX(_n11.index, !0);
+
+          _n11.render.position.x = _r5;
+        }
+
+        this.state._x = this.markToX(this.state.currentMark, !0), this.playbackHandle.start._x = this.markToX(this.playbackHandle.start.mark, !0), this.playbackHandle.end._x = this.markToX(this.playbackHandle.end.mark, !0), this.redraw();
+      }
+    }, {
+      key: "updateState",
+      value: function updateState(e) {
+        e = void 0 === e || e;
+
+        var t = function () {
+          var e = p.totalFrames,
+              t = u.state.currentMark,
+              i = null;
+
+          for (var n = parseInt(t); n >= 0; n--) {
+            var _e19 = h.keyframes[n];
+
+            if (_e19 && "head" == _e19.type) {
+              i = _e19.index;
+              break;
+            }
+          }
+
+          var r = null;
+
+          for (n = parseInt(t) + 1; n < e; n++) {
+            var _e20 = h.keyframes[n];
+
+            if (_e20 && "head" == _e20.type) {
+              r = _e20.index;
+              break;
+            }
+          }
+
+          var a = null;
+
+          for (n = i - 1; n >= 0; n--) {
+            var _e21 = h.keyframes[n];
+
+            if (_e21 && "head" == _e21.type) {
+              a = _e21.index;
+              break;
+            }
+          }
+
+          return {
+            current: i,
+            next: r,
+            previous: a
+          };
+        }();
+
+        if (this.state.currentFrame = t.current, this.state.nextFrame = t.next, this.state.previousFrame = t.previous, e) {
+          var _e22 = h.keyframes[this.state.currentMark];
+
+          if (_e22 = _e22 || h.keyframes[this.state.currentFrame], "object" == _typeof(_e22)) {
+            h.joints = _e22.joints;
+
+            var _t11 = h.joints.find(function (t) {
+              return t.id === _e22.activeJointId;
+            });
+
+            h.activeJoint = _t11 || h.joints[h.joints.length - 1];
+          }
         }
       }
-    };
+    }, {
+      key: "redraw",
+      value: function redraw() {
+        this.clear(), this.draw();
+      }
+    }, {
+      key: "clear",
+      value: function clear() {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      }
+    }, {
+      key: "draw",
+      value: function draw() {
+        var e = this.canvas.parentNode;
+        this.canvas.width == e.offsetWidth && this.canvas.height == e.offsetHeight || (this.canvas.width = e.offsetWidth, this.canvas.height = e.offsetHeight), this.scrollbar.height = .25 * this.canvas.height, this._timelineHeight = .4 * this.canvas.height;
+        var t = s.map(this.scrollbar.left, 0, this.canvas.width, 0, this.canvas.width * this.scrollbar.zoomSensitivity),
+            i = this.canvas.width + s.map(this.scrollbar.width, 0, this.canvas.width, this.canvas.width * this.scrollbar.zoomSensitivity, 0),
+            n = p.totalFrames,
+            r = 5 * Math.floor(s.clamp(p.totalFrames, i / 15, Number.MAX_SAFE_INTEGER) / (i / 15)),
+            l = Math.round((t - this.hatchMark.spacing / 2) / this.hatchMark.spacing),
+            c = Math.round((s.map(this.scrollbar.right, 0, this.canvas.width, 0, this.canvas.width * this.scrollbar.zoomSensitivity) - this.hatchMark.spacing / 2) / this.hatchMark.spacing),
+            d = this.markToX(this.state.currentMark, !0);
+        d = this.state.isDragging ? this.state._x : d;
+        var u = this._timelineHeight - this.hatchMark.height,
+            f = this.state.currentMark + 1;
+        this.createRect(this.scrollbar.left, this.scrollbar.y, this.scrollbar.right - this.scrollbar.left, this.scrollbar.height - 5, this.scrollbar.color, 4), this.createRect(0, this.scrollbar.height, this.canvas.width, this._timelineHeight, "rgba(0, 0, 0, 0.15)", 4), this.context.save(), this.context.clip(), this.hatchMark.spacing = i / n;
 
-    _proto6.redraw = function redraw() {
-      this.clear(), this.draw();
-    };
+        for (var g = 0; g < n; g++) {
+          if (g < l || g > c) continue;
 
-    _proto6.clear = function clear() {
-      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    };
+          var _e23 = (g + 1) % r == 0 ? 2 : 0,
+              _i10 = this.hatchMark.spacing * g + this.hatchMark.spacing / 2 - t,
+              _n12 = this.scrollbar.height + this._timelineHeight - this.hatchMark.height - _e23,
+              _a2 = 1,
+              _o = this.scrollbar.height + this._timelineHeight - _n12;
 
-    _proto6.draw = function draw() {
-      var e = this.canvas.parentNode;
-      this.canvas.width == e.offsetWidth && this.canvas.height == e.offsetHeight || (this.canvas.width = e.offsetWidth, this.canvas.height = e.offsetHeight), this.scrollbar.height = .25 * this.canvas.height, this._timelineHeight = .4 * this.canvas.height;
-      var t = s.map(this.scrollbar.left, 0, this.canvas.width, 0, this.canvas.width * this.scrollbar.zoomSensitivity),
-          i = this.canvas.width + s.map(this.scrollbar.width, 0, this.canvas.width, this.canvas.width * this.scrollbar.zoomSensitivity, 0),
-          n = p.totalFrames,
-          r = 5 * Math.floor(s.clamp(p.totalFrames, i / 15, Number.MAX_SAFE_INTEGER) / (i / 15)),
-          l = Math.round((t - this.hatchMark.spacing / 2) / this.hatchMark.spacing),
-          c = Math.round((s.map(this.scrollbar.right, 0, this.canvas.width, 0, this.canvas.width * this.scrollbar.zoomSensitivity) - this.hatchMark.spacing / 2) / this.hatchMark.spacing),
-          d = this.markToX(this.state.currentMark, !0);
-      d = this.state.isDragging ? this.state._x : d;
-      var u = this._timelineHeight - this.hatchMark.height,
-          f = this.state.currentMark + 1;
-      this.createRect(this.scrollbar.left, this.scrollbar.y, this.scrollbar.right - this.scrollbar.left, this.scrollbar.height - 5, this.scrollbar.color, 4), this.createRect(0, this.scrollbar.height, this.canvas.width, this._timelineHeight, "rgba(0, 0, 0, 0.15)", 4), this.context.save(), this.context.clip(), this.hatchMark.spacing = i / n;
+          if (this.createRect(_i10 - _a2 / 2, _n12, _a2, _o, "rgba(255, 255, 255, 0.25)"), _e23) {
+            _i10 >= d - 5 && _i10 <= d + 5 || this.text(g + 1, _i10, _n12 - 1, "rgba(255, 255, 255, 0.25)");
+          }
+        }
 
-      for (var g = 0; g < n; g++) {
-        if (g < l || g > c) continue;
+        this.context.beginPath(), this.context.moveTo(d - 5, this.scrollbar.height), this.context.lineTo(d + 5, this.scrollbar.height), this.context.lineTo(d + 5, this.scrollbar.height + u - 5), this.context.lineTo(d, this.scrollbar.height + u), this.context.lineTo(d - 5, this.scrollbar.height + u - 5), this.context.closePath(), this.context.fillStyle = o.accent, this.context.fill(), this.text(f, d + 10, u / 2 + 8 + this.scrollbar.height, o.accent, "left");
+        var m = this.markToX(this.playbackHandle.start.mark, !0);
+        m = this.playbackHandle.start.isDragging ? this.playbackHandle.start._x : m, this.createRect(m - this.playbackHandle.width / 2, this.scrollbar.height, this.playbackHandle.width, this._timelineHeight, o.accent), this.createRect(0, this.scrollbar.height, m, this._timelineHeight, "rgba(0, 0, 0, 0.15)");
+        var y = this.markToX(this.playbackHandle.end.mark, !0);
+        y = this.playbackHandle.end.isDragging ? this.playbackHandle.end._x : y, this.createRect(y - this.playbackHandle.width / 2, this.scrollbar.height, this.playbackHandle.width, this._timelineHeight, o.accent), this.createRect(y, this.scrollbar.height, this.canvas.width - y, this._timelineHeight, "rgba(0, 0, 0, 0.15)"), this.context.restore();
+        var v = Object.keys(h.keyframes);
 
-        var _e23 = (g + 1) % r == 0 ? 2 : 0,
-            _i10 = this.hatchMark.spacing * g + this.hatchMark.spacing / 2 - t,
-            _n12 = this.scrollbar.height + this._timelineHeight - this.hatchMark.height - _e23,
-            _a2 = 1,
-            _o = this.scrollbar.height + this._timelineHeight - _n12;
+        for (var _i11 = 0, _v = v; _i11 < _v.length; _i11++) {
+          var _e24 = _v[_i11];
+          var _t12 = h.keyframes[_e24];
+          _t12.render.position.y = this.scrollbar.height + this._timelineHeight + _t12.render.size + 5;
 
-        if (this.createRect(_i10 - _a2 / 2, _n12, _a2, _o, "rgba(255, 255, 255, 0.25)"), _e23) {
-          _i10 >= d - 5 && _i10 <= d + 5 || this.text(g + 1, _i10, _n12 - 1, "rgba(255, 255, 255, 0.25)");
+          var _i12 = this.markToX(_t12.index, !0);
+
+          _t12.render.position.x = _t12.dragged ? a.x - this.bounds.x : _i12, "head" == _t12.type && this.createKeyframe(_t12.render.position.x, _t12.render.position.y, _t12.render.size, _t12.render.color);
         }
       }
-
-      this.context.beginPath(), this.context.moveTo(d - 5, this.scrollbar.height), this.context.lineTo(d + 5, this.scrollbar.height), this.context.lineTo(d + 5, this.scrollbar.height + u - 5), this.context.lineTo(d, this.scrollbar.height + u), this.context.lineTo(d - 5, this.scrollbar.height + u - 5), this.context.closePath(), this.context.fillStyle = o.accent, this.context.fill(), this.text(f, d + 10, u / 2 + 8 + this.scrollbar.height, o.accent, "left");
-      var m = this.markToX(this.playbackHandle.start.mark, !0);
-      m = this.playbackHandle.start.isDragging ? this.playbackHandle.start._x : m, this.createRect(m - this.playbackHandle.width / 2, this.scrollbar.height, this.playbackHandle.width, this._timelineHeight, o.accent), this.createRect(0, this.scrollbar.height, m, this._timelineHeight, "rgba(0, 0, 0, 0.15)");
-      var y = this.markToX(this.playbackHandle.end.mark, !0);
-      y = this.playbackHandle.end.isDragging ? this.playbackHandle.end._x : y, this.createRect(y - this.playbackHandle.width / 2, this.scrollbar.height, this.playbackHandle.width, this._timelineHeight, o.accent), this.createRect(y, this.scrollbar.height, this.canvas.width - y, this._timelineHeight, "rgba(0, 0, 0, 0.15)"), this.context.restore();
-      var v = Object.keys(h.keyframes);
-
-      for (var _i11 = 0, _v = v; _i11 < _v.length; _i11++) {
-        var _e24 = _v[_i11];
-        var _t12 = h.keyframes[_e24];
-        _t12.render.position.y = this.scrollbar.height + this._timelineHeight + _t12.render.size + 5;
-
-        var _i12 = this.markToX(_t12.index, !0);
-
-        _t12.render.position.x = _t12.dragged ? a.x - this.bounds.x : _i12, "head" == _t12.type && this.createKeyframe(_t12.render.position.x, _t12.render.position.y, _t12.render.size, _t12.render.color);
+    }, {
+      key: "text",
+      value: function text(e, t, i, n, r) {
+        this.context.beginPath(), this.context.fillStyle = n, this.context.font = "12px Catamaran", this.context.textAlign = r || "center", this.context.textBaseline = "bottom", this.context.fillText(e, t, i);
       }
-    };
+    }, {
+      key: "createRect",
+      value: function createRect(e, t, i, n, r, a) {
+        a = a || 0, this.context.beginPath(), this.context.moveTo(e + a, t), this.context.lineTo(e + i - a, t), this.context.quadraticCurveTo(e + i, t, e + i, t + a), this.context.lineTo(e + i, t + n - a), this.context.quadraticCurveTo(e + i, t + n, e + i - a, t + n), this.context.lineTo(e + a, t + n), this.context.quadraticCurveTo(e, t + n, e, t + n - a), this.context.lineTo(e, t + a), this.context.quadraticCurveTo(e, t, e + a, t), this.context.closePath(), this.context.fillStyle = r, this.context.fill();
+      }
+    }, {
+      key: "createLine",
+      value: function createLine(e, t, i, n, r) {
+        this.context.beginPath(), this.context.moveTo(e, t), this.context.lineTo(i, n), this.context.strokeStyle = r, this.context.stroke();
+      }
+    }, {
+      key: "createKeyframe",
+      value: function createKeyframe(e, t, i, n) {
+        this.context.beginPath(), this.context.moveTo(e, t - i / 2), this.context.lineTo(e + i / 2, t), this.context.lineTo(e, t + i / 2), this.context.lineTo(e - i / 2, t), this.context.closePath(), this.context.fillStyle = n, this.context.fill();
+      }
+    }, {
+      key: "setCurrentMark",
+      value: function setCurrentMark(e, t) {
+        this.state.currentMark = e, p.setCurrentFrame(this.state.currentMark), this.updateState(t), this.redraw(), r.emit("timelineSeeked");
+      }
+    }, {
+      key: "play",
+      value: function play() {
+        var _this7 = this;
 
-    _proto6.text = function text(e, t, i, n, r) {
-      this.context.beginPath(), this.context.fillStyle = n, this.context.font = "12px Catamaran", this.context.textAlign = r || "center", this.context.textBaseline = "bottom", this.context.fillText(e, t, i);
-    };
+        this.loop = setInterval(function () {
+          _this7.state.currentMark < _this7.playbackHandle.start.mark && _this7.setCurrentMark(_this7.playbackHandle.start.mark - 1);
+          var e = _this7.state.currentMark < _this7.playbackHandle.end.mark ? _this7.state.currentMark + 1 : _this7.playbackHandle.start.mark;
 
-    _proto6.createRect = function createRect(e, t, i, n, r, a) {
-      a = a || 0, this.context.beginPath(), this.context.moveTo(e + a, t), this.context.lineTo(e + i - a, t), this.context.quadraticCurveTo(e + i, t, e + i, t + a), this.context.lineTo(e + i, t + n - a), this.context.quadraticCurveTo(e + i, t + n, e + i - a, t + n), this.context.lineTo(e + a, t + n), this.context.quadraticCurveTo(e, t + n, e, t + n - a), this.context.lineTo(e, t + a), this.context.quadraticCurveTo(e, t, e + a, t), this.context.closePath(), this.context.fillStyle = r, this.context.fill();
-    };
+          _this7.setCurrentMark(e);
+        }, 1e3 / p.animationSpeed), this.state.isPlaying = !0, this.buttons.play.firstChild.src = "assets/svg/round-square.svg", document.getElementById("propertyApp").classList.add("disabled");
+      }
+    }, {
+      key: "stop",
+      value: function stop() {
+        clearInterval(this.loop), this.state.isPlaying = !1, this.buttons.play.firstChild.src = "assets/svg/play.svg", document.getElementById("propertyApp").classList.remove("disabled"), r.emit("timelineSeeked");
+      }
+    }, {
+      key: "updateSize",
+      value: function updateSize() {
+        var _this8 = this;
 
-    _proto6.createLine = function createLine(e, t, i, n, r) {
-      this.context.beginPath(), this.context.moveTo(e, t), this.context.lineTo(i, n), this.context.strokeStyle = r, this.context.stroke();
-    };
+        var e = function e() {
+          var e = _this8.canvas.parentNode.getBoundingClientRect();
 
-    _proto6.createKeyframe = function createKeyframe(e, t, i, n) {
-      this.context.beginPath(), this.context.moveTo(e, t - i / 2), this.context.lineTo(e + i / 2, t), this.context.lineTo(e, t + i / 2), this.context.lineTo(e - i / 2, t), this.context.closePath(), this.context.fillStyle = n, this.context.fill();
-    };
+          _this8.canvas.width = e.width, _this8.canvas.height = e.height, _this8.bounds = _this8.canvas.getBoundingClientRect(), _this8.redraw();
+        };
 
-    _proto6.setCurrentMark = function setCurrentMark(e, t) {
-      this.state.currentMark = e, p.setCurrentFrame(this.state.currentMark), this.updateState(t), this.redraw(), r.emit("timelineSeeked");
-    };
-
-    _proto6.play = function play() {
-      var _this7 = this;
-
-      this.loop = setInterval(function () {
-        _this7.state.currentMark < _this7.playbackHandle.start.mark && _this7.setCurrentMark(_this7.playbackHandle.start.mark - 1);
-        var e = _this7.state.currentMark < _this7.playbackHandle.end.mark ? _this7.state.currentMark + 1 : _this7.playbackHandle.start.mark;
-
-        _this7.setCurrentMark(e);
-      }, 1e3 / p.animationSpeed), this.state.isPlaying = !0, this.buttons.play.firstChild.src = "assets/svg/round-square.svg", document.getElementById("propertyApp").classList.add("disabled");
-    };
-
-    _proto6.stop = function stop() {
-      clearInterval(this.loop), this.state.isPlaying = !1, this.buttons.play.firstChild.src = "assets/svg/play.svg", document.getElementById("propertyApp").classList.remove("disabled"), r.emit("timelineSeeked");
-    };
-
-    _proto6.updateSize = function updateSize() {
-      var _this8 = this;
-
-      var e = function e() {
-        var e = _this8.canvas.parentNode.getBoundingClientRect();
-
-        _this8.canvas.width = e.width, _this8.canvas.height = e.height, _this8.bounds = _this8.canvas.getBoundingClientRect(), _this8.redraw();
-      };
-
-      e(), setTimeout(e, 100);
-    };
-
-    _proto6.minimize = function minimize() {
-      var e = p.$el.offsetHeight,
-          t = document.querySelector("#timelineApp div.row-b");
-      p.$el.style.transform = "translateY(" + (e - t.offsetTop - 2) + "px)", this.buttons.minimize.style.transform = "translateY(-40px) rotate(0deg)", this.state.isMinimized = !0;
-    };
-
-    _proto6.maximize = function maximize() {
-      p.$el.offsetHeight;
-      p.$el.style.transform = "translateY(0px)", this.buttons.minimize.style.transform = "translateY(-40px) rotate(180deg)", this.state.isMinimized = !1;
-    };
+        e(), setTimeout(e, 100);
+      }
+    }, {
+      key: "minimize",
+      value: function minimize() {
+        var e = p.$el.offsetHeight,
+            t = document.querySelector("#timelineApp div.row-b");
+        p.$el.style.transform = "translateY(".concat(e - t.offsetTop - 2, "px)"), this.buttons.minimize.style.transform = "translateY(-40px) rotate(0deg)", this.state.isMinimized = !0;
+      }
+    }, {
+      key: "maximize",
+      value: function maximize() {
+        p.$el.offsetHeight;
+        p.$el.style.transform = "translateY(0px)", this.buttons.minimize.style.transform = "translateY(-40px) rotate(180deg)", this.state.isMinimized = !1;
+      }
+    }]);
 
     return _class3;
   }())(), s.loadJSONData(o.autosave.label + ".frames.config", function (e) {
@@ -1277,7 +1375,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
   try {
     i = i || new Function("return this")();
   } catch (e) {
-    "object" == typeof window && (i = window);
+    "object" == (typeof window === "undefined" ? "undefined" : _typeof(window)) && (i = window);
   }
 
   e.exports = i;
@@ -1288,90 +1386,108 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
   var n = /*#__PURE__*/function () {
     function n() {
-      var e = "object" == typeof arguments[0] ? arguments[0].x : arguments[0],
-          t = "object" == typeof arguments[0] ? arguments[0].y : arguments[1];
+      _classCallCheck(this, n);
+
+      var e = "object" == _typeof(arguments[0]) ? arguments[0].x : arguments[0],
+          t = "object" == _typeof(arguments[0]) ? arguments[0].y : arguments[1];
       this.x = e || 0, this.y = t || 0;
     }
 
-    var _proto7 = n.prototype;
-
-    _proto7.add = function add() {
-      var e = "object" == typeof arguments[0] ? arguments[0].x : arguments[0],
-          t = "object" == typeof arguments[0] ? arguments[0].y : arguments[1];
-      return this.x += e || 0, this.y += t || 0, this;
-    };
-
-    _proto7.sub = function sub() {
-      var e = "object" == typeof arguments[0] ? arguments[0].x : arguments[0],
-          t = "object" == typeof arguments[0] ? arguments[0].y : arguments[1];
-      return this.x -= e || 0, this.y -= t || 0, this;
-    };
-
-    _proto7.mult = function mult(e) {
-      return this.x *= e, this.y *= e, this;
-    };
-
-    _proto7.div = function div(e) {
-      return this.x /= e, this.y /= e, this;
-    };
-
-    _proto7.set = function set() {
-      var e = "object" == typeof arguments[0] ? arguments[0].x : arguments[0],
-          t = "object" == typeof arguments[0] ? arguments[0].y : arguments[1];
-      return this.x = e || 0, this.y = t || 0, this;
-    };
-
-    _proto7.equals = function equals() {
-      var e = "object" == typeof arguments[0] ? arguments[0].x : arguments[0],
-          t = "object" == typeof arguments[0] ? arguments[0].y : arguments[1];
-      return this.x == e && this.y == t;
-    };
-
-    _proto7.reset = function reset() {
-      return this.x = 0, this.y = 0, this;
-    };
-
-    _proto7.limit = function limit(e) {
-      return e = e || 1, this.getMag() >= e && this.setMag(e), this;
-    };
-
-    _proto7.lerp = function lerp(e, t) {
-      return t = t || .1, "number" == typeof e.x && (this.x = t * (e.x - this.x) + this.x), "number" == typeof e.y && (this.y = t * (e.y - this.y) + this.y), this;
-    };
-
-    _proto7.dist = function dist() {
-      var e = "object" == typeof arguments[0] ? arguments[0].x : arguments[0],
-          t = "object" == typeof arguments[0] ? arguments[0].y : arguments[1];
-      return Math.sqrt((this.x - e) * (this.x - e) + (this.y - t) * (this.y - t));
-    };
-
-    _proto7.heading = function heading() {
-      var e = "object" == typeof arguments[0] ? arguments[0].x : arguments[0],
-          t = "object" == typeof arguments[0] ? arguments[0].y : arguments[1];
-      return arguments.length ? Math.atan2(t - this.y, e - this.x) : Math.atan2(this.y, this.x);
-    };
-
-    _proto7.norm = function norm() {
-      var e = this.getMag();
-      return 0 != e && this.mult(1 / e, 1 / e), this;
-    };
-
-    _proto7.copy = function copy() {
-      return new n(this.x, this.y);
-    };
-
-    _proto7.setMag = function setMag(e) {
-      var t = this.getMag();
-      return t = 0 == t ? .001 : t, this.x *= 1 / t * e, this.y *= 1 / t * e, this;
-    };
-
-    _proto7.getMag = function getMag() {
-      return Math.sqrt(this.x * this.x + this.y * this.y);
-    };
-
-    _proto7.random2D = function random2D(e) {
-      return e = "number" != typeof e ? 1 : e, this.x = i(-e, e), this.y = i(-e, e), this.setMag(e), this;
-    };
+    _createClass(n, [{
+      key: "add",
+      value: function add() {
+        var e = "object" == _typeof(arguments[0]) ? arguments[0].x : arguments[0],
+            t = "object" == _typeof(arguments[0]) ? arguments[0].y : arguments[1];
+        return this.x += e || 0, this.y += t || 0, this;
+      }
+    }, {
+      key: "sub",
+      value: function sub() {
+        var e = "object" == _typeof(arguments[0]) ? arguments[0].x : arguments[0],
+            t = "object" == _typeof(arguments[0]) ? arguments[0].y : arguments[1];
+        return this.x -= e || 0, this.y -= t || 0, this;
+      }
+    }, {
+      key: "mult",
+      value: function mult(e) {
+        return this.x *= e, this.y *= e, this;
+      }
+    }, {
+      key: "div",
+      value: function div(e) {
+        return this.x /= e, this.y /= e, this;
+      }
+    }, {
+      key: "set",
+      value: function set() {
+        var e = "object" == _typeof(arguments[0]) ? arguments[0].x : arguments[0],
+            t = "object" == _typeof(arguments[0]) ? arguments[0].y : arguments[1];
+        return this.x = e || 0, this.y = t || 0, this;
+      }
+    }, {
+      key: "equals",
+      value: function equals() {
+        var e = "object" == _typeof(arguments[0]) ? arguments[0].x : arguments[0],
+            t = "object" == _typeof(arguments[0]) ? arguments[0].y : arguments[1];
+        return this.x == e && this.y == t;
+      }
+    }, {
+      key: "reset",
+      value: function reset() {
+        return this.x = 0, this.y = 0, this;
+      }
+    }, {
+      key: "limit",
+      value: function limit(e) {
+        return e = e || 1, this.getMag() >= e && this.setMag(e), this;
+      }
+    }, {
+      key: "lerp",
+      value: function lerp(e, t) {
+        return t = t || .1, "number" == typeof e.x && (this.x = t * (e.x - this.x) + this.x), "number" == typeof e.y && (this.y = t * (e.y - this.y) + this.y), this;
+      }
+    }, {
+      key: "dist",
+      value: function dist() {
+        var e = "object" == _typeof(arguments[0]) ? arguments[0].x : arguments[0],
+            t = "object" == _typeof(arguments[0]) ? arguments[0].y : arguments[1];
+        return Math.sqrt((this.x - e) * (this.x - e) + (this.y - t) * (this.y - t));
+      }
+    }, {
+      key: "heading",
+      value: function heading() {
+        var e = "object" == _typeof(arguments[0]) ? arguments[0].x : arguments[0],
+            t = "object" == _typeof(arguments[0]) ? arguments[0].y : arguments[1];
+        return arguments.length ? Math.atan2(t - this.y, e - this.x) : Math.atan2(this.y, this.x);
+      }
+    }, {
+      key: "norm",
+      value: function norm() {
+        var e = this.getMag();
+        return 0 != e && this.mult(1 / e, 1 / e), this;
+      }
+    }, {
+      key: "copy",
+      value: function copy() {
+        return new n(this.x, this.y);
+      }
+    }, {
+      key: "setMag",
+      value: function setMag(e) {
+        var t = this.getMag();
+        return t = 0 == t ? .001 : t, this.x *= 1 / t * e, this.y *= 1 / t * e, this;
+      }
+    }, {
+      key: "getMag",
+      value: function getMag() {
+        return Math.sqrt(this.x * this.x + this.y * this.y);
+      }
+    }, {
+      key: "random2D",
+      value: function random2D(e) {
+        return e = "number" != typeof e ? 1 : e, this.x = i(-e, e), this.y = i(-e, e), this.setMag(e), this;
+      }
+    }]);
 
     return n;
   }();
@@ -1405,752 +1521,779 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
       h = document.getElementById("showSkeleton");
   var c = new ( /*#__PURE__*/function () {
     function _class4() {
+      _classCallCheck(this, _class4);
+
       this.joints = [], this.keyframes = {}, this.totalKeyframes = 0, this.mouseBuffer = 10, this.activeJoint = null, this.bounds = {
         min: r(),
         max: r()
       }, this._moved = !1;
     }
 
-    var _proto8 = _class4.prototype;
+    _createClass(_class4, [{
+      key: "updateBounds",
+      value: function updateBounds() {
+        var e = Object.keys(this.keyframes),
+            t = [],
+            i = [];
 
-    _proto8.updateBounds = function updateBounds() {
-      var e = Object.keys(this.keyframes),
-          t = [],
-          i = [];
+        for (var n = 0; n < e.length; n++) {
+          var _s = this.keyframes[e[n]];
 
-      for (var n = 0; n < e.length; n++) {
-        var _s = this.keyframes[e[n]];
-
-        for (var r = 0; r < _s.joints.length; r++) {
-          var _e25 = _s.joints[r];
-          if (t.push(_e25.position.x + a.render.joint.radius), i.push(_e25.position.y + a.render.joint.radius), t.push(_e25.position.x - a.render.joint.radius), i.push(_e25.position.y - a.render.joint.radius), _e25.skin.vertices) for (var o = 0; o < _e25.skin.vertices.length; o++) {
-            t.push(_e25.skin.vertices[o].x), i.push(_e25.skin.vertices[o].y);
-          }
-        }
-      }
-
-      this.bounds.min.set({
-        x: Math.min.apply(Math, t),
-        y: Math.min.apply(Math, i)
-      }), this.bounds.max.set({
-        x: Math.max.apply(Math, t),
-        y: Math.max.apply(Math, i)
-      });
-    };
-
-    _proto8.reset = function reset() {
-      this.keyframes = {}, this.joints = [], this.totalKeyframes = 0, this.activeJoint = null, l.graph && (this.setKeyframe(0, {
-        position: {
-          x: l.graph.hatchMark.spacing / 2,
-          y: 0
-        },
-        locked: !0,
-        ignoreHistory: !0
-      }), l.graph.setCurrentMark(0), l.graph.updateState()), this.updateBounds(), s.add({
-        label: "Clear",
-        value: this.clone(),
-        group: "keyframe"
-      });
-    };
-
-    _proto8.clone = function clone(e) {
-      return e = e || this.keyframes, this.fromJSON(this.toJSON(e));
-    };
-
-    _proto8.getKeyframe = function getKeyframe(e, t) {
-      var i = Object.values(this.keyframes).find(function (i) {
-        return i[e] === t;
-      });
-      return i ? this.keyframes[i.index] : null;
-    };
-
-    _proto8.editJoints = function editJoints(e) {
-      var t = Object.values(this.keyframes);
-
-      for (var i = 0; i < t.length; i++) {
-        var _r6 = t[i];
-
-        for (var n = 0; n < _r6.joints.length; n++) {
-          var _t13 = _r6.joints[n];
-          "function" == typeof e && e(_t13, _r6);
-        }
-      }
-    };
-
-    _proto8.editJoint = function editJoint(e, t, i) {
-      var n = Object.values(this.keyframes);
-
-      for (var r = 0; r < n.length; r++) {
-        var _o2 = n[r].joints.find(function (t) {
-          return t.id === e;
-        });
-
-        if (t = i ? JSON.parse(JSON.stringify(t)) : t, _o2) {
-          var _e26 = Object.keys(t);
-
-          for (var a = 0; a < _e26.length; a++) {
-            _o2[_e26[a]] = t[_e26[a]];
-          }
-        }
-      }
-    };
-
-    _proto8.addSubKeyframes = function addSubKeyframes(e, t) {
-      if (l.graph) {
-        var _n13 = Object.keys(this.keyframes);
-
-        for (var i = 0; i < _n13.length; i++) {
-          if ("sub" == this.keyframes[_n13[i]].type) {
-            _n13.splice(i, 1);
-
-            break;
-          }
-        }
-
-        this.clone();
-
-        if (_n13.length > 1) {
-          l.graph.updateState();
-
-          for (i = t - 1; i >= e + 1; i--) {
-            var _e27 = this.clone(),
-                _n14 = _e27[t].joints,
-                _a3 = {
-              id: o.uid(),
-              type: "sub",
-              index: i,
-              activeJointId: _e27.activeJointId,
-              joints: _n14,
-              render: {
-                size: 12,
-                color: "red",
-                position: r(i * l.graph.hatchMark.spacing + l.graph.hatchMark.spacing / 2, 0)
-              }
-            };
-
-            this.keyframes[i] = _a3;
-          }
-        }
-      }
-
-      this.updateSubKeyframes(), l.graph.updateState(), l.graph.redraw();
-    };
-
-    _proto8.updateSubKeyframes = function updateSubKeyframes() {
-      var e = Object.keys(this.keyframes);
-
-      for (var t = e.length - 1; t >= 0; t--) {
-        var _r7 = this.keyframes[e[t]];
-        if (!_r7) continue;
-        if ("head" == _r7.type) continue;
-        var _s2 = null;
-
-        for (var i = _r7.index; i >= 0; i--) {
-          var _e28 = this.keyframes[i];
-
-          if (_e28 && "head" == _e28.type) {
-            _s2 = _e28.index;
-            break;
-          }
-        }
-
-        var _h = null;
-
-        for (i = _r7.index; i < l.app.totalFrames; i++) {
-          var _e29 = this.keyframes[i];
-
-          if (_e29 && "head" == _e29.type) {
-            _h = _e29.index;
-            break;
-          }
-        }
-
-        var _c = o.map(_r7.index, _h, _s2, 0, 1),
-            d = this.keyframes[_h],
-            u = this.keyframes[_s2];
-
-        var _loop = function _loop() {
-          var e = _r7.joints[i];
-
-          if (e && d && u) {
-            var _t14 = d.joints.find(function (t) {
-              return t.id === e.id;
-            }),
-                _i13 = u.joints.find(function (t) {
-              return t.id === e.id;
-            });
-
-            if (_t14 && _i13) {
-              var _r8 = _t14.position.copy().lerp(_i13.position, _c),
-                  _s3 = o.lerp(_t14.length, _i13.length, _c);
-
-              e.length = _s3, e.position.set(_r8), a.animateSkin && _i13.skin && _t14.skin && _i13.skin.offset && _t14.skin.offset && (e.skin.offset = {
-                x: o.lerp(_t14.skin.offset.x, _i13.skin.offset.x, _c),
-                y: o.lerp(_t14.skin.offset.y, _i13.skin.offset.y, _c),
-                scaleX: o.lerp(_t14.skin.offset.scaleX, _i13.skin.offset.scaleX, _c),
-                scaleY: o.lerp(_t14.skin.offset.scaleY, _i13.skin.offset.scaleY, _c),
-                angle: o.lerp(_t14.skin.offset.angle, _i13.skin.offset.angle, _c)
-              });
-
-              for (n = 0; n < e.children.length; n++) {
-                var _t15 = e.children[n];
-                _t15.angle = _t15.position.heading(e.position);
-              }
+          for (var r = 0; r < _s.joints.length; r++) {
+            var _e25 = _s.joints[r];
+            if (t.push(_e25.position.x + a.render.joint.radius), i.push(_e25.position.y + a.render.joint.radius), t.push(_e25.position.x - a.render.joint.radius), i.push(_e25.position.y - a.render.joint.radius), _e25.skin.vertices) for (var o = 0; o < _e25.skin.vertices.length; o++) {
+              t.push(_e25.skin.vertices[o].x), i.push(_e25.skin.vertices[o].y);
             }
-
-            e.id == u.activeJointId && (_r7.activeJointId = e.id);
           }
-        };
-
-        for (i = 0; i < _r7.joints.length; i++) {
-          var n;
-
-          _loop();
         }
 
-        "linear" != a.riggingMode && ("forwardKinematics" == a.riggingMode ? this.computeKinematics(_r7.joints) : "inverseKinematics" == a.riggingMode && this.computeKinematics(_r7.joints, !0)), this.updateSkin(_r7.joints);
+        this.bounds.min.set({
+          x: Math.min.apply(Math, t),
+          y: Math.min.apply(Math, i)
+        }), this.bounds.max.set({
+          x: Math.max.apply(Math, t),
+          y: Math.max.apply(Math, i)
+        });
       }
-    };
-
-    _proto8.setKeyframe = function setKeyframe(e, t) {
-      if ("number" != typeof e) return;
-      var i = {
-        type: "head",
-        index: (t = t || {}).keyframe ? t.keyframe.index : e,
-        activeJointId: t.keyframe ? t.keyframe.activeJointId : this.activeJoint ? this.activeJoint.id : null,
-        joints: t.joints,
-        render: {
-          size: a.render.keyframe.size,
-          color: a.render.keyframe.color["default"],
-          position: t.position || r(e * l.graph.hatchMark.spacing + l.graph.hatchMark.spacing / 2, 0)
-        },
-        locked: t.locked || !1
-      };
-
-      if (l.graph) {
-        var _e30 = this.clone()[l.graph.state.currentFrame],
-            _n15 = _e30 ? _e30.joints : [];
-
-        t.joints && (_n15 = t.joints), i.joints = _n15;
-      }
-
-      if (i.id = t.id || o.uid(), this.keyframes[e] = i, l.graph) {
-        l.graph.updateState();
-        var _e31 = l.graph.state.currentFrame,
-            _t16 = l.graph.state.previousFrame;
-        this.addSubKeyframes(_t16, _e31), l.graph.redraw();
-      }
-
-      if (!t.ignoreHistory) {
-        var _e32 = Object.values(this.keyframes),
-            _t17 = 0;
-
-        for (var n = 0; n < _e32.length; n++) {
-          "head" == _e32[n].type && _t17++;
-        }
-
-        var _r9 = "Add keyframe";
-        return _t17 == this.totalKeyframes && (_r9 = "Move keyframe"), this.updateBounds(), s.add({
-          label: _r9,
+    }, {
+      key: "reset",
+      value: function reset() {
+        this.keyframes = {}, this.joints = [], this.totalKeyframes = 0, this.activeJoint = null, l.graph && (this.setKeyframe(0, {
+          position: {
+            x: l.graph.hatchMark.spacing / 2,
+            y: 0
+          },
+          locked: !0,
+          ignoreHistory: !0
+        }), l.graph.setCurrentMark(0), l.graph.updateState()), this.updateBounds(), s.add({
+          label: "Clear",
           value: this.clone(),
           group: "keyframe"
-        }), this.totalKeyframes = _t17, i;
-      }
-    };
-
-    _proto8.deleteKeyframe = function deleteKeyframe(e) {
-      var t = this.getKeyframe("id", e);
-      if (!t) return;
-      if (Object.keys(this.keyframes).length <= 1) return;
-      var i,
-          n,
-          r = [];
-
-      for (var a = t.index - 1; a >= 0; a--) {
-        var _e33 = this.keyframes[a];
-
-        if (_e33 && ("sub" == _e33.type && r.push(_e33), "head" == _e33.type)) {
-          i = _e33;
-          break;
-        }
-      }
-
-      for (a = t.index + 1; a < l.app.totalFrames; a++) {
-        var _e34 = this.keyframes[a];
-
-        if (_e34 && ("sub" == _e34.type && r.push(_e34), "head" == _e34.type)) {
-          n = _e34;
-          break;
-        }
-      }
-
-      for (a = 0; a < r.length; a++) {
-        var _e35 = this.getKeyframe("id", r[a].id);
-
-        delete this.keyframes[_e35.index];
-      }
-
-      delete this.keyframes[t.index], n && i && this.addSubKeyframes(i.index, n.index), l.graph && (l.graph.updateState(), l.graph.redraw()), this.updateBounds();
-    };
-
-    _proto8.updateKeyframe = function updateKeyframe(e, t) {
-      var i = Object.keys(t);
-
-      for (var n = 0; n < i.length; n++) {
-        this.keyframes[e][i[n]] = t[i[n]];
-      }
-
-      this.updateSubKeyframes();
-    };
-
-    _proto8.addJoint = function addJoint(e, t, i) {
-      i = i || {}, l.graph && l.graph.setCurrentMark(l.graph.state.currentFrame, !1);
-      var a = i.parent || this.activeJoint,
-          h = {
-        id: "J" + o.uid(),
-        name: "Joint " + (this.joints.length + 1),
-        position: r(e, t),
-        positionPrev: r(e, t),
-        angle: a ? r(e, t).heading(a.position) : 0,
-        parent: a || null,
-        children: [],
-        length: a ? a.position.dist(e, t) : 0,
-        hierarchy: a ? a.hierarchy + 1 : 1,
-        skin: {},
-        zIndex: this.joints.length + 1
-      };
-      return a && a.children.push(h), i.ignoreDefaults || (this.activeJoint = h), this.joints.push(h), l.graph && this.updateKeyframe(l.graph.state.currentFrame, {
-        activeJointId: this.activeJoint.id
-      }), this.updateBounds(), i.ignoreHistory || s.add({
-        label: "Add joint",
-        value: this.clone(),
-        group: "keyframe"
-      }), n.emit("jointChange", this.joints), h;
-    };
-
-    _proto8.selectJoint = function selectJoint(e, t) {
-      if (!this.joints.length) return;
-      var i = this.joints.slice();
-      i.sort(function (i, n) {
-        return i.position.dist(e, t) - n.position.dist(e, t);
-      }), this.activeJoint = this.joints.find(function (e) {
-        return e.id === i[0].id;
-      }), n.emit("jointChange", this.joints), l.graph && this.updateKeyframe(l.graph.state.currentFrame, {
-        activeJointId: this.activeJoint.id
-      });
-    };
-
-    _proto8.removeJointById = function removeJointById(e) {
-      var t = Object.keys(this.keyframes);
-
-      for (var i = 0; i < t.length; i++) {
-        var _n16 = this.keyframes[t[i]],
-            _a4 = _n16.joints.find(function (t) {
-          return t.id === e;
         });
+      }
+    }, {
+      key: "clone",
+      value: function clone(e) {
+        return e = e || this.keyframes, this.fromJSON(this.toJSON(e));
+      }
+    }, {
+      key: "getKeyframe",
+      value: function getKeyframe(e, t) {
+        var i = Object.values(this.keyframes).find(function (i) {
+          return i[e] === t;
+        });
+        return i ? this.keyframes[i.index] : null;
+      }
+    }, {
+      key: "editJoints",
+      value: function editJoints(e) {
+        var t = Object.values(this.keyframes);
 
-        if (_a4) {
-          var _a4$parent$children;
+        for (var i = 0; i < t.length; i++) {
+          var _r6 = t[i];
 
-          for (var r = 0; r < _a4.children.length; r++) {
-            var _e36 = _a4.children[r];
-            _e36.parent = _a4.parent, _e36.length += _a4.length, this.activeJoint = _e36;
+          for (var n = 0; n < _r6.joints.length; n++) {
+            var _t13 = _r6.joints[n];
+            "function" == typeof e && e(_t13, _r6);
+          }
+        }
+      }
+    }, {
+      key: "editJoint",
+      value: function editJoint(e, t, i) {
+        var n = Object.values(this.keyframes);
+
+        for (var r = 0; r < n.length; r++) {
+          var _o2 = n[r].joints.find(function (t) {
+            return t.id === e;
+          });
+
+          if (t = i ? JSON.parse(JSON.stringify(t)) : t, _o2) {
+            var _e26 = Object.keys(t);
+
+            for (var a = 0; a < _e26.length; a++) {
+              _o2[_e26[a]] = t[_e26[a]];
+            }
+          }
+        }
+      }
+    }, {
+      key: "addSubKeyframes",
+      value: function addSubKeyframes(e, t) {
+        if (l.graph) {
+          var _n13 = Object.keys(this.keyframes);
+
+          for (var i = 0; i < _n13.length; i++) {
+            if ("sub" == this.keyframes[_n13[i]].type) {
+              _n13.splice(i, 1);
+
+              break;
+            }
           }
 
-          _a4.parent ? (_a4.parent.children.splice(_a4.parent.children.indexOf(_a4), 1), (_a4$parent$children = _a4.parent.children).push.apply(_a4$parent$children, _a4.children), this.activeJoint = _a4.parent) : this.activeJoint = _a4.children[0], _n16.joints.splice(_n16.joints.indexOf(_a4), 1);
+          this.clone();
+
+          if (_n13.length > 1) {
+            l.graph.updateState();
+
+            for (i = t - 1; i >= e + 1; i--) {
+              var _e27 = this.clone(),
+                  _n14 = _e27[t].joints,
+                  _a3 = {
+                id: o.uid(),
+                type: "sub",
+                index: i,
+                activeJointId: _e27.activeJointId,
+                joints: _n14,
+                render: {
+                  size: 12,
+                  color: "red",
+                  position: r(i * l.graph.hatchMark.spacing + l.graph.hatchMark.spacing / 2, 0)
+                }
+              };
+
+              this.keyframes[i] = _a3;
+            }
+          }
+        }
+
+        this.updateSubKeyframes(), l.graph.updateState(), l.graph.redraw();
+      }
+    }, {
+      key: "updateSubKeyframes",
+      value: function updateSubKeyframes() {
+        var e = Object.keys(this.keyframes);
+
+        for (var t = e.length - 1; t >= 0; t--) {
+          var _r7 = this.keyframes[e[t]];
+          if (!_r7) continue;
+          if ("head" == _r7.type) continue;
+          var _s2 = null;
+
+          for (var i = _r7.index; i >= 0; i--) {
+            var _e28 = this.keyframes[i];
+
+            if (_e28 && "head" == _e28.type) {
+              _s2 = _e28.index;
+              break;
+            }
+          }
+
+          var _h = null;
+
+          for (i = _r7.index; i < l.app.totalFrames; i++) {
+            var _e29 = this.keyframes[i];
+
+            if (_e29 && "head" == _e29.type) {
+              _h = _e29.index;
+              break;
+            }
+          }
+
+          var _c = o.map(_r7.index, _h, _s2, 0, 1),
+              d = this.keyframes[_h],
+              u = this.keyframes[_s2];
+
+          var _loop = function _loop() {
+            var e = _r7.joints[i];
+
+            if (e && d && u) {
+              var _t14 = d.joints.find(function (t) {
+                return t.id === e.id;
+              }),
+                  _i13 = u.joints.find(function (t) {
+                return t.id === e.id;
+              });
+
+              if (_t14 && _i13) {
+                var _r8 = _t14.position.copy().lerp(_i13.position, _c),
+                    _s3 = o.lerp(_t14.length, _i13.length, _c);
+
+                e.length = _s3, e.position.set(_r8), a.animateSkin && _i13.skin && _t14.skin && _i13.skin.offset && _t14.skin.offset && (e.skin.offset = {
+                  x: o.lerp(_t14.skin.offset.x, _i13.skin.offset.x, _c),
+                  y: o.lerp(_t14.skin.offset.y, _i13.skin.offset.y, _c),
+                  scaleX: o.lerp(_t14.skin.offset.scaleX, _i13.skin.offset.scaleX, _c),
+                  scaleY: o.lerp(_t14.skin.offset.scaleY, _i13.skin.offset.scaleY, _c),
+                  angle: o.lerp(_t14.skin.offset.angle, _i13.skin.offset.angle, _c)
+                });
+
+                for (n = 0; n < e.children.length; n++) {
+                  var _t15 = e.children[n];
+                  _t15.angle = _t15.position.heading(e.position);
+                }
+              }
+
+              e.id == u.activeJointId && (_r7.activeJointId = e.id);
+            }
+          };
+
+          for (i = 0; i < _r7.joints.length; i++) {
+            var n;
+
+            _loop();
+          }
+
+          "linear" != a.riggingMode && ("forwardKinematics" == a.riggingMode ? this.computeKinematics(_r7.joints) : "inverseKinematics" == a.riggingMode && this.computeKinematics(_r7.joints, !0)), this.updateSkin(_r7.joints);
         }
       }
+    }, {
+      key: "setKeyframe",
+      value: function setKeyframe(e, t) {
+        if ("number" != typeof e) return;
+        var i = {
+          type: "head",
+          index: (t = t || {}).keyframe ? t.keyframe.index : e,
+          activeJointId: t.keyframe ? t.keyframe.activeJointId : this.activeJoint ? this.activeJoint.id : null,
+          joints: t.joints,
+          render: {
+            size: a.render.keyframe.size,
+            color: a.render.keyframe.color["default"],
+            position: t.position || r(e * l.graph.hatchMark.spacing + l.graph.hatchMark.spacing / 2, 0)
+          },
+          locked: t.locked || !1
+        };
 
-      this.activeJoint && this.moveJoint(this.activeJoint.position.x, this.activeJoint.position.y), this.updateBounds(), s.add({
-        label: "Remove joint",
-        value: this.clone(),
-        group: "keyframe"
-      }), n.emit("jointChange", this.joints);
-    };
+        if (l.graph) {
+          var _e30 = this.clone()[l.graph.state.currentFrame],
+              _n15 = _e30 ? _e30.joints : [];
 
-    _proto8.removeJointByPosition = function removeJointByPosition(e, t) {
-      if (this.joints.length) for (var i = 0; i < this.joints.length; i++) {
-        var _n17 = this.joints[i];
-        _n17.position.dist(e, t) < a.render.joint.radius + this.mouseBuffer && this.removeJointById(_n17.id);
+          t.joints && (_n15 = t.joints), i.joints = _n15;
+        }
+
+        if (i.id = t.id || o.uid(), this.keyframes[e] = i, l.graph) {
+          l.graph.updateState();
+          var _e31 = l.graph.state.currentFrame,
+              _t16 = l.graph.state.previousFrame;
+          this.addSubKeyframes(_t16, _e31), l.graph.redraw();
+        }
+
+        if (!t.ignoreHistory) {
+          var _e32 = Object.values(this.keyframes),
+              _t17 = 0;
+
+          for (var n = 0; n < _e32.length; n++) {
+            "head" == _e32[n].type && _t17++;
+          }
+
+          var _r9 = "Add keyframe";
+          return _t17 == this.totalKeyframes && (_r9 = "Move keyframe"), this.updateBounds(), s.add({
+            label: _r9,
+            value: this.clone(),
+            group: "keyframe"
+          }), this.totalKeyframes = _t17, i;
+        }
       }
-    };
+    }, {
+      key: "deleteKeyframe",
+      value: function deleteKeyframe(e) {
+        var t = this.getKeyframe("id", e);
+        if (!t) return;
+        if (Object.keys(this.keyframes).length <= 1) return;
+        var i,
+            n,
+            r = [];
 
-    _proto8.computeKinematics = function computeKinematics(e, t) {
-      if (t) for (i = e.length - 1; i >= 0; i--) {
-        var _t18 = e[i];
-        _t18.parent && (_t18.parent.angle = _t18.position.heading(_t18.parent.position), _t18.parent.position.set({
-          x: _t18.position.x + Math.cos(_t18.parent.angle) * _t18.length,
-          y: _t18.position.y + Math.sin(_t18.parent.angle) * _t18.length
-        }));
-      } else for (var i = 0; i < e.length; i++) {
-        var _t19 = e[i];
+        for (var a = t.index - 1; a >= 0; a--) {
+          var _e33 = this.keyframes[a];
 
-        for (var n = 0; n < _t19.children.length; n++) {
-          var _e37 = _t19.children[n];
-          _e37.angle = _e37.position.heading(_t19.position), _e37.position.set({
-            x: _t19.position.x - Math.cos(_e37.angle) * _e37.length,
-            y: _t19.position.y - Math.sin(_e37.angle) * _e37.length
+          if (_e33 && ("sub" == _e33.type && r.push(_e33), "head" == _e33.type)) {
+            i = _e33;
+            break;
+          }
+        }
+
+        for (a = t.index + 1; a < l.app.totalFrames; a++) {
+          var _e34 = this.keyframes[a];
+
+          if (_e34 && ("sub" == _e34.type && r.push(_e34), "head" == _e34.type)) {
+            n = _e34;
+            break;
+          }
+        }
+
+        for (a = 0; a < r.length; a++) {
+          var _e35 = this.getKeyframe("id", r[a].id);
+
+          delete this.keyframes[_e35.index];
+        }
+
+        delete this.keyframes[t.index], n && i && this.addSubKeyframes(i.index, n.index), l.graph && (l.graph.updateState(), l.graph.redraw()), this.updateBounds();
+      }
+    }, {
+      key: "updateKeyframe",
+      value: function updateKeyframe(e, t) {
+        var i = Object.keys(t);
+
+        for (var n = 0; n < i.length; n++) {
+          this.keyframes[e][i[n]] = t[i[n]];
+        }
+
+        this.updateSubKeyframes();
+      }
+    }, {
+      key: "addJoint",
+      value: function addJoint(e, t, i) {
+        i = i || {}, l.graph && l.graph.setCurrentMark(l.graph.state.currentFrame, !1);
+        var a = i.parent || this.activeJoint,
+            h = {
+          id: "J" + o.uid(),
+          name: "Joint " + (this.joints.length + 1),
+          position: r(e, t),
+          positionPrev: r(e, t),
+          angle: a ? r(e, t).heading(a.position) : 0,
+          parent: a || null,
+          children: [],
+          length: a ? a.position.dist(e, t) : 0,
+          hierarchy: a ? a.hierarchy + 1 : 1,
+          skin: {},
+          zIndex: this.joints.length + 1
+        };
+        return a && a.children.push(h), i.ignoreDefaults || (this.activeJoint = h), this.joints.push(h), l.graph && this.updateKeyframe(l.graph.state.currentFrame, {
+          activeJointId: this.activeJoint.id
+        }), this.updateBounds(), i.ignoreHistory || s.add({
+          label: "Add joint",
+          value: this.clone(),
+          group: "keyframe"
+        }), n.emit("jointChange", this.joints), h;
+      }
+    }, {
+      key: "selectJoint",
+      value: function selectJoint(e, t) {
+        if (!this.joints.length) return;
+        var i = this.joints.slice();
+        i.sort(function (i, n) {
+          return i.position.dist(e, t) - n.position.dist(e, t);
+        }), this.activeJoint = this.joints.find(function (e) {
+          return e.id === i[0].id;
+        }), n.emit("jointChange", this.joints), l.graph && this.updateKeyframe(l.graph.state.currentFrame, {
+          activeJointId: this.activeJoint.id
+        });
+      }
+    }, {
+      key: "removeJointById",
+      value: function removeJointById(e) {
+        var t = Object.keys(this.keyframes);
+
+        for (var i = 0; i < t.length; i++) {
+          var _n16 = this.keyframes[t[i]],
+              _a4 = _n16.joints.find(function (t) {
+            return t.id === e;
+          });
+
+          if (_a4) {
+            var _a4$parent$children;
+
+            for (var r = 0; r < _a4.children.length; r++) {
+              var _e36 = _a4.children[r];
+              _e36.parent = _a4.parent, _e36.length += _a4.length, this.activeJoint = _e36;
+            }
+
+            _a4.parent ? (_a4.parent.children.splice(_a4.parent.children.indexOf(_a4), 1), (_a4$parent$children = _a4.parent.children).push.apply(_a4$parent$children, _toConsumableArray(_a4.children)), this.activeJoint = _a4.parent) : this.activeJoint = _a4.children[0], _n16.joints.splice(_n16.joints.indexOf(_a4), 1);
+          }
+        }
+
+        this.activeJoint && this.moveJoint(this.activeJoint.position.x, this.activeJoint.position.y), this.updateBounds(), s.add({
+          label: "Remove joint",
+          value: this.clone(),
+          group: "keyframe"
+        }), n.emit("jointChange", this.joints);
+      }
+    }, {
+      key: "removeJointByPosition",
+      value: function removeJointByPosition(e, t) {
+        if (this.joints.length) for (var i = 0; i < this.joints.length; i++) {
+          var _n17 = this.joints[i];
+          _n17.position.dist(e, t) < a.render.joint.radius + this.mouseBuffer && this.removeJointById(_n17.id);
+        }
+      }
+    }, {
+      key: "computeKinematics",
+      value: function computeKinematics(e, t) {
+        if (t) for (i = e.length - 1; i >= 0; i--) {
+          var _t18 = e[i];
+          _t18.parent && (_t18.parent.angle = _t18.position.heading(_t18.parent.position), _t18.parent.position.set({
+            x: _t18.position.x + Math.cos(_t18.parent.angle) * _t18.length,
+            y: _t18.position.y + Math.sin(_t18.parent.angle) * _t18.length
+          }));
+        } else for (var i = 0; i < e.length; i++) {
+          var _t19 = e[i];
+
+          for (var n = 0; n < _t19.children.length; n++) {
+            var _e37 = _t19.children[n];
+            _e37.angle = _e37.position.heading(_t19.position), _e37.position.set({
+              x: _t19.position.x - Math.cos(_e37.angle) * _e37.length,
+              y: _t19.position.y - Math.sin(_e37.angle) * _e37.length
+            });
+          }
+        }
+      }
+    }, {
+      key: "updateSkin",
+      value: function updateSkin(e) {
+        e = e || this.joints;
+
+        for (var t = 0; t < e.length; t++) {
+          var _i14 = e[t],
+              _n18 = _i14.length,
+              _r10 = _i14.length,
+              _a5 = 0,
+              _s4 = _i14.skin.crop,
+              _l = 0,
+              _h2 = 0;
+          _s4 && (_l = _s4.to.x - _s4.from.x, _h2 = _s4.to.y - _s4.from.y), _l > _h2 ? _r10 = Number.MAX_SAFE_INTEGER : (_n18 = Number.MAX_SAFE_INTEGER, _a5 = Math.PI / 2), _i14.skin.size = o.scaleSize(_l, _h2, _n18, _r10), _i14.skin._sizeOriginal = {
+            width: _l,
+            height: _h2
+          }, _i14.skin.angleAuto = _a5;
+          var _c2 = 0,
+              d = 0,
+              u = 1,
+              p = 1,
+              f = 0;
+
+          if (_i14.skin.offset && (_c2 = _i14.skin.offset.x || 0, d = _i14.skin.offset.y || 0, u = _i14.skin.offset.scaleX || 0, p = _i14.skin.offset.scaleY || 0, f = _i14.skin.offset.angle || 0), _i14.parent && _s4) {
+            _i14.skin.position = {
+              x: (_i14.position.x + _i14.parent.position.x) / 2,
+              y: (_i14.position.y + _i14.parent.position.y) / 2
+            };
+            var _e38 = [{
+              x: _i14.skin.position.x + _c2 - _i14.skin.size.width / 2,
+              y: _i14.skin.position.y + d - _i14.skin.size.height / 2
+            }, {
+              x: _i14.skin.position.x + _c2 + _i14.skin.size.width / 2,
+              y: _i14.skin.position.y + d - _i14.skin.size.height / 2
+            }, {
+              x: _i14.skin.position.x + _c2 + _i14.skin.size.width / 2,
+              y: _i14.skin.position.y + d + _i14.skin.size.height / 2
+            }, {
+              x: _i14.skin.position.x + _c2 - _i14.skin.size.width / 2,
+              y: _i14.skin.position.y + d + _i14.skin.size.height / 2
+            }];
+
+            for (var _i15 = 0, _e39 = _e38; _i15 < _e39.length; _i15++) {
+              var _t20 = _e39[_i15];
+              var _e40 = {
+                x: _t20.x - _i14.skin.position.x,
+                y: _t20.y - _i14.skin.position.y
+              };
+              _t20.x = _t20.x + _e40.x * (u - 1), _t20.y = _t20.y + _e40.y * (p - 1);
+            }
+
+            for (var _i16 = 0, _e41 = _e38; _i16 < _e41.length; _i16++) {
+              var _t21 = _e41[_i16];
+
+              var _e42 = _i14.angle + _i14.skin.angleAuto + f,
+                  _n19 = (_t21.x - _i14.skin.position.x) * Math.cos(_e42) - (_t21.y - _i14.skin.position.y) * Math.sin(_e42),
+                  _r11 = (_t21.x - _i14.skin.position.x) * Math.sin(_e42) + (_t21.y - _i14.skin.position.y) * Math.cos(_e42);
+
+              _t21.x = _n19 + _i14.skin.position.x, _t21.y = _r11 + _i14.skin.position.y;
+            }
+
+            _i14.skin.vertices = _e38;
+          }
+        }
+      }
+    }, {
+      key: "moveJointById",
+      value: function moveJointById(e, t, i) {
+        if (this.activeJoint = this.getJoint(e), this.activeJoint) {
+          if (l.graph) {
+            if (a.animation.autoAddKeyframe) {
+              if (!this.activeJoint.position.equals(t, i)) {
+                var _e43 = l.graph.state.currentMark,
+                    _t22 = this.keyframes[_e43];
+                _t22 ? "head" != _t22.type && this.setKeyframe(_e43) : this.setKeyframe(_e43);
+              }
+            } else l.graph.setCurrentMark(l.graph.state.currentFrame, !1), l.graph.updateState();
+
+            this.updateSubKeyframes();
+          }
+
+          if (t && i && (this.activeJoint.position.dist(this.activeJoint.positionPrev) > 1 && (this._moved = !0, this.activeJoint.positionPrev.set(this.activeJoint.position.x, this.activeJoint.position.y)), this.activeJoint.position.set(t, i), "linear" == a.riggingMode)) {
+            this.activeJoint.parent && (this.activeJoint.angle = this.activeJoint.position.heading(this.activeJoint.parent.position), this.activeJoint.length = this.activeJoint.position.dist(this.activeJoint.parent.position));
+
+            for (var n = 0; n < this.activeJoint.children.length; n++) {
+              var _e44 = this.activeJoint.children[n];
+              _e44.length = _e44.position.dist(this.activeJoint.position);
+            }
+          }
+
+          return "linear" != a.riggingMode && ("forwardKinematics" == a.riggingMode ? this.computeKinematics(this.joints) : "inverseKinematics" == a.riggingMode && this.computeKinematics(this.joints, !0)), this.updateSkin(), this.updateBounds(), this.activeJoint;
+        }
+      }
+    }, {
+      key: "moveJoint",
+      value: function moveJoint(e, t) {
+        this.moveJointById(this.activeJoint.id, e, t);
+      }
+    }, {
+      key: "getJoint",
+      value: function getJoint(e) {
+        return this.joints.find(function (t) {
+          return t.id === e;
+        }) || null;
+      }
+    }, {
+      key: "toJSON",
+      value: function toJSON(e, t) {
+        var i = e || this.clone(),
+            n = {},
+            r = Object.keys(i);
+
+        for (var a = 0; a < r.length; a++) {
+          var _e45 = i[r[a]],
+              _l2 = {
+            id: _e45.id,
+            activeJointId: _e45.activeJointId,
+            index: _e45.index,
+            joints: [],
+            render: _e45.render,
+            type: _e45.type,
+            locked: _e45.locked
+          };
+
+          for (var o = 0; o < _e45.joints.length; o++) {
+            var _i17 = _e45.joints[o],
+                _n20 = {
+              id: _i17.id,
+              name: _i17.name,
+              angle: _i17.angle,
+              position: _i17.position,
+              positionPrev: _i17.positionPrev,
+              length: _i17.length,
+              parent: _i17.parent ? _i17.parent.id : null,
+              hierarchy: _i17.hierarchy,
+              children: [],
+              skinImageSrc: _i17.skin && !t ? _i17.skin.imageSrc : void 0,
+              skinCrop: _i17.skin ? _i17.skin.crop : null,
+              skinOffset: _i17.skin ? _i17.skin.offset : null,
+              skinPosition: _i17.skin ? _i17.skin.position : null,
+              skinAngleAuto: _i17.skin ? _i17.skin.angleAuto : void 0,
+              skinSize: _i17.skin ? _i17.skin.size : null,
+              _skinSizeOriginal: _i17.skin ? _i17.skin._sizeOriginal : null,
+              _vueCrop: _i17.skin ? _i17.skin._vueCrop : null,
+              zIndex: _i17.zIndex
+            };
+
+            for (var s = 0; s < _i17.children.length; s++) {
+              var _e46 = _i17.children[s];
+
+              _n20.children.push(_e46.id);
+            }
+
+            _l2.joints.push(_n20);
+          }
+
+          n[_l2.index] = _l2;
+        }
+
+        return n;
+      }
+    }, {
+      key: "fromJSON",
+      value: function fromJSON(e) {
+        if (!e) return;
+        var t = {},
+            i = Object.keys(e);
+
+        var _loop2 = function _loop2() {
+          var s = e[i[n]],
+              l = (s.joints.find(function (e) {
+            return e.id === s.activeJointId;
+          }), []);
+
+          for (a = 0; a < s.joints.length; a++) {
+            var _e47 = s.joints[a],
+                _t23 = {
+              id: _e47.id,
+              name: _e47.name,
+              angle: _e47.angle,
+              position: r(_e47.position),
+              positionPrev: r(_e47.positionPrev),
+              length: _e47.length,
+              hierarchy: _e47.hierarchy,
+              parent: _e47.parent,
+              children: _e47.children.slice(),
+              skin: {
+                offset: _e47.skinOffset,
+                crop: _e47.skinCrop,
+                _vueCrop: _e47._vueCrop,
+                imageSrc: _e47.skinImageSrc,
+                position: _e47.skinPosition,
+                angleAuto: _e47.angleAuto,
+                size: _e47.skinSize,
+                _sizeOriginal: _e47._skinSizeOriginal
+              },
+              zIndex: _e47.zIndex
+            };
+            l.push(_t23);
+          }
+
+          var _loop3 = function _loop3() {
+            var e = l[a];
+            e.parent = l.find(function (t) {
+              return t.id === e.parent;
+            }) || null;
+
+            var _loop4 = function _loop4() {
+              var t = e.children[o];
+              e.children[o] = l.find(function (e) {
+                return e.id === t;
+              }) || null;
+            };
+
+            for (o = 0; o < e.children.length; o++) {
+              _loop4();
+            }
+          };
+
+          for (a = 0; a < l.length; a++) {
+            _loop3();
+          }
+
+          var h = {
+            activeJointId: s.activeJointId,
+            id: s.id,
+            index: s.index,
+            joints: l,
+            locked: s.locked,
+            render: s.render,
+            type: s.type
+          };
+          t[s.index] = h;
+        };
+
+        for (var n = 0; n < i.length; n++) {
+          var a;
+          var o;
+
+          _loop2();
+        }
+
+        return t;
+      }
+    }, {
+      key: "import",
+      value: function _import(e) {
+        this.keyframes = this.clone(e);
+        var t = Object.values(this.keyframes),
+            i = 0;
+
+        for (var r = 0; r < t.length; r++) {
+          "head" == t[r].type && i++;
+        }
+
+        if (this.totalKeyframes = i, l.graph) {
+          var _e48 = this.keyframes[l.graph.state.currentMark];
+          _e48 && (this.activeJoint = this.getKeyframe("id", _e48.activeJointId), this.activeJoint && this.updateKeyframe(l.graph.state.currentFrame, {
+            activeJointId: this.activeJoint.id
+          })), l.graph.updateState();
+        }
+
+        this.updateSkin(), this.updateBounds(), n.emit("jointChange", this.joints);
+      }
+    }, {
+      key: "renderTo",
+      value: function renderTo(e, t) {
+        t = t || {};
+        var i = this.keyframes[t.frame];
+        if (!i) return;
+        t.position = t.position || {
+          x: 0,
+          y: 0
+        };
+        var n = -this.bounds.min.x + t.position.x,
+            r = -this.bounds.min.y + t.position.y;
+        if (i.joints.sort(function (e, t) {
+          return e.zIndex - t.zIndex;
+        }), t.showSkin) for (var o = 0; o < i.joints.length; o++) {
+          var _t24 = i.joints[o];
+
+          if (_t24.parent) {
+            if (_t24.skin.imageSrc) if (_t24.skin.image) {
+              if (!_t24.skin.image.width) {
+                var _e49 = new Image();
+
+                _e49.src = _t24.skin.imageSrc, _t24.skin.image = _e49, this.updateSkin(), this.updateBounds();
+              }
+            } else {
+              var _e50 = new Image();
+
+              _e50.src = _t24.skin.imageSrc, _t24.skin.image = _e50, this.updateSkin(), this.updateBounds();
+            }
+
+            if (_t24.skin && "object" == _typeof(_t24.skin.image) && _t24.skin.image.src && _t24.skin.position) {
+              if (e.save(), e.translate(_t24.skin.position.x + n, _t24.skin.position.y + r), e.rotate(_t24.angle + _t24.skin.angleAuto), _t24.skin.offset) {
+                var _i18 = _t24.skin.offset.x,
+                    _n21 = _t24.skin.offset.y,
+                    _r12 = _t24.skin.offset.scaleX,
+                    _a6 = _t24.skin.offset.scaleY,
+                    _o3 = _t24.skin.offset.angle;
+                e.rotate(_o3), e.translate(_i18, _n21), e.scale(_r12, _a6);
+              }
+
+              e.drawImage(_t24.skin.image, _t24.skin.crop.from.x, _t24.skin.crop.from.y, _t24.skin._sizeOriginal.width, _t24.skin._sizeOriginal.height, -_t24.skin.size.width / 2, -_t24.skin.size.height / 2, _t24.skin.size.width, _t24.skin.size.height), e.restore(), _t24.skin.vertices || (this.updateSkin(), this.updateBounds());
+            }
+          }
+        }
+
+        if (t.showBones) {
+          for (o = 0; o < i.joints.length; o++) {
+            var _t25 = i.joints[o];
+            _t25.parent && (e.beginPath(), e.moveTo(_t25.position.x + n, _t25.position.y + r), e.lineTo(_t25.parent.position.x + n, _t25.parent.position.y + r), e.lineWidth = a.render.segment.width, e.lineCap = "round", e.strokeStyle = a.render.segment.color, e.stroke());
+          }
+
+          for (o = 0; o < i.joints.length; o++) {
+            var _s5 = i.joints[o],
+                _h3 = _s5 === this.activeJoint ? a.render.joint.color.selected : a.render.joint.color["default"];
+
+            l.graph && (this.activeJoint && !l.graph.state.isPlaying && (this.activeJoint.children.length && (_h3 = this.activeJoint.children.includes(_s5) ? "#5bff85" : _h3), this.activeJoint.parent && (_h3 = this.activeJoint.parent === _s5 ? "#9b68e1" : _h3)), l.graph.state.isPlaying && (_h3 = a.render.joint.color["default"])), e.beginPath(), e.arc(_s5.position.x + n, _s5.position.y + r, a.render.joint.radius, 0, 2 * Math.PI), e.closePath(), e.fillStyle = t.workColor ? _h3 : a.render.joint.color["default"], e.fill();
+          }
+        }
+      }
+    }, {
+      key: "render",
+      value: function render(e) {
+        var t = h.checked;
+
+        if (l.graph) {
+          var _i19 = l.graph.state.previousFrame,
+              _n22 = l.graph.state.currentFrame,
+              _r13 = l.graph.state.nextFrame,
+              _a7 = l.graph.state.currentMark;
+          e.save(), e.context.globalAlpha = .1, this.renderTo(e.context, {
+            frame: _i19,
+            position: {
+              x: this.bounds.min.x,
+              y: this.bounds.min.y
+            },
+            showBones: t
+          }), this.renderTo(e.context, {
+            frame: _n22,
+            position: {
+              x: this.bounds.min.x,
+              y: this.bounds.min.y
+            },
+            showBones: t
+          }), this.renderTo(e.context, {
+            frame: _r13,
+            position: {
+              x: this.bounds.min.x,
+              y: this.bounds.min.y
+            },
+            showBones: t
+          }), e.restore(), this.keyframes[_a7] || (_a7 = _n22), this.renderTo(e.context, {
+            frame: _a7,
+            position: {
+              x: this.bounds.min.x,
+              y: this.bounds.min.y
+            },
+            showBones: t,
+            showSkin: !0,
+            workColor: !0
           });
         }
       }
-    };
-
-    _proto8.updateSkin = function updateSkin(e) {
-      e = e || this.joints;
-
-      for (var t = 0; t < e.length; t++) {
-        var _i14 = e[t],
-            _n18 = _i14.length,
-            _r10 = _i14.length,
-            _a5 = 0,
-            _s4 = _i14.skin.crop,
-            _l = 0,
-            _h2 = 0;
-        _s4 && (_l = _s4.to.x - _s4.from.x, _h2 = _s4.to.y - _s4.from.y), _l > _h2 ? _r10 = Number.MAX_SAFE_INTEGER : (_n18 = Number.MAX_SAFE_INTEGER, _a5 = Math.PI / 2), _i14.skin.size = o.scaleSize(_l, _h2, _n18, _r10), _i14.skin._sizeOriginal = {
-          width: _l,
-          height: _h2
-        }, _i14.skin.angleAuto = _a5;
-        var _c2 = 0,
-            d = 0,
-            u = 1,
-            p = 1,
-            f = 0;
-
-        if (_i14.skin.offset && (_c2 = _i14.skin.offset.x || 0, d = _i14.skin.offset.y || 0, u = _i14.skin.offset.scaleX || 0, p = _i14.skin.offset.scaleY || 0, f = _i14.skin.offset.angle || 0), _i14.parent && _s4) {
-          _i14.skin.position = {
-            x: (_i14.position.x + _i14.parent.position.x) / 2,
-            y: (_i14.position.y + _i14.parent.position.y) / 2
-          };
-          var _e38 = [{
-            x: _i14.skin.position.x + _c2 - _i14.skin.size.width / 2,
-            y: _i14.skin.position.y + d - _i14.skin.size.height / 2
-          }, {
-            x: _i14.skin.position.x + _c2 + _i14.skin.size.width / 2,
-            y: _i14.skin.position.y + d - _i14.skin.size.height / 2
-          }, {
-            x: _i14.skin.position.x + _c2 + _i14.skin.size.width / 2,
-            y: _i14.skin.position.y + d + _i14.skin.size.height / 2
-          }, {
-            x: _i14.skin.position.x + _c2 - _i14.skin.size.width / 2,
-            y: _i14.skin.position.y + d + _i14.skin.size.height / 2
-          }];
-
-          for (var _i15 = 0, _e39 = _e38; _i15 < _e39.length; _i15++) {
-            var _t20 = _e39[_i15];
-            var _e40 = {
-              x: _t20.x - _i14.skin.position.x,
-              y: _t20.y - _i14.skin.position.y
-            };
-            _t20.x = _t20.x + _e40.x * (u - 1), _t20.y = _t20.y + _e40.y * (p - 1);
-          }
-
-          for (var _i16 = 0, _e41 = _e38; _i16 < _e41.length; _i16++) {
-            var _t21 = _e41[_i16];
-
-            var _e42 = _i14.angle + _i14.skin.angleAuto + f,
-                _n19 = (_t21.x - _i14.skin.position.x) * Math.cos(_e42) - (_t21.y - _i14.skin.position.y) * Math.sin(_e42),
-                _r11 = (_t21.x - _i14.skin.position.x) * Math.sin(_e42) + (_t21.y - _i14.skin.position.y) * Math.cos(_e42);
-
-            _t21.x = _n19 + _i14.skin.position.x, _t21.y = _r11 + _i14.skin.position.y;
-          }
-
-          _i14.skin.vertices = _e38;
-        }
-      }
-    };
-
-    _proto8.moveJointById = function moveJointById(e, t, i) {
-      if (this.activeJoint = this.getJoint(e), this.activeJoint) {
-        if (l.graph) {
-          if (a.animation.autoAddKeyframe) {
-            if (!this.activeJoint.position.equals(t, i)) {
-              var _e43 = l.graph.state.currentMark,
-                  _t22 = this.keyframes[_e43];
-              _t22 ? "head" != _t22.type && this.setKeyframe(_e43) : this.setKeyframe(_e43);
-            }
-          } else l.graph.setCurrentMark(l.graph.state.currentFrame, !1), l.graph.updateState();
-
-          this.updateSubKeyframes();
-        }
-
-        if (t && i && (this.activeJoint.position.dist(this.activeJoint.positionPrev) > 1 && (this._moved = !0, this.activeJoint.positionPrev.set(this.activeJoint.position.x, this.activeJoint.position.y)), this.activeJoint.position.set(t, i), "linear" == a.riggingMode)) {
-          this.activeJoint.parent && (this.activeJoint.angle = this.activeJoint.position.heading(this.activeJoint.parent.position), this.activeJoint.length = this.activeJoint.position.dist(this.activeJoint.parent.position));
-
-          for (var n = 0; n < this.activeJoint.children.length; n++) {
-            var _e44 = this.activeJoint.children[n];
-            _e44.length = _e44.position.dist(this.activeJoint.position);
-          }
-        }
-
-        return "linear" != a.riggingMode && ("forwardKinematics" == a.riggingMode ? this.computeKinematics(this.joints) : "inverseKinematics" == a.riggingMode && this.computeKinematics(this.joints, !0)), this.updateSkin(), this.updateBounds(), this.activeJoint;
-      }
-    };
-
-    _proto8.moveJoint = function moveJoint(e, t) {
-      this.moveJointById(this.activeJoint.id, e, t);
-    };
-
-    _proto8.getJoint = function getJoint(e) {
-      return this.joints.find(function (t) {
-        return t.id === e;
-      }) || null;
-    };
-
-    _proto8.toJSON = function toJSON(e, t) {
-      var i = e || this.clone(),
-          n = {},
-          r = Object.keys(i);
-
-      for (var a = 0; a < r.length; a++) {
-        var _e45 = i[r[a]],
-            _l2 = {
-          id: _e45.id,
-          activeJointId: _e45.activeJointId,
-          index: _e45.index,
-          joints: [],
-          render: _e45.render,
-          type: _e45.type,
-          locked: _e45.locked
-        };
-
-        for (var o = 0; o < _e45.joints.length; o++) {
-          var _i17 = _e45.joints[o],
-              _n20 = {
-            id: _i17.id,
-            name: _i17.name,
-            angle: _i17.angle,
-            position: _i17.position,
-            positionPrev: _i17.positionPrev,
-            length: _i17.length,
-            parent: _i17.parent ? _i17.parent.id : null,
-            hierarchy: _i17.hierarchy,
-            children: [],
-            skinImageSrc: _i17.skin && !t ? _i17.skin.imageSrc : void 0,
-            skinCrop: _i17.skin ? _i17.skin.crop : null,
-            skinOffset: _i17.skin ? _i17.skin.offset : null,
-            skinPosition: _i17.skin ? _i17.skin.position : null,
-            skinAngleAuto: _i17.skin ? _i17.skin.angleAuto : void 0,
-            skinSize: _i17.skin ? _i17.skin.size : null,
-            _skinSizeOriginal: _i17.skin ? _i17.skin._sizeOriginal : null,
-            _vueCrop: _i17.skin ? _i17.skin._vueCrop : null,
-            zIndex: _i17.zIndex
-          };
-
-          for (var s = 0; s < _i17.children.length; s++) {
-            var _e46 = _i17.children[s];
-
-            _n20.children.push(_e46.id);
-          }
-
-          _l2.joints.push(_n20);
-        }
-
-        n[_l2.index] = _l2;
-      }
-
-      return n;
-    };
-
-    _proto8.fromJSON = function fromJSON(e) {
-      if (!e) return;
-      var t = {},
-          i = Object.keys(e);
-
-      var _loop2 = function _loop2() {
-        var s = e[i[n]],
-            l = (s.joints.find(function (e) {
-          return e.id === s.activeJointId;
-        }), []);
-
-        for (a = 0; a < s.joints.length; a++) {
-          var _e47 = s.joints[a],
-              _t23 = {
-            id: _e47.id,
-            name: _e47.name,
-            angle: _e47.angle,
-            position: r(_e47.position),
-            positionPrev: r(_e47.positionPrev),
-            length: _e47.length,
-            hierarchy: _e47.hierarchy,
-            parent: _e47.parent,
-            children: _e47.children.slice(),
-            skin: {
-              offset: _e47.skinOffset,
-              crop: _e47.skinCrop,
-              _vueCrop: _e47._vueCrop,
-              imageSrc: _e47.skinImageSrc,
-              position: _e47.skinPosition,
-              angleAuto: _e47.angleAuto,
-              size: _e47.skinSize,
-              _sizeOriginal: _e47._skinSizeOriginal
-            },
-            zIndex: _e47.zIndex
-          };
-          l.push(_t23);
-        }
-
-        var _loop3 = function _loop3() {
-          var e = l[a];
-          e.parent = l.find(function (t) {
-            return t.id === e.parent;
-          }) || null;
-
-          var _loop4 = function _loop4() {
-            var t = e.children[o];
-            e.children[o] = l.find(function (e) {
-              return e.id === t;
-            }) || null;
-          };
-
-          for (o = 0; o < e.children.length; o++) {
-            _loop4();
-          }
-        };
-
-        for (a = 0; a < l.length; a++) {
-          _loop3();
-        }
-
-        var h = {
-          activeJointId: s.activeJointId,
-          id: s.id,
-          index: s.index,
-          joints: l,
-          locked: s.locked,
-          render: s.render,
-          type: s.type
-        };
-        t[s.index] = h;
-      };
-
-      for (var n = 0; n < i.length; n++) {
-        var a;
-        var o;
-
-        _loop2();
-      }
-
-      return t;
-    };
-
-    _proto8["import"] = function _import(e) {
-      this.keyframes = this.clone(e);
-      var t = Object.values(this.keyframes),
-          i = 0;
-
-      for (var r = 0; r < t.length; r++) {
-        "head" == t[r].type && i++;
-      }
-
-      if (this.totalKeyframes = i, l.graph) {
-        var _e48 = this.keyframes[l.graph.state.currentMark];
-        _e48 && (this.activeJoint = this.getKeyframe("id", _e48.activeJointId), this.activeJoint && this.updateKeyframe(l.graph.state.currentFrame, {
-          activeJointId: this.activeJoint.id
-        })), l.graph.updateState();
-      }
-
-      this.updateSkin(), this.updateBounds(), n.emit("jointChange", this.joints);
-    };
-
-    _proto8.renderTo = function renderTo(e, t) {
-      t = t || {};
-      var i = this.keyframes[t.frame];
-      if (!i) return;
-      t.position = t.position || {
-        x: 0,
-        y: 0
-      };
-      var n = -this.bounds.min.x + t.position.x,
-          r = -this.bounds.min.y + t.position.y;
-      if (i.joints.sort(function (e, t) {
-        return e.zIndex - t.zIndex;
-      }), t.showSkin) for (var o = 0; o < i.joints.length; o++) {
-        var _t24 = i.joints[o];
-
-        if (_t24.parent) {
-          if (_t24.skin.imageSrc) if (_t24.skin.image) {
-            if (!_t24.skin.image.width) {
-              var _e49 = new Image();
-
-              _e49.src = _t24.skin.imageSrc, _t24.skin.image = _e49, this.updateSkin(), this.updateBounds();
-            }
-          } else {
-            var _e50 = new Image();
-
-            _e50.src = _t24.skin.imageSrc, _t24.skin.image = _e50, this.updateSkin(), this.updateBounds();
-          }
-
-          if (_t24.skin && "object" == typeof _t24.skin.image && _t24.skin.image.src && _t24.skin.position) {
-            if (e.save(), e.translate(_t24.skin.position.x + n, _t24.skin.position.y + r), e.rotate(_t24.angle + _t24.skin.angleAuto), _t24.skin.offset) {
-              var _i18 = _t24.skin.offset.x,
-                  _n21 = _t24.skin.offset.y,
-                  _r12 = _t24.skin.offset.scaleX,
-                  _a6 = _t24.skin.offset.scaleY,
-                  _o3 = _t24.skin.offset.angle;
-              e.rotate(_o3), e.translate(_i18, _n21), e.scale(_r12, _a6);
-            }
-
-            e.drawImage(_t24.skin.image, _t24.skin.crop.from.x, _t24.skin.crop.from.y, _t24.skin._sizeOriginal.width, _t24.skin._sizeOriginal.height, -_t24.skin.size.width / 2, -_t24.skin.size.height / 2, _t24.skin.size.width, _t24.skin.size.height), e.restore(), _t24.skin.vertices || (this.updateSkin(), this.updateBounds());
-          }
-        }
-      }
-
-      if (t.showBones) {
-        for (o = 0; o < i.joints.length; o++) {
-          var _t25 = i.joints[o];
-          _t25.parent && (e.beginPath(), e.moveTo(_t25.position.x + n, _t25.position.y + r), e.lineTo(_t25.parent.position.x + n, _t25.parent.position.y + r), e.lineWidth = a.render.segment.width, e.lineCap = "round", e.strokeStyle = a.render.segment.color, e.stroke());
-        }
-
-        for (o = 0; o < i.joints.length; o++) {
-          var _s5 = i.joints[o],
-              _h3 = _s5 === this.activeJoint ? a.render.joint.color.selected : a.render.joint.color["default"];
-
-          l.graph && (this.activeJoint && !l.graph.state.isPlaying && (this.activeJoint.children.length && (_h3 = this.activeJoint.children.includes(_s5) ? "#5bff85" : _h3), this.activeJoint.parent && (_h3 = this.activeJoint.parent === _s5 ? "#9b68e1" : _h3)), l.graph.state.isPlaying && (_h3 = a.render.joint.color["default"])), e.beginPath(), e.arc(_s5.position.x + n, _s5.position.y + r, a.render.joint.radius, 0, 2 * Math.PI), e.closePath(), e.fillStyle = t.workColor ? _h3 : a.render.joint.color["default"], e.fill();
-        }
-      }
-    };
-
-    _proto8.render = function render(e) {
-      var t = h.checked;
-
-      if (l.graph) {
-        var _i19 = l.graph.state.previousFrame,
-            _n22 = l.graph.state.currentFrame,
-            _r13 = l.graph.state.nextFrame,
-            _a7 = l.graph.state.currentMark;
-        e.save(), e.context.globalAlpha = .1, this.renderTo(e.context, {
-          frame: _i19,
-          position: {
-            x: this.bounds.min.x,
-            y: this.bounds.min.y
-          },
-          showBones: t
-        }), this.renderTo(e.context, {
-          frame: _n22,
-          position: {
-            x: this.bounds.min.x,
-            y: this.bounds.min.y
-          },
-          showBones: t
-        }), this.renderTo(e.context, {
-          frame: _r13,
-          position: {
-            x: this.bounds.min.x,
-            y: this.bounds.min.y
-          },
-          showBones: t
-        }), e.restore(), this.keyframes[_a7] || (_a7 = _n22), this.renderTo(e.context, {
-          frame: _a7,
-          position: {
-            x: this.bounds.min.x,
-            y: this.bounds.min.y
-          },
-          showBones: t,
-          showSkin: !0,
-          workColor: !0
-        });
-      }
-    };
+    }]);
 
     return _class4;
   }())();
@@ -2165,65 +2308,77 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
       r = (i(3), i(1));
   var a = new ( /*#__PURE__*/function () {
     function _class5() {
+      _classCallCheck(this, _class5);
+
       this.events = [], this.present = null, this.maxStates = 300, this.eventCount = 0;
     }
 
-    var _proto9 = _class5.prototype;
-
-    _proto9.add = function add(e) {
-      e = e || {}, this.present && this.events.splice(0, this.events.indexOf(this.present));
-      var t = {
-        id: "E" + n.uid(),
-        label: e.label,
-        value: e.value,
-        group: e.group,
-        time: Date.now()
-      };
-      this.present = t, this.events.push(t), this.sortByLatest(), this.events.length > this.maxStates && this.events.pop(), this.eventCount++, r.emit("historyChange");
-    };
-
-    _proto9.sortByLatest = function sortByLatest() {
-      this.events.sort(function (e, t) {
-        return t.time - e.time;
-      });
-    };
-
-    _proto9.sortByOldest = function sortByOldest() {
-      this.events.sort(function (e, t) {
-        return e.time - t.time;
-      });
-    };
-
-    _proto9.getLatest = function getLatest() {
-      return this.events[0];
-    };
-
-    _proto9.getOldest = function getOldest() {
-      return this.events[this.events.length - 1];
-    };
-
-    _proto9.getNext = function getNext() {
-      return this.events[this.events.indexOf(this.present) - 1] || null;
-    };
-
-    _proto9.getPrevious = function getPrevious() {
-      return this.events[this.events.indexOf(this.present) + 1] || null;
-    };
-
-    _proto9.forward = function forward() {
-      this.present = this.getNext();
-    };
-
-    _proto9.backward = function backward() {
-      this.present = this.getPrevious();
-    };
-
-    _proto9.jump = function jump(e) {
-      var t = this.events.find(function (t) {
-        return t.id === e;
-      });
-      e && (this.present = t);
-    };
+    _createClass(_class5, [{
+      key: "add",
+      value: function add(e) {
+        e = e || {}, this.present && this.events.splice(0, this.events.indexOf(this.present));
+        var t = {
+          id: "E" + n.uid(),
+          label: e.label,
+          value: e.value,
+          group: e.group,
+          time: Date.now()
+        };
+        this.present = t, this.events.push(t), this.sortByLatest(), this.events.length > this.maxStates && this.events.pop(), this.eventCount++, r.emit("historyChange");
+      }
+    }, {
+      key: "sortByLatest",
+      value: function sortByLatest() {
+        this.events.sort(function (e, t) {
+          return t.time - e.time;
+        });
+      }
+    }, {
+      key: "sortByOldest",
+      value: function sortByOldest() {
+        this.events.sort(function (e, t) {
+          return e.time - t.time;
+        });
+      }
+    }, {
+      key: "getLatest",
+      value: function getLatest() {
+        return this.events[0];
+      }
+    }, {
+      key: "getOldest",
+      value: function getOldest() {
+        return this.events[this.events.length - 1];
+      }
+    }, {
+      key: "getNext",
+      value: function getNext() {
+        return this.events[this.events.indexOf(this.present) - 1] || null;
+      }
+    }, {
+      key: "getPrevious",
+      value: function getPrevious() {
+        return this.events[this.events.indexOf(this.present) + 1] || null;
+      }
+    }, {
+      key: "forward",
+      value: function forward() {
+        this.present = this.getNext();
+      }
+    }, {
+      key: "backward",
+      value: function backward() {
+        this.present = this.getPrevious();
+      }
+    }, {
+      key: "jump",
+      value: function jump(e) {
+        var t = this.events.find(function (t) {
+          return t.id === e;
+        });
+        e && (this.present = t);
+      }
+    }]);
 
     return _class5;
   }())();
@@ -2258,7 +2413,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
         if (o = s[s.length - 1], t = null, n = 1, s.length > 2) {
           var _e52 = 1;
-          "function" != typeof s[_e52] && "object" != typeof s[_e52] || (t = s[_e52++]), "number" != typeof s[_e52] && "string" != typeof s[_e52] || "number" != typeof s[_e52++] || (i = function (e) {
+          "function" != typeof s[_e52] && "object" != _typeof(s[_e52]) || (t = s[_e52++]), "number" != typeof s[_e52] && "string" != typeof s[_e52] || "number" != typeof s[_e52++] || (i = function (e) {
             return "number" == typeof e ? (e = Math.round(e)) >= 1 && e <= 10 ? e : e < 1 ? 0 : 10 : e.length <= 10 ? e : e.substr(0, 9);
           }(s[_e52++])), "number" == typeof s[_e52] && (n = a(s[_e52]));
         }
@@ -2308,11 +2463,11 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
         c = /^(?:0|[1-9]\d*)$/,
         d = {};
     d[n] = d["[object Array]"] = d["[object ArrayBuffer]"] = d["[object DataView]"] = d["[object Boolean]"] = d["[object Date]"] = d["[object Float32Array]"] = d["[object Float64Array]"] = d["[object Int8Array]"] = d["[object Int16Array]"] = d["[object Int32Array]"] = d[o] = d["[object Number]"] = d["[object Object]"] = d["[object RegExp]"] = d[s] = d["[object String]"] = d["[object Symbol]"] = d["[object Uint8Array]"] = d["[object Uint8ClampedArray]"] = d["[object Uint16Array]"] = d["[object Uint32Array]"] = !0, d["[object Error]"] = d[r] = d["[object WeakMap]"] = !1;
-    var u = "object" == typeof e && e && e.Object === Object && e,
-        p = "object" == typeof self && self && self.Object === Object && self,
+    var u = "object" == _typeof(e) && e && e.Object === Object && e,
+        p = "object" == (typeof self === "undefined" ? "undefined" : _typeof(self)) && self && self.Object === Object && self,
         f = u || p || Function("return this")(),
         g = t && !t.nodeType && t,
-        m = g && "object" == typeof i && i && !i.nodeType && i,
+        m = g && "object" == _typeof(i) && i && !i.nodeType && i,
         y = m && m.exports === g;
 
     function v(e, t) {
@@ -2436,7 +2591,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
       var i = Se(e) || function (e) {
         return function (e) {
           return function (e) {
-            return !!e && "object" == typeof e;
+            return !!e && "object" == _typeof(e);
           }(e) && Ee(e);
         }(e) && q.call(e, "callee") && (!L.call(e, "callee") || F.call(e) == n);
       }(e) ? function (e, t) {
@@ -2624,7 +2779,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
       var i,
           n,
           r = e.__data__;
-      return ("string" == (n = typeof (i = t)) || "number" == n || "symbol" == n || "boolean" == n ? "__proto__" !== i : null === i) ? r["string" == typeof t ? "string" : "hash"] : r.map;
+      return ("string" == (n = _typeof(i = t)) || "number" == n || "symbol" == n || "boolean" == n ? "__proto__" !== i : null === i) ? r["string" == typeof t ? "string" : "hash"] : r.map;
     }
 
     function me(e, t) {
@@ -2777,7 +2932,8 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
     }
 
     function je(e) {
-      var t = typeof e;
+      var t = _typeof(e);
+
       return !!e && ("object" == t || "function" == t);
     }
 
@@ -2868,10 +3024,19 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
         a = void 0, o = void 0, document.getElementById("overlayFilename").innerText = "Choose a file...";
         var e = document.querySelectorAll("#overlayApp .section.disabled");
 
-        for (var _iterator = _createForOfIteratorHelperLoose(e), _step; !(_step = _iterator()).done;) {
-          var _t26 = _step.value;
+        var _iterator = _createForOfIteratorHelper(e),
+            _step;
 
-          _t26.classList.add("disabled");
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            var _t26 = _step.value;
+
+            _t26.classList.add("disabled");
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
         }
 
         document.getElementById("addOverlay").classList.add("disabled"), this.hidden = !0, n.emit("renderFocus");
@@ -2923,10 +3088,19 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
           var _t27 = document.querySelectorAll("#overlayApp .section.disabled");
 
-          for (var _iterator2 = _createForOfIteratorHelperLoose(_t27), _step2; !(_step2 = _iterator2()).done;) {
-            var _e54 = _step2.value;
+          var _iterator2 = _createForOfIteratorHelper(_t27),
+              _step2;
 
-            _e54.classList.remove("disabled");
+          try {
+            for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+              var _e54 = _step2.value;
+
+              _e54.classList.remove("disabled");
+            }
+          } catch (err) {
+            _iterator2.e(err);
+          } finally {
+            _iterator2.f();
           }
 
           document.getElementById("addOverlay").classList.remove("disabled");
@@ -4064,7 +4238,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
             showBones: e.showBones
           }), h.toBlob(function (s) {
             var l = {
-              name: "frames/" + d + ".png",
+              name: "frames/".concat(d, ".png"),
               stream: function stream() {
                 return s.stream();
               }
@@ -4310,7 +4484,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
           if (i.id === t.id) {
             i.skin.imageSrc = e.url, i.skin.image = new Image(), i.skin.image.src = e.url, i.skin.crop = JSON.parse(JSON.stringify(_l5));
             var _r20 = t.skin._vueCrop;
-            "object" == typeof _r20 && _r20 && (i.skin._vueCrop = JSON.parse(JSON.stringify(_r20)) || null), f.updateSkin(n.joints);
+            "object" == _typeof(_r20) && _r20 && (i.skin._vueCrop = JSON.parse(JSON.stringify(_r20)) || null), f.updateSkin(n.joints);
           }
         }), f.updateSubKeyframes(), f.updateBounds(), g.add({
           label: "Change skin",
@@ -4687,7 +4861,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
   n = function n() {
     "use strict";
 
-    var e = "object" == typeof window ? window : _this20;
+    var e = "object" == (typeof window === "undefined" ? "undefined" : _typeof(window)) ? window : _this20;
     e.HTMLElement || console.warn("streamsaver is meant to run on browsers main thread");
     var t = null,
         i = !1;
@@ -6076,7 +6250,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
         var n = "",
             r = "",
             a = e[t];
-        if (a && "object" == typeof a) for (n in a) {
+        if (a && "object" == _typeof(a)) for (n in a) {
           Object.prototype.hasOwnProperty.call(a, n) && (r = g(a, n), void 0 !== r ? a[n] = r : delete a[n]);
         }
         return i.call(e, t, a);
@@ -6404,7 +6578,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
                         case 6:
                           "function" == typeof s && (m = s.call(r, t, m));
-                          _context5.t0 = typeof m;
+                          _context5.t0 = _typeof(m);
                           _context5.next = _context5.t0 === "string" ? 10 : _context5.t0 === "number" ? 27 : _context5.t0 === "boolean" ? 28 : _context5.t0 === "null" ? 28 : _context5.t0 === "undefined" ? 29 : _context5.t0 === "object" ? 30 : 76;
                           break;
 
@@ -6505,7 +6679,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
                           return _context5.abrupt("return", _i37(!1));
 
                         case 45:
-                          if (!(s && "object" == typeof s)) {
+                          if (!(s && "object" == _typeof(s))) {
                             _context5.next = 59;
                             break;
                           }
@@ -6552,7 +6726,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
                           d = _context5.t6.value;
 
-                          if (!("object" == typeof m[d] && null !== m[d] && void 0 !== m[d])) {
+                          if (!("object" == _typeof(m[d]) && null !== m[d] && void 0 !== m[d])) {
                             _context5.next = 66;
                             break;
                           }
@@ -6622,7 +6796,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
           f = p.next(),
           g = function g() {
         e(function () {
-          if (f = p.next(), f && !0 === f.done) return i = 0, r = "", n = [], "object" == typeof d ? c(d, null) : c(null, d);
+          if (f = p.next(), f && !0 === f.done) return i = 0, r = "", n = [], "object" == _typeof(d) ? c(d, null) : c(null, d);
           g();
         });
       };
@@ -6635,6 +6809,8 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
       r = i(34);
   e.exports = new ( /*#__PURE__*/function () {
     function _class6() {
+      _classCallCheck(this, _class6);
+
       this.canvas = document.getElementById("gameCanvas"), this.bounds = this.canvas.getBoundingClientRect(), this.context = this.canvas.getContext("2d"), this.camera = n.create(this.context), this.engine = r.create(), this.offscreen = 0, this.context.offscreens = [], this._customOptions = ["fill", "stroke", "align", "close", "curve"], this._currentContext = this.context, this._render = null;
 
       var e = function e(_e74) {
@@ -6644,191 +6820,222 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
       this.canvas.addEventListener("drag", e), this.canvas.addEventListener("dragstart", e);
     }
 
-    var _proto10 = _class6.prototype;
-
-    _proto10.draw = function draw(e) {
-      this._render = e, "function" == typeof this._render && this._render();
-    };
-
-    _proto10.redraw = function redraw() {
-      "function" == typeof this._render && this._render();
-    };
-
-    _proto10.render = function render(e) {
-      var _this21 = this;
-
-      "function" == typeof e && this.engine.run(function () {
-        _this21.clear(), e(), _this21.context.offscreens.length && _this21.drawOffscreens();
-      });
-    };
-
-    _proto10.getFrameCount = function getFrameCount() {
-      return this.engine.frameCount;
-    };
-
-    _proto10.getFrameRate = function getFrameRate() {
-      return this.engine.frameRate;
-    };
-
-    _proto10.setSize = function setSize(e, t) {
-      this.canvas.width = e, this.canvas.height = t, this.bounds = this.canvas.getBoundingClientRect();
-
-      for (var _iterator3 = _createForOfIteratorHelperLoose(this.context.offscreens), _step3; !(_step3 = _iterator3()).done;) {
-        var _e75 = _step3.value;
-        _e75.canvas.width = this.canvas.width, _e75.canvas.height = this.canvas.height;
+    _createClass(_class6, [{
+      key: "draw",
+      value: function draw(e) {
+        this._render = e, "function" == typeof this._render && this._render();
       }
-    };
-
-    _proto10.fullscreen = function fullscreen() {
-      var _this22 = this;
-
-      this.setSize(innerWidth, innerHeight), addEventListener("resize", function () {
-        _this22.setSize(innerWidth, innerHeight);
-      });
-    };
-
-    _proto10.createLayer = function createLayer() {
-      var e = document.createElement("canvas");
-      e.width = this.canvas.width, e.height = this.canvas.height;
-      var t = e.getContext("2d"),
-          i = {
-        camera: this.camera
-      };
-      return t.rendererData = i, this.context.offscreens.push(t), t;
-    };
-
-    _proto10.drawOffscreens = function drawOffscreens() {
-      var _this23 = this;
-
-      var _loop13 = function _loop13() {
-        var t = _this23.context.offscreens[e];
-        t.rendererData.camera.begin(function () {
-          _this23.context.drawImage(t.canvas, 0, 0, t.canvas.width, t.canvas.height);
-        }), t.clearRect(0, 0, t.canvas.width, t.canvas.height);
-      };
-
-      for (var e = 0; e < this.context.offscreens.length; e++) {
-        _loop13();
+    }, {
+      key: "redraw",
+      value: function redraw() {
+        "function" == typeof this._render && this._render();
       }
-    };
+    }, {
+      key: "render",
+      value: function render(e) {
+        var _this21 = this;
 
-    _proto10.line = function line(e, t, i, n, r, a) {
-      var o = a || this.context;
-      o.beginPath(), o.moveTo(e, t), o.lineTo(i, n), this._hasProperty(r, "close", function () {
-        o.closePath();
-      }), this._evaluateOptions(r, o);
-    };
+        "function" == typeof e && this.engine.run(function () {
+          _this21.clear(), e(), _this21.context.offscreens.length && _this21.drawOffscreens();
+        });
+      }
+    }, {
+      key: "getFrameCount",
+      value: function getFrameCount() {
+        return this.engine.frameCount;
+      }
+    }, {
+      key: "getFrameRate",
+      value: function getFrameRate() {
+        return this.engine.frameRate;
+      }
+    }, {
+      key: "setSize",
+      value: function setSize(e, t) {
+        this.canvas.width = e, this.canvas.height = t, this.bounds = this.canvas.getBoundingClientRect();
 
-    _proto10.circle = function circle(e, t, i, n, r) {
-      var a = r || this.context;
-      a.beginPath(), a.arc(e, t, i, 0, 2 * Math.PI), this._hasProperty(n, "close", function () {
-        a.closePath();
-      }), this._evaluateOptions(n, a);
-    };
+        var _iterator3 = _createForOfIteratorHelper(this.context.offscreens),
+            _step3;
 
-    _proto10.rect = function rect(e, t, i, n, r, a) {
-      var o = a || this.context;
-      this._hasProperty(r, "align", function (r) {
-        var a = r.split(" ");
-        a[0] && ("center" == a[0] || "middle" == a[0] ? e -= .5 * i : "right" == a[0] && (e -= i)), a[1] && ("center" == a[1] || "middle" == a[0] ? t -= .5 * n : "bottom" == a[1] && (t -= n));
-      }), o.beginPath(), o.rect(e, t, i, n), this._hasProperty(r, "close", function () {
-        o.closePath();
-      }), this._evaluateOptions(r, o);
-    };
-
-    _proto10.fromVertices = function fromVertices(e, t, i) {
-      var n = i || this.context;
-
-      if (e.length) {
-        if (n.beginPath(), !this._hasProperty(t, "curve")) {
-          n.moveTo(e[0].x, e[0].y);
-
-          for (var r = 0; r < e.length; r++) {
-            var _t55 = e[r];
-            n.lineTo(_t55.x, _t55.y);
+        try {
+          for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+            var _e75 = _step3.value;
+            _e75.canvas.width = this.canvas.width, _e75.canvas.height = this.canvas.height;
           }
+        } catch (err) {
+          _iterator3.e(err);
+        } finally {
+          _iterator3.f();
+        }
+      }
+    }, {
+      key: "fullscreen",
+      value: function fullscreen() {
+        var _this22 = this;
+
+        this.setSize(innerWidth, innerHeight), addEventListener("resize", function () {
+          _this22.setSize(innerWidth, innerHeight);
+        });
+      }
+    }, {
+      key: "createLayer",
+      value: function createLayer() {
+        var e = document.createElement("canvas");
+        e.width = this.canvas.width, e.height = this.canvas.height;
+        var t = e.getContext("2d"),
+            i = {
+          camera: this.camera
+        };
+        return t.rendererData = i, this.context.offscreens.push(t), t;
+      }
+    }, {
+      key: "drawOffscreens",
+      value: function drawOffscreens() {
+        var _this23 = this;
+
+        var _loop13 = function _loop13() {
+          var t = _this23.context.offscreens[e];
+          t.rendererData.camera.begin(function () {
+            _this23.context.drawImage(t.canvas, 0, 0, t.canvas.width, t.canvas.height);
+          }), t.clearRect(0, 0, t.canvas.width, t.canvas.height);
+        };
+
+        for (var e = 0; e < this.context.offscreens.length; e++) {
+          _loop13();
+        }
+      }
+    }, {
+      key: "line",
+      value: function line(e, t, i, n, r, a) {
+        var o = a || this.context;
+        o.beginPath(), o.moveTo(e, t), o.lineTo(i, n), this._hasProperty(r, "close", function () {
+          o.closePath();
+        }), this._evaluateOptions(r, o);
+      }
+    }, {
+      key: "circle",
+      value: function circle(e, t, i, n, r) {
+        var a = r || this.context;
+        a.beginPath(), a.arc(e, t, i, 0, 2 * Math.PI), this._hasProperty(n, "close", function () {
+          a.closePath();
+        }), this._evaluateOptions(n, a);
+      }
+    }, {
+      key: "rect",
+      value: function rect(e, t, i, n, r, a) {
+        var o = a || this.context;
+        this._hasProperty(r, "align", function (r) {
+          var a = r.split(" ");
+          a[0] && ("center" == a[0] || "middle" == a[0] ? e -= .5 * i : "right" == a[0] && (e -= i)), a[1] && ("center" == a[1] || "middle" == a[0] ? t -= .5 * n : "bottom" == a[1] && (t -= n));
+        }), o.beginPath(), o.rect(e, t, i, n), this._hasProperty(r, "close", function () {
+          o.closePath();
+        }), this._evaluateOptions(r, o);
+      }
+    }, {
+      key: "fromVertices",
+      value: function fromVertices(e, t, i) {
+        var n = i || this.context;
+
+        if (e.length) {
+          if (n.beginPath(), !this._hasProperty(t, "curve")) {
+            n.moveTo(e[0].x, e[0].y);
+
+            for (var r = 0; r < e.length; r++) {
+              var _t55 = e[r];
+              n.lineTo(_t55.x, _t55.y);
+            }
+          }
+
+          this._hasProperty(t, "curve", function () {
+            n.beginPath();
+            var t = e[0],
+                i = e[1],
+                r = .5 * (t.x + i.x),
+                a = .5 * (t.y + i.y);
+            n.moveTo(r, a);
+
+            for (var o = 1; o < e.length; o++) {
+              var _t56 = e[o],
+                  _i38 = e[o + 1 == e.length ? 0 : o + 1],
+                  _r23 = .5 * (_i38.x + _t56.x),
+                  _a17 = .5 * (_i38.y + _t56.y);
+
+              n.quadraticCurveTo(_t56.x, _t56.y, _r23, _a17);
+            }
+
+            n.quadraticCurveTo(t.x, t.y, r, a), n.lineJoin = "round";
+          }), this._hasProperty(t, "close", function () {
+            n.closePath();
+          }), this._evaluateOptions(t, n);
+        }
+      }
+    }, {
+      key: "text",
+      value: function text(e, t, i, n, r) {
+        var a = r || this.context;
+        this._hasProperty(n, "align", function (e) {
+          var t = e.split(" ");
+          t[0] && ("left" == t[0] ? a.textAlign = "start" : "center" == t[0] || "middle" == t[0] ? a.textAlign = "center" : "right" == t[0] && (a.textAlign = "right")), t[1] && ("top" == t[1] ? a.textBaseline = "start" : "center" == t[1] || "middle" == t[0] ? a.textBaseline = "middle" : "bottom" == t[1] && (a.textBaseline = "bottom"));
+        }), a.beginPath(), this._evaluateOptions(n, a), this._hasProperty(n, "stroke", function () {
+          a.strokeText(e, t, i);
+        }), this._hasProperty(n, "fill", function () {
+          a.fillText(e, t, i);
+        }), this._hasProperty(n, "close", function () {
+          a.closePath();
+        });
+      }
+    }, {
+      key: "clear",
+      value: function clear(e) {
+        (e || this.context).clearRect(0, 0, this.canvas.width, this.canvas.height);
+      }
+    }, {
+      key: "save",
+      value: function save(e) {
+        (e || this.context).save();
+      }
+    }, {
+      key: "restore",
+      value: function restore(e) {
+        (e || this.context).restore();
+      }
+    }, {
+      key: "clip",
+      value: function clip(e) {
+        (e || this.context).clip();
+      }
+    }, {
+      key: "fill",
+      value: function fill(e, t) {
+        var i = t || this.context;
+        i.fillStyle = e, i.fill();
+      }
+    }, {
+      key: "stroke",
+      value: function stroke(e, t) {
+        var i = t || this.context;
+        i.strokeStyle = e, i.stroke();
+      }
+    }, {
+      key: "_evaluateOptions",
+      value: function _evaluateOptions(e, t) {
+        var i = t || this.context;
+        if (!e) return;
+        var n = Object.keys(e);
+
+        for (var r = 0; r < n.length; r++) {
+          var _t57 = n[r];
+          "stroke" == _t57 && (i.strokeStyle = e[_t57]), "fill" == _t57 && (i.fillStyle = e[_t57]), this._customOptions.includes(_t57) || (i[_t57] = e[_t57]);
         }
 
-        this._hasProperty(t, "curve", function () {
-          n.beginPath();
-          var t = e[0],
-              i = e[1],
-              r = .5 * (t.x + i.x),
-              a = .5 * (t.y + i.y);
-          n.moveTo(r, a);
-
-          for (var o = 1; o < e.length; o++) {
-            var _t56 = e[o],
-                _i38 = e[o + 1 == e.length ? 0 : o + 1],
-                _r23 = .5 * (_i38.x + _t56.x),
-                _a17 = .5 * (_i38.y + _t56.y);
-
-            n.quadraticCurveTo(_t56.x, _t56.y, _r23, _a17);
-          }
-
-          n.quadraticCurveTo(t.x, t.y, r, a), n.lineJoin = "round";
-        }), this._hasProperty(t, "close", function () {
-          n.closePath();
-        }), this._evaluateOptions(t, n);
+        e.stroke && this.stroke(e.stroke, i), e.fill && this.fill(e.fill, i);
       }
-    };
-
-    _proto10.text = function text(e, t, i, n, r) {
-      var a = r || this.context;
-      this._hasProperty(n, "align", function (e) {
-        var t = e.split(" ");
-        t[0] && ("left" == t[0] ? a.textAlign = "start" : "center" == t[0] || "middle" == t[0] ? a.textAlign = "center" : "right" == t[0] && (a.textAlign = "right")), t[1] && ("top" == t[1] ? a.textBaseline = "start" : "center" == t[1] || "middle" == t[0] ? a.textBaseline = "middle" : "bottom" == t[1] && (a.textBaseline = "bottom"));
-      }), a.beginPath(), this._evaluateOptions(n, a), this._hasProperty(n, "stroke", function () {
-        a.strokeText(e, t, i);
-      }), this._hasProperty(n, "fill", function () {
-        a.fillText(e, t, i);
-      }), this._hasProperty(n, "close", function () {
-        a.closePath();
-      });
-    };
-
-    _proto10.clear = function clear(e) {
-      (e || this.context).clearRect(0, 0, this.canvas.width, this.canvas.height);
-    };
-
-    _proto10.save = function save(e) {
-      (e || this.context).save();
-    };
-
-    _proto10.restore = function restore(e) {
-      (e || this.context).restore();
-    };
-
-    _proto10.clip = function clip(e) {
-      (e || this.context).clip();
-    };
-
-    _proto10.fill = function fill(e, t) {
-      var i = t || this.context;
-      i.fillStyle = e, i.fill();
-    };
-
-    _proto10.stroke = function stroke(e, t) {
-      var i = t || this.context;
-      i.strokeStyle = e, i.stroke();
-    };
-
-    _proto10._evaluateOptions = function _evaluateOptions(e, t) {
-      var i = t || this.context;
-      if (!e) return;
-      var n = Object.keys(e);
-
-      for (var r = 0; r < n.length; r++) {
-        var _t57 = n[r];
-        "stroke" == _t57 && (i.strokeStyle = e[_t57]), "fill" == _t57 && (i.fillStyle = e[_t57]), this._customOptions.includes(_t57) || (i[_t57] = e[_t57]);
+    }, {
+      key: "_hasProperty",
+      value: function _hasProperty(e, t, i) {
+        if (e) return !!e[t] && ("function" == typeof i && i(e[t]), e[t]);
       }
-
-      e.stroke && this.stroke(e.stroke, i), e.fill && this.fill(e.fill, i);
-    };
-
-    _proto10._hasProperty = function _hasProperty(e, t, i) {
-      if (e) return !!e[t] && ("function" == typeof i && i(e[t]), e[t]);
-    };
+    }]);
 
     return _class6;
   }())();
@@ -6839,6 +7046,8 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
   var n = /*#__PURE__*/function () {
     function n(e, t) {
+      _classCallCheck(this, n);
+
       t = t || {}, this.movement = {
         x: 0,
         y: 0
@@ -6853,61 +7062,73 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
       }, this.distance = 0, this.context = e || null, this.fieldOfView = t.fieldOfView || Math.PI / 4, this.moveSpeed = t.moveSpeed || 1, this.zoomSpeed = t.zoomSpeed || 1, this.scaleSpeed = t.scaleSpeed || 1;
     }
 
-    var _proto11 = n.prototype;
-
-    _proto11.setContext = function setContext(e) {
-      this.context = e, this.updateViewport();
-    };
-
-    _proto11.setMoveSpeed = function setMoveSpeed(e) {
-      this.moveSpeed = e;
-    };
-
-    _proto11.setZoomSpeed = function setZoomSpeed(e) {
-      this.zoomSpeed = e;
-    };
-
-    _proto11.setScaleSpeed = function setScaleSpeed(e) {
-      this.scaleSpeed = e;
-    };
-
-    _proto11.begin = function begin(e) {
-      "function" == typeof e && (this.context.save(), this.applyScale(), this.applyTranslation(), e(this), this.context.restore());
-    };
-
-    _proto11.applyScale = function applyScale() {
-      this.context.scale(this.viewport.scale[0], this.viewport.scale[1]);
-    };
-
-    _proto11.applyTranslation = function applyTranslation() {
-      this.context.translate(-this.viewport.left, -this.viewport.top);
-    };
-
-    _proto11.updateViewport = function updateViewport() {
-      this.aspectRatio = this.context.canvas.width / this.context.canvas.height, this.viewport.width = i(this.viewport.width, this.distance * Math.tan(this.fieldOfView), this.scaleSpeed), this.viewport.height = i(this.viewport.height, this.viewport.width / this.aspectRatio, this.scaleSpeed), this.viewport.left = this.movement.x - this.viewport.width / 2, this.viewport.top = this.movement.y - this.viewport.height / 2, this.viewport.right = this.viewport.left + this.viewport.width, this.viewport.bottom = this.viewport.top + this.viewport.height, this.viewport.scale[0] = this.context.canvas.width / this.viewport.width, this.viewport.scale[1] = this.context.canvas.height / this.viewport.height;
-    };
-
-    _proto11.zoomTo = function zoomTo(e) {
-      this.distance = i(this.distance, e, this.zoomSpeed), this.updateViewport();
-    };
-
-    _proto11.moveTo = function moveTo(e, t) {
-      this.movement.x = i(this.movement.x, e, this.moveSpeed), this.movement.y = i(this.movement.y, t, this.moveSpeed), this.updateViewport();
-    };
-
-    _proto11.screenToWorld = function screenToWorld(e, t, i) {
-      return i = i || {
-        x: e / this.viewport.scale[0] + this.viewport.left,
-        y: t / this.viewport.scale[1] + this.viewport.top
-      };
-    };
-
-    _proto11.worldToScreen = function worldToScreen(e, t, i) {
-      return i = i || {
-        x: (e - this.viewport.left) * this.viewport.scale[0],
-        y: (t - this.viewport.top) * this.viewport.scale[1]
-      };
-    };
+    _createClass(n, [{
+      key: "setContext",
+      value: function setContext(e) {
+        this.context = e, this.updateViewport();
+      }
+    }, {
+      key: "setMoveSpeed",
+      value: function setMoveSpeed(e) {
+        this.moveSpeed = e;
+      }
+    }, {
+      key: "setZoomSpeed",
+      value: function setZoomSpeed(e) {
+        this.zoomSpeed = e;
+      }
+    }, {
+      key: "setScaleSpeed",
+      value: function setScaleSpeed(e) {
+        this.scaleSpeed = e;
+      }
+    }, {
+      key: "begin",
+      value: function begin(e) {
+        "function" == typeof e && (this.context.save(), this.applyScale(), this.applyTranslation(), e(this), this.context.restore());
+      }
+    }, {
+      key: "applyScale",
+      value: function applyScale() {
+        this.context.scale(this.viewport.scale[0], this.viewport.scale[1]);
+      }
+    }, {
+      key: "applyTranslation",
+      value: function applyTranslation() {
+        this.context.translate(-this.viewport.left, -this.viewport.top);
+      }
+    }, {
+      key: "updateViewport",
+      value: function updateViewport() {
+        this.aspectRatio = this.context.canvas.width / this.context.canvas.height, this.viewport.width = i(this.viewport.width, this.distance * Math.tan(this.fieldOfView), this.scaleSpeed), this.viewport.height = i(this.viewport.height, this.viewport.width / this.aspectRatio, this.scaleSpeed), this.viewport.left = this.movement.x - this.viewport.width / 2, this.viewport.top = this.movement.y - this.viewport.height / 2, this.viewport.right = this.viewport.left + this.viewport.width, this.viewport.bottom = this.viewport.top + this.viewport.height, this.viewport.scale[0] = this.context.canvas.width / this.viewport.width, this.viewport.scale[1] = this.context.canvas.height / this.viewport.height;
+      }
+    }, {
+      key: "zoomTo",
+      value: function zoomTo(e) {
+        this.distance = i(this.distance, e, this.zoomSpeed), this.updateViewport();
+      }
+    }, {
+      key: "moveTo",
+      value: function moveTo(e, t) {
+        this.movement.x = i(this.movement.x, e, this.moveSpeed), this.movement.y = i(this.movement.y, t, this.moveSpeed), this.updateViewport();
+      }
+    }, {
+      key: "screenToWorld",
+      value: function screenToWorld(e, t, i) {
+        return i = i || {
+          x: e / this.viewport.scale[0] + this.viewport.left,
+          y: t / this.viewport.scale[1] + this.viewport.top
+        };
+      }
+    }, {
+      key: "worldToScreen",
+      value: function worldToScreen(e, t, i) {
+        return i = i || {
+          x: (e - this.viewport.left) * this.viewport.scale[0],
+          y: (t - this.viewport.top) * this.viewport.scale[1]
+        };
+      }
+    }]);
 
     return n;
   }();
@@ -6920,20 +7141,23 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 }, function (e, t) {
   var i = /*#__PURE__*/function () {
     function i() {
+      _classCallCheck(this, i);
+
       this.frameRate = 0, this.frameCount = 0, this._targetFrameRate = 60;
     }
 
-    var _proto12 = i.prototype;
+    _createClass(i, [{
+      key: "run",
+      value: function run(e) {
+        var t,
+            _i39 = performance.now(),
+            n = (performance.now(), this);
 
-    _proto12.run = function run(e) {
-      var t,
-          _i39 = performance.now(),
-          n = (performance.now(), this);
-
-      !function r() {
-        t = (performance.now() - _i39) / 1e3, n.frameRate = 1 / t, _i39 = performance.now(), n.frameCount++, "function" == typeof e && e(), requestAnimationFrame(r);
-      }();
-    };
+        !function r() {
+          t = (performance.now() - _i39) / 1e3, n.frameRate = 1 / t, _i39 = performance.now(), n.frameCount++, "function" == typeof e && e(), requestAnimationFrame(r);
+        }();
+      }
+    }]);
 
     return i;
   }();
@@ -6946,19 +7170,23 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 }, function (e, t) {
   var i = new ( /*#__PURE__*/function () {
     function _class7() {
+      _classCallCheck(this, _class7);
+
       this.code = null, this.name = null, this.activeKeys = {};
     }
 
-    var _proto13 = _class7.prototype;
-
-    _proto13.check = function check(e) {
-      if ("number" == typeof e) return e in this.activeKeys;
-      return Object.values(this.activeKeys).includes(e);
-    };
-
-    _proto13.on = function on(e, t) {
-      "function" == typeof t && addEventListener(e, t);
-    };
+    _createClass(_class7, [{
+      key: "check",
+      value: function check(e) {
+        if ("number" == typeof e) return e in this.activeKeys;
+        return Object.values(this.activeKeys).includes(e);
+      }
+    }, {
+      key: "on",
+      value: function on(e, t) {
+        "function" == typeof t && addEventListener(e, t);
+      }
+    }]);
 
     return _class7;
   }())();
