@@ -1,3 +1,5 @@
+"use strict";
+
 var clonedeep = require("lodash.clonedeep");
 
 var rigModel = require("../rig.model.js");

@@ -1,3 +1,5 @@
+"use strict";
+
 var saveApp = require("./save.js");
 
 var loadApp = require("./load.js");

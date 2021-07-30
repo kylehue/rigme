@@ -1,3 +1,5 @@
+"use strict";
+
 var events = require("../../../lib/events.js");
 
 var dom = require("../../../lib/dom.js");

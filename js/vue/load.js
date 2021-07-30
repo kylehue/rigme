@@ -1,3 +1,5 @@
+"use strict";
+
 var yj = require("yieldable-json");
 
 var events = require("../../../lib/events.js");

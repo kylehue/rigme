@@ -1,3 +1,5 @@
+"use strict";
+
 var timeline = require("./timeline.js");
 
 var contextMenu = require("./contextMenu.js");
