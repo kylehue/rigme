@@ -26,6 +26,7 @@ An easy to use and very simple animator web application. [Try it here](https://k
 
 ### Some tips
 - Hold <kbd>Shift</kbd> while adding a joint to mirror it horizontally
+- Hold <kbd>Space</kbd> to pan camera
 - Drag the blue vertical lines in the timeline to change loop region
 - Refrain moving mouse in the timeline to avoid viewport lag
 - Drag the timeline's scrollbar from its left or right side to resize
