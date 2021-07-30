@@ -1,1 +1,254 @@
-"use strict";function _createForOfIteratorHelper(e,t){var n="undefined"!=typeof Symbol&&e[Symbol.iterator]||e["@@iterator"];if(!n){if(Array.isArray(e)||(n=_unsupportedIterableToArray(e))||t&&e&&"number"==typeof e.length){n&&(e=n);var r=0,t=function(){};return{s:t,n:function(){return r>=e.length?{done:!0}:{done:!1,value:e[r++]}},e:function(e){throw e},f:t}}throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}var i,a=!0,o=!1;return{s:function(){n=n.call(e)},n:function(){var e=n.next();return a=e.done,e},e:function(e){o=!0,i=e},f:function(){try{a||null==n.return||n.return()}finally{if(o)throw i}}}}function _unsupportedIterableToArray(e,t){if(e){if("string"==typeof e)return _arrayLikeToArray(e,t);var n=Object.prototype.toString.call(e).slice(8,-1);return"Map"===(n="Object"===n&&e.constructor?e.constructor.name:n)||"Set"===n?Array.from(e):"Arguments"===n||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)?_arrayLikeToArray(e,t):void 0}}function _arrayLikeToArray(e,t){(null==t||t>e.length)&&(t=e.length);for(var n=0,r=new Array(t);n<t;n++)r[n]=e[n];return r}function _classCallCheck(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function _defineProperties(e,t){for(var n=0;n<t.length;n++){var r=t[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(e,r.key,r)}}function _createClass(e,t,n){return t&&_defineProperties(e.prototype,t),n&&_defineProperties(e,n),e}var camera=require("./../lib/camera.js"),engine=require("./engine.js"),Renderer=function(){function t(){_classCallCheck(this,t),this.canvas=document.getElementById("gameCanvas"),this.bounds=this.canvas.getBoundingClientRect(),this.context=this.canvas.getContext("2d"),this.camera=camera.create(this.context),this.engine=engine.create(),this.offscreen=0,this.context.offscreens=[],this._customOptions=["fill","stroke","align","close","curve"],this._currentContext=this.context,this._render=null;function e(e){e.preventDefault()}this.canvas.addEventListener("drag",e),this.canvas.addEventListener("dragstart",e)}return _createClass(t,[{key:"draw",value:function(e){this._render=e,"function"==typeof this._render&&this._render()}},{key:"redraw",value:function(){"function"==typeof this._render&&this._render()}},{key:"render",value:function(e){var t=this;"function"==typeof e&&this.engine.run(function(){t.clear(),e(),t.context.offscreens.length&&t.drawOffscreens()})}},{key:"getFrameCount",value:function(){return this.engine.frameCount}},{key:"getFrameRate",value:function(){return this.engine.frameRate}},{key:"setSize",value:function(e,t){this.canvas.width=e,this.canvas.height=t,this.bounds=this.canvas.getBoundingClientRect();var n,r=_createForOfIteratorHelper(this.context.offscreens);try{for(r.s();!(n=r.n()).done;){var i=n.value;i.canvas.width=this.canvas.width,i.canvas.height=this.canvas.height}}catch(e){r.e(e)}finally{r.f()}}},{key:"fullscreen",value:function(){var e=this;this.setSize(innerWidth,innerHeight),addEventListener("resize",function(){e.setSize(innerWidth,innerHeight)})}},{key:"createLayer",value:function(){var e=document.createElement("canvas");e.width=this.canvas.width,e.height=this.canvas.height;var t=e.getContext("2d"),e={camera:this.camera};return t.rendererData=e,this.context.offscreens.push(t),t}},{key:"drawOffscreens",value:function(){for(var t=this,n=0;n<this.context.offscreens.length;n++)!function(){var e=t.context.offscreens[n];e.rendererData.camera.begin(function(){t.context.drawImage(e.canvas,0,0,e.canvas.width,e.canvas.height)}),e.clearRect(0,0,e.canvas.width,e.canvas.height)}()}},{key:"line",value:function(e,t,n,r,i,a){var o=a||this.context;o.beginPath(),o.moveTo(e,t),o.lineTo(n,r),this._hasProperty(i,"close",function(){o.closePath()}),this._evaluateOptions(i,o)}},{key:"circle",value:function(e,t,n,r,i){var a=i||this.context;a.beginPath(),a.arc(e,t,n,0,2*Math.PI),this._hasProperty(r,"close",function(){a.closePath()}),this._evaluateOptions(r,a)}},{key:"rect",value:function(t,n,r,i,e,a){var o=a||this.context;this._hasProperty(e,"align",function(e){e=e.split(" ");e[0]&&("center"==e[0]||"middle"==e[0]?t-=.5*r:"right"==e[0]&&(t-=r)),e[1]&&("center"==e[1]||"middle"==e[0]?n-=.5*i:"bottom"==e[1]&&(n-=i))}),o.beginPath(),o.rect(t,n,r,i),this._hasProperty(e,"close",function(){o.closePath()}),this._evaluateOptions(e,o)}},{key:"fromVertices",value:function(s,e,t){var c=t||this.context;if(s.length){if(c.beginPath(),!this._hasProperty(e,"curve")){c.moveTo(s[0].x,s[0].y);for(var n=0;n<s.length;n++){var r=s[n];c.lineTo(r.x,r.y)}}this._hasProperty(e,"curve",function(){c.beginPath();var e=s[0],t=s[1],n=.5*(e.x+t.x),t=.5*(e.y+t.y);c.moveTo(n,t);for(var r=1;r<s.length;r++){var i=s[r],a=s[r+1==s.length?0:r+1],o=.5*(a.x+i.x),a=.5*(a.y+i.y);c.quadraticCurveTo(i.x,i.y,o,a)}c.quadraticCurveTo(e.x,e.y,n,t),c.lineJoin="round"}),this._hasProperty(e,"close",function(){c.closePath()}),this._evaluateOptions(e,c)}}},{key:"text",value:function(e,t,n,r,i){var a=i||this.context;this._hasProperty(r,"align",function(e){e=e.split(" ");e[0]&&("left"==e[0]?a.textAlign="start":"center"==e[0]||"middle"==e[0]?a.textAlign="center":"right"==e[0]&&(a.textAlign="right")),e[1]&&("top"==e[1]?a.textBaseline="start":"center"==e[1]||"middle"==e[0]?a.textBaseline="middle":"bottom"==e[1]&&(a.textBaseline="bottom"))}),a.beginPath(),this._evaluateOptions(r,a),this._hasProperty(r,"stroke",function(){a.strokeText(e,t,n)}),this._hasProperty(r,"fill",function(){a.fillText(e,t,n)}),this._hasProperty(r,"close",function(){a.closePath()})}},{key:"clear",value:function(e){(e||this.context).clearRect(0,0,this.canvas.width,this.canvas.height)}},{key:"save",value:function(e){(e||this.context).save()}},{key:"restore",value:function(e){(e||this.context).restore()}},{key:"clip",value:function(e){(e||this.context).clip()}},{key:"fill",value:function(e,t){t=t||this.context;t.fillStyle=e,t.fill()}},{key:"stroke",value:function(e,t){t=t||this.context;t.strokeStyle=e,t.stroke()}},{key:"_evaluateOptions",value:function(e,t){var n=t||this.context;if(e){for(var r=Object.keys(e),i=0;i<r.length;i++){var a=r[i];"stroke"==a&&(n.strokeStyle=e[a]),"fill"==a&&(n.fillStyle=e[a]),this._customOptions.includes(a)||(n[a]=e[a])}e.stroke&&this.stroke(e.stroke,n),e.fill&&this.fill(e.fill,n)}}},{key:"_hasProperty",value:function(e,t,n){if(e)return!!e[t]&&("function"==typeof n&&n(e[t]),e[t])}}]),t}();module.exports=new Renderer;
+"use strict";
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var camera = require("./../lib/camera.js"),
+    engine = require("./engine.js");
+
+var Renderer = /*#__PURE__*/function () {
+  function Renderer() {
+    _classCallCheck(this, Renderer);
+
+    this.canvas = document.getElementById("gameCanvas"), this.bounds = this.canvas.getBoundingClientRect(), this.context = this.canvas.getContext("2d"), this.camera = camera.create(this.context), this.engine = engine.create(), this.offscreen = 0, this.context.offscreens = [], this._customOptions = ["fill", "stroke", "align", "close", "curve"], this._currentContext = this.context, this._render = null;
+
+    var t = function t(_t) {
+      _t.preventDefault();
+    };
+
+    this.canvas.addEventListener("drag", t), this.canvas.addEventListener("dragstart", t);
+  }
+
+  _createClass(Renderer, [{
+    key: "draw",
+    value: function draw(t) {
+      this._render = t, "function" == typeof this._render && this._render();
+    }
+  }, {
+    key: "redraw",
+    value: function redraw() {
+      "function" == typeof this._render && this._render();
+    }
+  }, {
+    key: "render",
+    value: function render(t) {
+      var _this = this;
+
+      "function" == typeof t && this.engine.run(function () {
+        _this.clear(), t(), _this.context.offscreens.length && _this.drawOffscreens();
+      });
+    }
+  }, {
+    key: "getFrameCount",
+    value: function getFrameCount() {
+      return this.engine.frameCount;
+    }
+  }, {
+    key: "getFrameRate",
+    value: function getFrameRate() {
+      return this.engine.frameRate;
+    }
+  }, {
+    key: "setSize",
+    value: function setSize(t, e) {
+      this.canvas.width = t, this.canvas.height = e, this.bounds = this.canvas.getBoundingClientRect();
+
+      var _iterator = _createForOfIteratorHelper(this.context.offscreens),
+          _step;
+
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var s = _step.value;
+          s.canvas.width = this.canvas.width, s.canvas.height = this.canvas.height;
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+    }
+  }, {
+    key: "fullscreen",
+    value: function fullscreen() {
+      var _this2 = this;
+
+      this.setSize(innerWidth, innerHeight), addEventListener("resize", function () {
+        _this2.setSize(innerWidth, innerHeight);
+      });
+    }
+  }, {
+    key: "createLayer",
+    value: function createLayer() {
+      var t = document.createElement("canvas");
+      t.width = this.canvas.width, t.height = this.canvas.height;
+      var e = t.getContext("2d");
+      var s = {
+        camera: this.camera
+      };
+      return e.rendererData = s, this.context.offscreens.push(e), e;
+    }
+  }, {
+    key: "drawOffscreens",
+    value: function drawOffscreens() {
+      var _this3 = this;
+
+      var _loop = function _loop() {
+        var t = _this3.context.offscreens[e];
+        t.rendererData.camera.begin(function () {
+          _this3.context.drawImage(t.canvas, 0, 0, t.canvas.width, t.canvas.height);
+        }), t.clearRect(0, 0, t.canvas.width, t.canvas.height);
+      };
+
+      for (var e = 0; e < this.context.offscreens.length; e++) {
+        _loop();
+      }
+    }
+  }, {
+    key: "line",
+    value: function line(t, e, s, i, n, r) {
+      var a = r || this.context;
+      a.beginPath(), a.moveTo(t, e), a.lineTo(s, i), this._hasProperty(n, "close", function () {
+        a.closePath();
+      }), this._evaluateOptions(n, a);
+    }
+  }, {
+    key: "circle",
+    value: function circle(t, e, s, i, n) {
+      var r = n || this.context;
+      r.beginPath(), r.arc(t, e, s, 0, 2 * Math.PI), this._hasProperty(i, "close", function () {
+        r.closePath();
+      }), this._evaluateOptions(i, r);
+    }
+  }, {
+    key: "rect",
+    value: function rect(e, s, i, n, t, r) {
+      var a = r || this.context;
+      this._hasProperty(t, "align", function (t) {
+        t = t.split(" ");
+        t[0] && ("center" == t[0] || "middle" == t[0] ? e -= .5 * i : "right" == t[0] && (e -= i)), t[1] && ("center" == t[1] || "middle" == t[0] ? s -= .5 * n : "bottom" == t[1] && (s -= n));
+      }), a.beginPath(), a.rect(e, s, i, n), this._hasProperty(t, "close", function () {
+        a.closePath();
+      }), this._evaluateOptions(t, a);
+    }
+  }, {
+    key: "fromVertices",
+    value: function fromVertices(h, t, e) {
+      var o = e || this.context;
+
+      if (h.length) {
+        if (o.beginPath(), !this._hasProperty(t, "curve")) {
+          o.moveTo(h[0].x, h[0].y);
+
+          for (var s = 0; s < h.length; s++) {
+            var i = h[s];
+            o.lineTo(i.x, i.y);
+          }
+        }
+
+        this._hasProperty(t, "curve", function () {
+          o.beginPath();
+          var t = h[0],
+              e = h[1],
+              s = .5 * (t.x + e.x),
+              e = .5 * (t.y + e.y);
+          o.moveTo(s, e);
+
+          for (var i = 1; i < h.length; i++) {
+            var n = h[i],
+                r = h[i + 1 == h.length ? 0 : i + 1],
+                a = .5 * (r.x + n.x),
+                r = .5 * (r.y + n.y);
+            o.quadraticCurveTo(n.x, n.y, a, r);
+          }
+
+          o.quadraticCurveTo(t.x, t.y, s, e), o.lineJoin = "round";
+        }), this._hasProperty(t, "close", function () {
+          o.closePath();
+        }), this._evaluateOptions(t, o);
+      }
+    }
+  }, {
+    key: "text",
+    value: function text(t, e, s, i, n) {
+      var r = n || this.context;
+      this._hasProperty(i, "align", function (t) {
+        t = t.split(" ");
+        t[0] && ("left" == t[0] ? r.textAlign = "start" : "center" == t[0] || "middle" == t[0] ? r.textAlign = "center" : "right" == t[0] && (r.textAlign = "right")), t[1] && ("top" == t[1] ? r.textBaseline = "start" : "center" == t[1] || "middle" == t[0] ? r.textBaseline = "middle" : "bottom" == t[1] && (r.textBaseline = "bottom"));
+      }), r.beginPath(), this._evaluateOptions(i, r), this._hasProperty(i, "stroke", function () {
+        r.strokeText(t, e, s);
+      }), this._hasProperty(i, "fill", function () {
+        r.fillText(t, e, s);
+      }), this._hasProperty(i, "close", function () {
+        r.closePath();
+      });
+    }
+  }, {
+    key: "clear",
+    value: function clear(t) {
+      var e = t || this.context;
+      e.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+  }, {
+    key: "save",
+    value: function save(t) {
+      var e = t || this.context;
+      e.save();
+    }
+  }, {
+    key: "restore",
+    value: function restore(t) {
+      var e = t || this.context;
+      e.restore();
+    }
+  }, {
+    key: "clip",
+    value: function clip(t) {
+      var e = t || this.context;
+      e.clip();
+    }
+  }, {
+    key: "fill",
+    value: function fill(t, e) {
+      var s = e || this.context;
+      s.fillStyle = t, s.fill();
+    }
+  }, {
+    key: "stroke",
+    value: function stroke(t, e) {
+      var s = e || this.context;
+      s.strokeStyle = t, s.stroke();
+    }
+  }, {
+    key: "_evaluateOptions",
+    value: function _evaluateOptions(t, e) {
+      var s = e || this.context;
+
+      if (t) {
+        for (var i = Object.keys(t), n = 0; n < i.length; n++) {
+          var r = i[n];
+          "stroke" == r && (s.strokeStyle = t[r]), "fill" == r && (s.fillStyle = t[r]), this._customOptions.includes(r) || (s[r] = t[r]);
+        }
+
+        t.stroke && this.stroke(t.stroke, s), t.fill && this.fill(t.fill, s);
+      }
+    }
+  }, {
+    key: "_hasProperty",
+    value: function _hasProperty(t, e, s) {
+      if (t) return !!t[e] && ("function" == typeof s && s(t[e]), t[e]);
+    }
+  }]);
+
+  return Renderer;
+}();
+
+module.exports = new Renderer();

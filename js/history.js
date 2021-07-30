@@ -1,1 +1,91 @@
-"use strict";function _classCallCheck(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function _defineProperties(e,t){for(var n=0;n<t.length;n++){var s=t[n];s.enumerable=s.enumerable||!1,s.configurable=!0,"value"in s&&(s.writable=!0),Object.defineProperty(e,s.key,s)}}function _createClass(e,t,n){return t&&_defineProperties(e.prototype,t),n&&_defineProperties(e,n),e}var utils=require("../../lib/utils.js"),config=require("../../lib/config.js"),events=require("../../lib/events.js"),History=function(){function e(){_classCallCheck(this,e),this.events=[],this.present=null,this.maxStates=300,this.eventCount=0}return _createClass(e,[{key:"add",value:function(e){e=e||{},this.present&&this.events.splice(0,this.events.indexOf(this.present));e={id:"E"+utils.uid(),label:e.label,value:e.value,group:e.group,time:Date.now()};this.present=e,this.events.push(e),this.sortByLatest(),this.events.length>this.maxStates&&this.events.pop(),this.eventCount++,events.emit("historyChange")}},{key:"sortByLatest",value:function(){this.events.sort(function(e,t){return t.time-e.time})}},{key:"sortByOldest",value:function(){this.events.sort(function(e,t){return e.time-t.time})}},{key:"getLatest",value:function(){return this.events[0]}},{key:"getOldest",value:function(){return this.events[this.events.length-1]}},{key:"getNext",value:function(){return this.events[this.events.indexOf(this.present)-1]||null}},{key:"getPrevious",value:function(){return this.events[this.events.indexOf(this.present)+1]||null}},{key:"forward",value:function(){this.present=this.getNext()}},{key:"backward",value:function(){this.present=this.getPrevious()}},{key:"jump",value:function(t){var e=this.events.find(function(e){return e.id===t});t&&(this.present=e)}}]),e}(),history=new History;module.exports=history;
+"use strict";
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var utils = require("../../lib/utils.js"),
+    config = require("../../lib/config.js"),
+    events = require("../../lib/events.js");
+
+var History = /*#__PURE__*/function () {
+  function History() {
+    _classCallCheck(this, History);
+
+    this.events = [], this.present = null, this.maxStates = 300, this.eventCount = 0;
+  }
+
+  _createClass(History, [{
+    key: "add",
+    value: function add(t) {
+      t = t || {}, this.present && this.events.splice(0, this.events.indexOf(this.present));
+      t = {
+        id: "E" + utils.uid(),
+        label: t.label,
+        value: t.value,
+        group: t.group,
+        time: Date.now()
+      };
+      this.present = t, this.events.push(t), this.sortByLatest(), this.events.length > this.maxStates && this.events.pop(), this.eventCount++, events.emit("historyChange");
+    }
+  }, {
+    key: "sortByLatest",
+    value: function sortByLatest() {
+      this.events.sort(function (t, e) {
+        return e.time - t.time;
+      });
+    }
+  }, {
+    key: "sortByOldest",
+    value: function sortByOldest() {
+      this.events.sort(function (t, e) {
+        return t.time - e.time;
+      });
+    }
+  }, {
+    key: "getLatest",
+    value: function getLatest() {
+      return this.events[0];
+    }
+  }, {
+    key: "getOldest",
+    value: function getOldest() {
+      return this.events[this.events.length - 1];
+    }
+  }, {
+    key: "getNext",
+    value: function getNext() {
+      return this.events[this.events.indexOf(this.present) - 1] || null;
+    }
+  }, {
+    key: "getPrevious",
+    value: function getPrevious() {
+      return this.events[this.events.indexOf(this.present) + 1] || null;
+    }
+  }, {
+    key: "forward",
+    value: function forward() {
+      this.present = this.getNext();
+    }
+  }, {
+    key: "backward",
+    value: function backward() {
+      this.present = this.getPrevious();
+    }
+  }, {
+    key: "jump",
+    value: function jump(e) {
+      var t = this.events.find(function (t) {
+        return t.id === e;
+      });
+      e && (this.present = t);
+    }
+  }]);
+
+  return History;
+}();
+
+var history = new History();
+module.exports = history;
