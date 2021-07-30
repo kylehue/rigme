@@ -541,8 +541,8 @@ class Timeline {
 
 				//Keyframe drag
 				if (activeDrag == "keyframe") {
-
 					if (!activeKeyframe) {
+						let keys = Object.keys(rigModel.keyframes);
 						for (var i = 0; i < keys.length; i++) {
 							let frame = rigModel.keyframes[keys[i]];
 

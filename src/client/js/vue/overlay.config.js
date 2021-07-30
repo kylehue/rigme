@@ -77,7 +77,6 @@ const overlayConfigApp = new Vue({
 			let min = e.target.dataset.min;
 
 			if (e.target.id == "overlayConfigTrimEnd") {
-
 				min = this.trimStart;
 			}
 

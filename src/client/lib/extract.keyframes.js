@@ -1,4 +1,5 @@
 const events = require("../../../lib/events.js");
+const utils = require("../../../lib/utils.js");
 const HAVE_ENOUGH_DATA = 4;
 let pct;
 
@@ -19,13 +20,16 @@ function extractFrames(url, options) {
 	let start = options.start || 1;
 	let frameRate = options.frameRate || 24;
 	let quality = options.quality || 0.1;
+	let width = options.width || 640;
+	let height = options.height || 480;
 
 	video.addEventListener("loadedmetadata", () => {
 		let end = options.end || video.duration;
 		let frameCount = options.frameCount || (end - start) * frameRate;
 
-		canvas.width = video.videoWidth;
-		canvas.height = video.videoHeight;
+		let size = utils.scaleSize(video.videoWidth, video.videoHeight, width, height);
+		canvas.width = size.width;
+		canvas.height = size.height;
 
 		video.currentTime = start;
 
@@ -44,7 +48,7 @@ function extractFrames(url, options) {
 	});
 
 	let extract = events.on("extractKeyframeProgress", frameCount => {
-		context.drawImage(video, 0, 0);
+		context.drawImage(video, 0, 0, canvas.width, canvas.height);
 		let dataURL = canvas.toDataURL("image/jpeg", quality);
 		let img = new Image();
 		img.crossOrigin = "anonymous";

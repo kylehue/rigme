@@ -4,7 +4,6 @@ const renderer = require("../lib/renderer.js");
 const dom = require("../../../lib/dom.js");
 const events = require("../../../lib/events.js");
 const vector = require("../../../lib/vector.js");
-const shape = require("../../../lib/shape.js");
 const mouse = require("../../../lib/mouse.js");
 const key = require("../../../lib/key.js");
 const utils = require("../../../lib/utils.js");
@@ -376,6 +375,7 @@ events.on("loadProject", data => {
 				img.src = src;
 				overlayFrames.push(img);
 			}
+			events.emit("overlayFrames", overlayFrames);
 		}
 	} else {
 		console.warn("Couldn't load overlay.");
@@ -388,24 +388,46 @@ events.on("loadProject", data => {
 	});
 });
 
+let progressBarWrapper = dom.query("#progressBarWrapper");
+let progressBar = dom.query("#progressBar");
+let cancelButton = dom.query("#progressBarWrapper button");
+let progressText = dom.query("#progressBarWrapper p");
+
+events.on("loadProgress", (progress, text, cancelFn) => {
+	if (progressBarWrapper.node.style.display != "flex") {
+		progressBarWrapper.css("display", "flex");
+	}
+
+	if (progressText.text() != text) {
+		progressText.text(text, true);
+	}
+
+	if (typeof cancelFn == "function") {
+		if (cancelButton.node.onclick != cancelFn) {
+			cancelButton.node.onclick = cancelFn;
+		}
+	}
+
+	if (progress >= 100) {
+		events.emit("doneProgress");
+	}
+
+	progressBar.css("width", `${progress}%`)
+});
+
+events.on("doneProgress", () => {
+	progressBarWrapper.css("display", "none");
+	progressBar.css("width", "0");
+});
+
 events.on("extractFrames", (url, options) => {
 	overlayFrames = [];
-	let progressBarWrapper = document.getElementById("progressBarWrapper");
-	progressBarWrapper.style.display = "flex";
-	let progressBar = document.getElementById("progressBar");
-	let cancelButton = document.querySelector("#progressBarWrapper button");
-
-	let interval, cancelled;
+	events.emit("loadProgress", 0, "Extracting frames...");
 
 	function done() {
-		progressBarWrapper.style.display = "none";
-		progressBar.style.width = "0";
-		clearInterval(interval);
-		interval = undefined;
-		cancelButton.onclick = null;
 		vue.optionApp.overlayConfigHidden = false;
-
 		events.emit("overlayFrames", overlayFrames);
+		events.emit("doneProgress");
 	}
 
 	extractKeyframes(url, {
@@ -416,22 +438,18 @@ events.on("extractFrames", (url, options) => {
 		quality: options.quality,
 		drop: false,
 		progress: function(img, pct) {
-			if (cancelled) {
+			events.emit("loadProgress", pct, "Extracting frames...", () => {
 				this.drop = true;
-			} else {
-				overlayFrames.push(img);
-				progressBar.style.width = `${pct}%`;
-			}
+				done();
+			});
+
+			overlayFrames.push(img);
 		},
 		done: function(images) {
 			overlayFrames = images;
 			done();
 		}
 	});
-
-	cancelButton.onclick = function() {
-		cancelled = true;
-	};
 });
 
 events.on("removeOverlay", () => {
@@ -439,6 +457,266 @@ events.on("removeOverlay", () => {
 	vue.optionApp.overlayConfigHidden = true;
 });
 
+events.on("rotoscope", async() => {
+	if (!overlayFrames.length) return;
+	let poseNet = posenet.load({
+		architecture: "MobileNetV1",
+		outputStride: 16,
+		inputResolution: {
+			width: 257,
+			height: 200
+		},
+		quantBytes: 2,
+		multiplier: 0.75,
+		flipHorizontal: false
+	});
+
+	events.emit("loadProgress", 0, "Feeding frames to PoseNet...");
+	events.emit("changeRiggingMode", "linear");
+	rigModel.reset();
+
+	let head = rigModel.addJoint(0, 0);
+	head.name = "Head";
+	let chin = rigModel.addJoint(0, 0);
+	chin.name = "Chin";
+	let neck = rigModel.addJoint(0, 0);
+	neck.name = "Neck";
+	let abdomen = rigModel.addJoint(0, 0);
+	abdomen.name = "Abdomen";
+	let groin = rigModel.addJoint(0, 0);
+	groin.name = "Groin";
+	rigModel.activeJoint = neck;
+	let leftShoulder = rigModel.addJoint(0, 0);
+	leftShoulder.name = "Right Shoulder";
+	let leftElbow = rigModel.addJoint(0, 0);
+	leftElbow.name = "Right Elbow";
+	let leftWrist = rigModel.addJoint(0, 0);
+	leftWrist.name = "Right Wrist";
+	let leftHand = rigModel.addJoint(0, 0);
+	leftHand.name = "Right Hand";
+	rigModel.activeJoint = neck;
+	let rightShoulder = rigModel.addJoint(0, 0);
+	rightShoulder.name = "Left Shoulder";
+	let rightElbow = rigModel.addJoint(0, 0);
+	rightElbow.name = "Left Elbow";
+	let rightWrist = rigModel.addJoint(0, 0);
+	rightWrist.name = "Left Wrist";
+	let rightHand = rigModel.addJoint(0, 0);
+	rightHand.name = "Left Hand";
+	rigModel.activeJoint = groin;
+	let leftHip = rigModel.addJoint(0, 0);
+	leftHip.name = "Right Hip";
+	let leftKnee = rigModel.addJoint(0, 0);
+	leftKnee.name = "Right Knee";
+	let leftAnkle = rigModel.addJoint(0, 0);
+	leftAnkle.name = "Right Ankle";
+	let leftFoot = rigModel.addJoint(0, 0);
+	leftFoot.name = "Right Foot";
+	rigModel.activeJoint = groin;
+	let rightHip = rigModel.addJoint(0, 0);
+	rightHip.name = "Left Hip";
+	let rightKnee = rigModel.addJoint(0, 0);
+	rightKnee.name = "Left Knee";
+	let rightAnkle = rigModel.addJoint(0, 0);
+	rightAnkle.name = "Left Ankle";
+	let rightFoot = rigModel.addJoint(0, 0);
+	rightFoot.name = "Left Foot";
+	let prevPose;
+	for (var i = 0; i < overlayFrames.length; i++) {
+		let frame = overlayFrames[i];
+		await poseNet.then(net => {
+			return net.estimateSinglePose(frame);
+		}).then(pose => {
+			let pct = (i / (overlayFrames.length - 1)) * 100;
+			events.emit("loadProgress", pct, "Rotoscoping...", () => {
+				i = overlayFrames.length;
+				pct = 100;
+				events.emit("doneProgress");
+			});
+
+			if (pct == 100) return;
+
+			//Get pose bounds
+			let xAxes = [];
+			let yAxes = [];
+			for (var j = 0; j < pose.keypoints.length; j++) {
+				let point = pose.keypoints[j];
+				xAxes.push(point.position.x);
+				yAxes.push(point.position.y);
+			}
+
+			let bounds = {
+				min: {
+					x: Math.min(...xAxes),
+					y: Math.min(...yAxes)
+				},
+				max: {
+					x: Math.max(...xAxes),
+					y: Math.max(...yAxes)
+				}
+			};
+
+			let poseX = (bounds.min.x + bounds.max.x) / 2;
+			let poseY = (bounds.min.y + bounds.max.y) / 2;
+
+			//Scale/Rotate pose based on overlay configuration
+
+			//Scale
+			for (var j = 0; j < pose.keypoints.length; j++) {
+				let point = pose.keypoints[j].position;
+				let vertexDelta = {
+					x: point.x - poseX,
+					y: point.y - poseY
+				};
+
+				point.x = point.x + vertexDelta.x * (vue.overlayConfigApp.scale - 1);
+				point.y = point.y + vertexDelta.y * (vue.overlayConfigApp.scale - 1);
+			}
+
+			//Rotate
+			for (var j = 0; j < pose.keypoints.length; j++) {
+				let point = pose.keypoints[j].position;
+				let x = (point.x - poseX) * Math.cos(vue.overlayConfigApp.angle) - (point.y - poseY) * Math.sin(vue.overlayConfigApp.angle);
+				let y = (point.x - poseX) * Math.sin(vue.overlayConfigApp.angle) + (point.y - poseY) * Math.cos(vue.overlayConfigApp.angle);
+
+				point.x = x + poseX;
+				point.y = y + poseY;
+			}
+
+			for (var j = 0; j < pose.keypoints.length; j++) {
+				let point = pose.keypoints[j];
+				/*if (point.score < 0.4 && i > 0) continue;*/
+				point.position.x -= frame.width / 2;
+				point.position.y -= frame.height / 2;
+				switch (point.part) {
+					case "leftShoulder":
+						leftShoulder = rigModel.moveJointById(leftShoulder.id, point.position.x, point.position.y);
+						break;
+					case "leftElbow":
+						leftElbow = rigModel.moveJointById(leftElbow.id, point.position.x, point.position.y);
+						break;
+					case "leftWrist":
+						leftWrist = rigModel.moveJointById(leftWrist.id, point.position.x, point.position.y);
+						break;
+					case "rightShoulder":
+						rightShoulder = rigModel.moveJointById(rightShoulder.id, point.position.x, point.position.y);
+						break;
+					case "rightElbow":
+						rightElbow = rigModel.moveJointById(rightElbow.id, point.position.x, point.position.y);
+						break;
+					case "rightWrist":
+						rightWrist = rigModel.moveJointById(rightWrist.id, point.position.x, point.position.y);
+						break;
+					case "leftHip":
+						leftHip = rigModel.moveJointById(leftHip.id, point.position.x, point.position.y);
+						break;
+					case "leftKnee":
+						leftKnee = rigModel.moveJointById(leftKnee.id, point.position.x, point.position.y);
+						break;
+					case "leftAnkle":
+						leftAnkle = rigModel.moveJointById(leftAnkle.id, point.position.x, point.position.y);
+						break;
+					case "rightHip":
+						rightHip = rigModel.moveJointById(rightHip.id, point.position.x, point.position.y);
+						break;
+					case "rightKnee":
+						rightKnee = rigModel.moveJointById(rightKnee.id, point.position.x, point.position.y);
+						break;
+					case "rightAnkle":
+						rightAnkle = rigModel.moveJointById(rightAnkle.id, point.position.x, point.position.y);
+						break;
+				}
+			}
+
+			//Set misc joints position
+
+			//Groin
+			let midpointHip = vector({
+				x: (leftHip.position.x + rightHip.position.x) / 2,
+				y: (leftHip.position.y + rightHip.position.y) / 2
+			});
+
+			groin = rigModel.moveJointById(groin.id, midpointHip.x, midpointHip.y);
+
+			//Abdomen
+			let bodyAngle = midpointHip.heading(neck.position);
+			let bodyLength = midpointHip.dist(neck.position);
+			let bodyX = midpointHip.x + Math.cos(bodyAngle) * (bodyLength / 2);
+			let bodyY = midpointHip.y + Math.sin(bodyAngle) * (bodyLength / 2);
+
+			abdomen = rigModel.moveJointById(abdomen.id, bodyX, bodyY);
+
+			let midpointShoulder = vector({
+				x: (leftShoulder.position.x + rightShoulder.position.x) / 2,
+				y: (leftShoulder.position.y + rightShoulder.position.y) / 2
+			});
+
+			//Head, neck, chin
+			let shoulderAngle = leftShoulder.position.heading(rightShoulder.position);
+			let headAngle = shoulderAngle - Math.PI / 2;
+			let headLength = bodyLength / 2;
+			let neckLength = bodyLength / 6;
+
+			neck = rigModel.moveJointById(neck.id, midpointShoulder.x, midpointShoulder.y);
+			chin = rigModel.moveJointById(chin.id, midpointShoulder.x, midpointShoulder.y - neckLength);
+			let headX = chin.position.x - Math.cos(headAngle) * headLength;
+			let headY = chin.position.y - Math.sin(headAngle) * headLength;
+			head = rigModel.moveJointById(head.id, headX, headY);
+
+			//Left hand
+			let leftArmAngle = leftShoulder.position.heading(leftWrist.position);
+			let leftArmLength = leftElbow.position.dist(leftWrist.position) / 2;
+			let leftHandX = leftWrist.position.x + Math.cos(leftArmAngle) * leftArmLength;
+			let leftHandY = leftWrist.position.y + Math.sin(leftArmAngle) * leftArmLength;
+			leftHand = rigModel.moveJointById(leftHand.id, leftHandX, leftHandY);
+
+			//Right hand
+			let rightArmAngle = rightShoulder.position.heading(rightWrist.position);
+			let rightArmLength = rightElbow.position.dist(rightWrist.position) / 2;
+			let rightHandX = rightWrist.position.x + Math.cos(rightArmAngle) * rightArmLength;
+			let rightHandY = rightWrist.position.y + Math.sin(rightArmAngle) * rightArmLength;
+			rightHand = rigModel.moveJointById(rightHand.id, rightHandX, rightHandY);
+
+			//Left Foot
+			let leftFootAngle = leftHip.position.heading(leftKnee.position);
+			let leftFootLength = leftAnkle.position.dist(leftKnee.position) / 4;
+			let leftFootX = leftAnkle.position.x + Math.cos(leftFootAngle) * leftFootLength;
+			let leftFootY = leftAnkle.position.y + Math.sin(leftFootAngle) * leftFootLength;
+			leftFoot = rigModel.moveJointById(leftFoot.id, leftFootX, leftFootY);
+
+			//Right Foot
+			let rightFootAngle = rightHip.position.heading(rightKnee.position);
+			let rightFootLength = rightAnkle.position.dist(rightKnee.position) / 4;
+			let rightFootX = rightAnkle.position.x + Math.cos(rightFootAngle) * rightFootLength;
+			let rightFootY = rightAnkle.position.y + Math.sin(rightFootAngle) * rightFootLength;
+			rightFoot = rigModel.moveJointById(rightFoot.id, rightFootX, rightFootY);
+
+			if (prevPose) {
+				for (var j = 0; j < prevPose.keypoints.length; j++) {
+					let point = prevPose.keypoints[j];
+					let newPoint = pose.keypoints.find(k => k.part == point.part);
+					if (newPoint) {
+						let pointA = vector(point.position);
+						let pointB = vector(newPoint.position);
+						if (pointA.dist(pointB) > 10 * vue.overlayConfigApp.scale) {
+							vue.timeline.graph.setCurrentMark(i);
+							vue.timeline.graph.updateState();
+							rigModel.setKeyframe(i);
+							prevPose = JSON.parse(JSON.stringify(pose));
+							break;
+						}
+					}
+				}
+			} else {
+				vue.timeline.graph.setCurrentMark(i);
+				rigModel.setKeyframe(i);
+				prevPose = JSON.parse(JSON.stringify(pose));
+			}
+		});
+	}
+});
+
+window.events = events;
 
 events.on("exportSpritesheet", options => {
 	let canvas = document.createElement("canvas");
@@ -592,19 +870,28 @@ events.on("exportGIF", options => {
 	});
 });
 
-const rigModeBtns = dom.query("#riggingMode button", true);
-rigModeBtns.on("click", event => {
-	rigModeBtns.removeClass("selected");;
-	let btn = dom.query(event.target);
-	btn.addClass("selected");
-
-	if (btn.node.id == "inverseKinematics") {
-		config.riggingMode = "inverseKinematics";
-	} else if (btn.node.id == "forwardKinematics") {
-		config.riggingMode = "forwardKinematics";
-	} else {
-		config.riggingMode = "linear";
+events.on("changeRiggingMode", mode => {
+	rigModeBtns.removeClass("selected");
+	switch (mode) {
+		case "linear":
+			dom.query("#riggingMode #linear").addClass("selected");
+			config.riggingMode = "linear";
+			break;
+		case "inverse":
+			dom.query("#riggingMode #inverseKinematics").addClass("selected");
+			config.riggingMode = "inverseKinematics";
+			break;
+		case "forward":
+			dom.query("#riggingMode #forwardKinematics").addClass("selected");
+			config.riggingMode = "forwardKinematics";
+			break;
 	}
+});
+
+const rigModeBtns = dom.query("#riggingMode button", true);
+
+rigModeBtns.on("click", event => {
+	events.emit("changeRiggingMode", event.target.dataset.mode);
 });
 
 const autoAddKeyframeBtn = dom.query("#autoAddKeyframe");
@@ -1499,7 +1786,7 @@ addEventListener("resize", function() {
 
 fixRendererSize();
 renderer.camera.setZoomSpeed(0.2);
-renderer.camera.setMoveSpeed(0.4);
+renderer.camera.setMoveSpeed(0.6);
 
 let showBounds = dom.query("#showBounds");
 let showGrid = dom.query("#showGrid");
@@ -1616,9 +1903,10 @@ renderer.render(() => {
 	renderer.redraw();
 });
 
-/*key.on("keyup", function() {
+key.on("keyup", function() {
 	if (key.code === 16) {
 		console.log(history);
 		console.log(rigModel);
+		console.log(overlayFrames)
 	}
-});*/
+});

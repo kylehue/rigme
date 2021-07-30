@@ -50,13 +50,17 @@
 			<!-- Option app -->
 			<div id="optionApp" v-if="!hidden">
 				<div class="wrapper">
-					<button id="showOverlayApp" class="darko-d" v-on:mousedown="showOverlayApp">Add Overlay...</button>
-					<button id="showOverlayConfigApp" class="darko-d" v-on:mousedown="showOverlayConfigApp" v-if="!overlayConfigHidden">Overlay Settings...</button>
-					<button id="" class="darko-d" v-on:mousedown="undo">Undo<span class="shortcut">Ctrl + Z</span></button>
-					<button id="" class="darko-d" v-on:mousedown="redo">Redo<span class="shortcut">Ctrl + Y</span></button>
-					<button id="" class="darko-d" v-on:mousedown="clearJoints">Reset all</button>
-					<button id="" class="darko-d" v-on:mousedown="resetTimeline">Reset timeline</button>
-					<button id="" class="darko-d" v-on:mousedown="resetView">Reset view</button>
+					<button id="showOverlayActions" class="darko-d" v-on:mousedown="showOverlayApp" v-on:mouseover="toggleOverlayActions(true)"><span>Overlay</span><img src="assets/svg/play.svg"></button>
+					<button id="" class="darko-d" v-on:mousedown="undo" v-on:mouseover="showOverlayActions = false">Undo<span class="shortcut">Ctrl + Z</span></button>
+					<button id="" class="darko-d" v-on:mousedown="redo" v-on:mouseover="showOverlayActions = false">Redo<span class="shortcut">Ctrl + Y</span></button>
+					<button id="" class="darko-d" v-on:mousedown="clearJoints" v-on:mouseover="showOverlayActions = false">Reset all</button>
+					<button id="" class="darko-d" v-on:mousedown="resetTimeline" v-on:mouseover="showOverlayActions = false">Reset timeline</button>
+					<button id="" class="darko-d" v-on:mousedown="resetView" v-on:mouseover="showOverlayActions = false">Reset view</button>
+				</div>
+				<div id="overlayActions" v-if="showOverlayActions">
+					<button id="showOverlayApp" class="darko-d" v-on:mousedown="showOverlayApp">Add</button>
+					<button id="showOverlayConfigApp" class="darko-d disabled" v-on:mousedown="showOverlayConfigApp">Settings</button>
+					<button id="rotoscope" class="darko-d disabled" v-on:mousedown="rotoscope">Rotoscope</button>
 				</div>
 			</div>
 			<!-- File app -->
@@ -443,13 +447,13 @@
 					</div>
 					<div class="row">
 						<div id="riggingMode" class="config">
-							<button id="forwardKinematics" class="option selected" title="Maintain length">
+							<button id="forwardKinematics" class="option selected" title="Maintain length" data-mode="forward">
 							<img src="assets/svg/joint-arrow-down.svg" class="" />
 							</button>
-							<!-- <button id="inverseKinematics" class="option" title="Inverse kinematics">
+							<!-- <button id="inverseKinematics" class="option" title="Inverse kinematics" data-mode="inverse">
 							<img src="assets/svg/joint-arrow-up.svg" class="" />
 							</button>-->
-							<button id="linear" class="option" title="Linear">
+							<button id="linear" class="option" title="Linear" data-mode="linear">
 							<img src="assets/svg/joint-arrows.svg" class="" />
 							</button>
 						</div>
@@ -497,7 +501,7 @@
 					</div>
 					<div id="progressBarWrapper">
 						<div id="progressBar"></div>
-						<p>Converting to frames...</p>
+						<p></p>
 						<button class="darko-a">Stop</button>
 					</div>
 					<canvas id="gameCanvas"></canvas>
@@ -692,8 +696,9 @@
 				</div>
 			</div>
 		</div>
-		<!-- <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script> -->
-		<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+		<script src="lib/vue.dev.js"></script>
+		<script src="lib/tfjs.js"></script>
+		<script src="lib/posenet.js"></script>
 		<script src="lib/canvas-toBlob.js"></script>
 		<script src="lib/zip-stream.js"></script>
 		<script src="lib/gif.js"></script>

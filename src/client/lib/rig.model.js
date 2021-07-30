@@ -212,7 +212,7 @@ class RigModel {
 
 			for (var j = 0; j < frame.joints.length; j++) {
 				let joint = frame.joints[j];
-				if (joint) {
+				if (joint && frontFrame && backFrame) {
 					let frontJoint = frontFrame.joints.find(fj => fj.id === joint.id);
 					let backJoint = backFrame.joints.find(bj => bj.id === joint.id);
 
@@ -669,7 +669,8 @@ class RigModel {
 		}
 	}
 
-	moveJoint(x, y) {
+	moveJointById(id, x, y) {
+		this.activeJoint = this.getJoint(id);
 		if (!this.activeJoint) return;
 		if (timeline.graph) {
 			if (config.animation.autoAddKeyframe) {
@@ -712,7 +713,6 @@ class RigModel {
 					child.length = child.position.dist(this.activeJoint.position);
 				}
 			}
-
 		}
 
 		if (config.riggingMode != "linear") {
@@ -725,6 +725,12 @@ class RigModel {
 
 		this.updateSkin();
 		this.updateBounds();
+
+		return this.activeJoint;
+	}
+
+	moveJoint(x, y) {
+		this.moveJointById(this.activeJoint.id, x, y);
 	}
 
 	getJoint(id) {
