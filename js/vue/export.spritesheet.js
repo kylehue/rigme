@@ -54,7 +54,11 @@ var spritesheetExportApp = new Vue({
       events.emit("renderFocus");
     },
     validateFormat: function validateFormat(e) {
-      e.target.value = e.target.value.replace(/[^0-9.-]/g, "").replace(/(\..*)\./g, "$1").replace(/^0+/g, "").replace(/(?<!^)-/g, "");
+      var num = new RegExp("[^0-9.-]", "g");
+      var sym_a = new RegExp("(\..*)\.", "g");
+      var sym_b = new RegExp("^0+", "g");
+      var sym_c = new RegExp("(?<!^)-", "g");
+      e.target.value = e.target.value.replace(num, "").replace(sym_a, "$1").replace(sym_b, "").replace(sym_c, "");
       this.validateMax(e);
     },
     validateAmount: function validateAmount(e) {
