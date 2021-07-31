@@ -17,16 +17,24 @@ const paneApp = new Vue({
 		handleFocusOut: function(e) {
 			let el = e.target;
 
-			if (!el.value.length || !el.value) {
-				el.value = 0;
+			if (skinningInputIds.includes(el.id)) {
+				if (!el.value.length || !el.value) {
+					el.value = el.placeholder;
+				}
+			}
+
+			if (el.id == "jointName") {
+				if (!el.value.length || !el.value) {
+					el.value = utils.uid();
+				}
 			}
 
 			if (el._lastValue != el.value) {
 				if (skinningInputIds.includes(el.id)) {
 					events.emit("jointSkinningInputChange");
-				}else if (el.id == "jointZIndex") {
+				} else if (el.id == "jointZIndex") {
 					events.emit("jointZIndexInputChange");
-				}else if (el.id == "jointName") {
+				} else if (el.id == "jointName") {
 					events.emit("jointNameInputChange");
 				}
 			}
