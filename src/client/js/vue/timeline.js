@@ -319,15 +319,14 @@ class Timeline {
 
 	addMouseEvents() {
 		this.canvas.addEventListener("contextmenu", event => {
+			if (event.target != this.canvas) return;
 			let mouseX = mouse.x - this.bounds.x;
 			let mouseY = mouse.y - this.bounds.y;
-			if (mouseInside(this.canvas)) {
-				this.storeSelectedKeyframe();
+			this.storeSelectedKeyframe();
 
-				let offsetX = mouse.x + contextMenuApp.width > innerWidth ? -contextMenuApp.width : 0;
-				let offsetY = mouse.y + contextMenuApp.height > innerHeight ? -contextMenuApp.height : 0;
-				contextMenuApp.show(mouse.x + offsetX, mouse.y + offsetY);
-			}
+			let offsetX = mouse.x + contextMenuApp.width > innerWidth ? -contextMenuApp.width : 0;
+			let offsetY = mouse.y + contextMenuApp.height > innerHeight ? -contextMenuApp.height : 0;
+			contextMenuApp.show(mouse.x + offsetX, mouse.y + offsetY);
 		});
 
 		let dragging = false;
@@ -337,8 +336,8 @@ class Timeline {
 		let mouseX, mouseY;
 		let onScrollbar, onTimeline, onKeyframe, onScrollbarLeft, onScrollbarRight, onPlaybackHandle;
 
-		const dragStart = () => {
-			if (!mouseInside(this.canvas)) return;
+		const dragStart = event => {
+			if (event.target != this.canvas) return;
 			dragging = true;
 			events.emit("renderSleep");
 
@@ -426,7 +425,7 @@ class Timeline {
 					return;
 				}
 			}
-			
+
 			onScrollbar = mouseY >= 0 && mouseY <= this.scrollbar.height;
 			onTimeline = mouseY >= this.scrollbar.height && mouseY <= this.scrollbar.height + this._timelineHeight;
 			onKeyframe = mouseY >= this.scrollbar.height + this._timelineHeight && mouseY <= this.canvas.height;
@@ -616,38 +615,21 @@ class Timeline {
 
 		let holdInterval;
 
-
-		//Zoom in
-		this.buttons.zoomIn.addEventListener("mousedown", () => {
-			events.emit("checkMouseHold", "zoomIn");
-		});
-
-		this.buttons.zoomOut.addEventListener("mousedown", () => {
-			events.emit("checkMouseHold", "zoomOut");
-		});
-
-		events.on("checkMouseHold", button => {
-			holdInterval = setInterval(() => {
-				if (!mouse.pressed) {
-					clearInterval(holdInterval);
-					holdInterval = null;
-				} else {
-					events.emit("mousehold", button);
+		let timelineZoomSpeed = 0.5;
+		mouse.on("mousewheel", event => {
+			if (event.target != this.canvas) return;
+			if (mouse.scrollTop) {
+				if (this.scrollbar.width > this.scrollbar.minWidth + 5) {
+					let lerpWeight = utils.map(this.scrollbar.width, 0, this.canvas.width, timelineZoomSpeed, 0.001);
+					let currentX = this.markToX(this.state.currentMark, true);
+					this.scrollbar.left = utils.lerp(this.scrollbar.left, currentX - this.scrollbar.minWidth / 2, lerpWeight);
+					this.scrollbar.right = utils.lerp(this.scrollbar.right, currentX + this.scrollbar.minWidth / 2, lerpWeight);
 				}
-			}, 1000 / 60);
-		});
-
-		events.on("mousehold", button => {
-			if (button == "zoomIn") {
-				let lerpWeight = utils.map(this.scrollbar.width, 0, this.canvas.width, 0.1, 0.001);
-				let currentX = this.markToX(this.state.currentMark, true);
-				this.scrollbar.left = utils.lerp(this.scrollbar.left, currentX - this.scrollbar.minWidth / 2, lerpWeight);
-				this.scrollbar.right = utils.lerp(this.scrollbar.right, currentX + this.scrollbar.minWidth / 2, lerpWeight);
-
-			} else if (button == "zoomOut") {
-				let lerpWeight = utils.map(this.scrollbar.width, 0, this.canvas.width, 0.001, 0.1);
+			} else {
+				let lerpWeight = utils.map(this.scrollbar.width, 0, this.canvas.width, 0.001, timelineZoomSpeed);
 				this.scrollbar.left = utils.lerp(this.scrollbar.left, 0, lerpWeight);
 				this.scrollbar.right = utils.lerp(this.scrollbar.right, this.canvas.width, lerpWeight);
+
 			}
 
 			this.scrollbar.width = this.scrollbar.right - this.scrollbar.left;
