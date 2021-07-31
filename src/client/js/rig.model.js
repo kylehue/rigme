@@ -410,7 +410,15 @@ class RigModel {
 			children: [],
 			length: parent ? parent.position.dist(x, y) : 0,
 			hierarchy: parent ? parent.hierarchy + 1 : 1,
-			skin: {},
+			skin: {
+				offset: {
+					x: 0,
+					y: 0,
+					scaleX: 1,
+					scaleY: 1,
+					angle: 0
+				}
+			},
 			zIndex: this.joints.length + 1
 		};
 
