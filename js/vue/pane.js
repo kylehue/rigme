@@ -21,8 +21,16 @@ var paneApp = new Vue({
     handleFocusOut: function handleFocusOut(e) {
       var el = e.target;
 
-      if (!el.value.length || !el.value) {
-        el.value = 0;
+      if (skinningInputIds.includes(el.id)) {
+        if (!el.value.length || !el.value) {
+          el.value = el.placeholder;
+        }
+      }
+
+      if (el.id == "jointName") {
+        if (!el.value.length || !el.value) {
+          el.value = utils.uid();
+        }
       }
 
       if (el._lastValue != el.value) {

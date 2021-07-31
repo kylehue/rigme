@@ -348,16 +348,15 @@ var Timeline = /*#__PURE__*/function () {
       var _this3 = this;
 
       this.canvas.addEventListener("contextmenu", function (event) {
+        if (event.target != _this3.canvas) return;
         var mouseX = mouse.x - _this3.bounds.x;
         var mouseY = mouse.y - _this3.bounds.y;
 
-        if (mouseInside(_this3.canvas)) {
-          _this3.storeSelectedKeyframe();
+        _this3.storeSelectedKeyframe();
 
-          var offsetX = mouse.x + contextMenuApp.width > innerWidth ? -contextMenuApp.width : 0;
-          var offsetY = mouse.y + contextMenuApp.height > innerHeight ? -contextMenuApp.height : 0;
-          contextMenuApp.show(mouse.x + offsetX, mouse.y + offsetY);
-        }
+        var offsetX = mouse.x + contextMenuApp.width > innerWidth ? -contextMenuApp.width : 0;
+        var offsetY = mouse.y + contextMenuApp.height > innerHeight ? -contextMenuApp.height : 0;
+        contextMenuApp.show(mouse.x + offsetX, mouse.y + offsetY);
       });
       var dragging = false;
       var activeDrag = null;
@@ -366,8 +365,8 @@ var Timeline = /*#__PURE__*/function () {
       var mouseX, mouseY;
       var onScrollbar, onTimeline, onKeyframe, onScrollbarLeft, onScrollbarRight, onPlaybackHandle;
 
-      var dragStart = function dragStart() {
-        if (!mouseInside(_this3.canvas)) return;
+      var dragStart = function dragStart(event) {
+        if (event.target != _this3.canvas) return;
         dragging = true;
         events.emit("renderSleep");
 
@@ -671,34 +670,22 @@ var Timeline = /*#__PURE__*/function () {
       this.buttons["delete"].addEventListener("click", function () {
         events.emit("deleteKeyframe");
       });
-      var holdInterval; //Zoom in
+      var holdInterval;
+      var timelineZoomSpeed = 0.5;
+      mouse.on("mousewheel", function (event) {
+        if (event.target != _this4.canvas) return;
 
-      this.buttons.zoomIn.addEventListener("mousedown", function () {
-        events.emit("checkMouseHold", "zoomIn");
-      });
-      this.buttons.zoomOut.addEventListener("mousedown", function () {
-        events.emit("checkMouseHold", "zoomOut");
-      });
-      events.on("checkMouseHold", function (button) {
-        holdInterval = setInterval(function () {
-          if (!mouse.pressed) {
-            clearInterval(holdInterval);
-            holdInterval = null;
-          } else {
-            events.emit("mousehold", button);
+        if (mouse.scrollTop) {
+          if (_this4.scrollbar.width > _this4.scrollbar.minWidth + 5) {
+            var lerpWeight = utils.map(_this4.scrollbar.width, 0, _this4.canvas.width, timelineZoomSpeed, 0.001);
+
+            var currentX = _this4.markToX(_this4.state.currentMark, true);
+
+            _this4.scrollbar.left = utils.lerp(_this4.scrollbar.left, currentX - _this4.scrollbar.minWidth / 2, lerpWeight);
+            _this4.scrollbar.right = utils.lerp(_this4.scrollbar.right, currentX + _this4.scrollbar.minWidth / 2, lerpWeight);
           }
-        }, 1000 / 60);
-      });
-      events.on("mousehold", function (button) {
-        if (button == "zoomIn") {
-          var lerpWeight = utils.map(_this4.scrollbar.width, 0, _this4.canvas.width, 0.1, 0.001);
-
-          var currentX = _this4.markToX(_this4.state.currentMark, true);
-
-          _this4.scrollbar.left = utils.lerp(_this4.scrollbar.left, currentX - _this4.scrollbar.minWidth / 2, lerpWeight);
-          _this4.scrollbar.right = utils.lerp(_this4.scrollbar.right, currentX + _this4.scrollbar.minWidth / 2, lerpWeight);
-        } else if (button == "zoomOut") {
-          var _lerpWeight = utils.map(_this4.scrollbar.width, 0, _this4.canvas.width, 0.001, 0.1);
+        } else {
+          var _lerpWeight = utils.map(_this4.scrollbar.width, 0, _this4.canvas.width, 0.001, timelineZoomSpeed);
 
           _this4.scrollbar.left = utils.lerp(_this4.scrollbar.left, 0, _lerpWeight);
           _this4.scrollbar.right = utils.lerp(_this4.scrollbar.right, _this4.canvas.width, _lerpWeight);
