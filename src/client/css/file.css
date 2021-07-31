@@ -68,6 +68,8 @@ button#showExportFormats span {
 	left: calc(100% + 2.5px);
 	transform: translateY(-30px);
 	box-shadow: var(--drop-shadow);
+	border-radius: 3px;
+	background: var(--darko-d);
 }
 
 #fileApp #exportFormats button {
