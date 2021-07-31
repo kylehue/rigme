@@ -302,7 +302,7 @@ events.on("saveProject", filename => {
 	});
 });
 
-addEventListener("unload", function () {
+addEventListener("unload", function() {
 	if (writableStream) writableStream.abort();
 });
 
@@ -459,6 +459,7 @@ events.on("removeOverlay", () => {
 
 events.on("rotoscope", async() => {
 	if (!overlayFrames.length) return;
+
 	let poseNet = posenet.load({
 		architecture: "MobileNetV1",
 		outputStride: 16,
@@ -471,10 +472,10 @@ events.on("rotoscope", async() => {
 		flipHorizontal: false
 	});
 
-	events.emit("loadProgress", 0, "Feeding frames to PoseNet...");
-	events.emit("changeRiggingMode", "linear");
-	rigModel.reset();
+	let scoreThreshold = 0.1;
 
+	events.emit("loadProgress", 0, "Feeding frames to PoseNet...");
+	rigModel.reset();
 	let head = rigModel.addJoint(0, 0);
 	head.name = "Head";
 	let chin = rigModel.addJoint(0, 0);
@@ -585,9 +586,14 @@ events.on("rotoscope", async() => {
 
 			for (var j = 0; j < pose.keypoints.length; j++) {
 				let point = pose.keypoints[j];
-				/*if (point.score < 0.4 && i > 0) continue;*/
+				if (point.score < scoreThreshold && i > 0) continue;
 				point.position.x -= frame.width / 2;
 				point.position.y -= frame.height / 2;
+
+				if (config.riggingMode != "linear") {
+					events.emit("changeRiggingMode", "linear");
+				}
+
 				switch (point.part) {
 					case "leftShoulder":
 						leftShoulder = rigModel.moveJointById(leftShoulder.id, point.position.x, point.position.y);
