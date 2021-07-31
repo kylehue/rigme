@@ -302,9 +302,9 @@ events.on("saveProject", filename => {
 	});
 });
 
-window.onunload = () => {
-	writableStream.abort();
-}
+addEventListener("unload", function () {
+	if (writableStream) writableStream.abort();
+});
 
 events.on("loadProject", data => {
 	if (data.model) {

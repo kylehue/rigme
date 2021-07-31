@@ -1,1 +1,114 @@
-"use strict";function _classCallCheck(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function _defineProperties(e,t){for(var n=0;n<t.length;n++){var s=t[n];s.enumerable=s.enumerable||!1,s.configurable=!0,"value"in s&&(s.writable=!0),Object.defineProperty(e,s.key,s)}}function _createClass(e,t,n){return t&&_defineProperties(e.prototype,t),n&&_defineProperties(e,n),e}var utils=require("./utils.js"),_once=!1,Events=function(){function e(){_classCallCheck(this,e),this.emits={},this.listeners=[],this.maxListeners=100}return _createClass(e,[{key:"setMaxListeners",value:function(e){this.maxListeners=e}},{key:"removeListener",value:function(t,n){var e=this.listeners.find(function(e){return e[t]===n});if(e=!n?t:e)for(var s=0;s<this.listeners.length;s++)if(this.listeners[s].id===e.id){this.listeners.splice(s,1);break}}},{key:"emit",value:function(e){if(e){for(var t=[],n=0;n<arguments.length;n++)t.push(arguments[n]);t.shift(),this.emits[e]=t;for(var s=[],n=0;n<this.listeners.length;n++){var i=this.listeners[n];i.name===e&&s.push(i)}for(n=0;n<s.length;n++){var r=s[n];"function"==typeof r.method&&(r.method.apply(r,t),r.once&&this.removeListener("id",r.id))}}}},{key:"on",value:function(e,t){if(e&&t&&"function"==typeof t){t={id:utils.uid(),name:e,method:t,once:_once};return this.listeners.push(t),this.listeners.length>=this.maxListeners&&(this.listeners.shift(),console.warn("Reached the max number of listeners.")),t}}},{key:"once",value:function(e,t){_once=!0;t=this.on(e,t);return _once=!1,t}}]),e}(),events=new Events;module.exports=events;
+"use strict";
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var utils = require("./utils.js");
+
+var _once = false;
+
+var Events = /*#__PURE__*/function () {
+  function Events() {
+    _classCallCheck(this, Events);
+
+    this.emits = {};
+    this.listeners = [];
+    this.maxListeners = 100;
+  }
+
+  _createClass(Events, [{
+    key: "setMaxListeners",
+    value: function setMaxListeners(n) {
+      this.maxListeners = n;
+    }
+  }, {
+    key: "removeListener",
+    value: function removeListener(find, value) {
+      var listener = this.listeners.find(function (l) {
+        return l[find] === value;
+      });
+
+      if (!value) {
+        listener = find;
+      }
+
+      if (listener) {
+        for (var i = 0; i < this.listeners.length; i++) {
+          if (this.listeners[i].id === listener.id) {
+            this.listeners.splice(i, 1);
+            break;
+          }
+        }
+      }
+    }
+  }, {
+    key: "emit",
+    value: function emit(name) {
+      if (!name) return;
+      var args = [];
+
+      for (var i = 0; i < arguments.length; i++) {
+        args.push(arguments[i]);
+      }
+
+      args.shift();
+      this.emits[name] = args;
+      var listeners = [];
+
+      for (var i = 0; i < this.listeners.length; i++) {
+        var listener = this.listeners[i];
+
+        if (listener.name === name) {
+          listeners.push(listener);
+        }
+      }
+
+      for (var i = 0; i < listeners.length; i++) {
+        var _listener = listeners[i];
+
+        if (typeof _listener.method == "function") {
+          _listener.method.apply(_listener, args);
+
+          if (_listener.once) {
+            this.removeListener("id", _listener.id);
+          }
+        }
+      }
+    }
+  }, {
+    key: "on",
+    value: function on(name, f) {
+      if (!name || !f || typeof f != "function") return;
+      var listener = {
+        id: utils.uid(),
+        name: name,
+        method: f,
+        once: _once
+      };
+      this.listeners.push(listener);
+
+      if (this.listeners.length >= this.maxListeners) {
+        this.listeners.shift();
+        console.warn("Reached the max number of listeners.");
+      }
+
+      return listener;
+    }
+  }, {
+    key: "once",
+    value: function once(name, f) {
+      _once = true;
+      var listener = this.on(name, f);
+      _once = false;
+      return listener;
+    }
+  }]);
+
+  return Events;
+}();
+
+var events = new Events();
+module.exports = events;

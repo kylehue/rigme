@@ -1,1 +1,137 @@
-"use strict";var events=require("../../../lib/events.js"),utils=require("../../../lib/utils.js"),dom=require("../../../lib/dom.js"),timeline=require("./timeline.js"),randomTitle=require("../random.title.js"),GIFExportApp=new Vue({el:"#GIFExportApp",data:{hidden:!0},methods:{show:function(){var o=this;this.hidden=!1,this.$nextTick(function(){o.$el.style.opacity="1",dom.query("#GIFExportApp .drag").draggable({restrict:!0,root:o.$el}),dom.query("#GIFExportApp .custom-checkbox",!0).on("click",function(e){dom.query(e.target).query(".checkbox").toggleClass("checked")}),dom.query("#GIFExportName").value(randomTitle.generate());var e=timeline.graph.playbackHandle.start.mark+1,t=timeline.graph.playbackHandle.end.mark+1,a=rigModel.bounds,r=a.max.x-a.min.x,a=a.max.y-a.min.y;dom.query("#GIFExportStart").value(e),dom.query("#GIFExportEnd").value(t),dom.query("#GIFExportWidth").value(r.toFixed(2)),dom.query("#GIFExportHeight").value(a.toFixed(2)),setTimeout(function(){document.getElementById("GIFExportName").focus()},100),events.emit("renderSleep")})},hide:function(){this.hidden=!0,events.emit("renderFocus")},validateFormat:function(e){e.target.value=e.target.value.replace(/[^0-9.-]/g,"").replace(/(\..*)\./g,"$1").replace(/^0+/g,"").replace(/(?<!^)-/g,""),this.validateMax(e)},validateAmount:function(e){this.validateMin(e),this.validateMax(e)},validateMax:function(e){var t=e.target.value,a=e.target.dataset.max;"GIFExportStart"==e.target.id&&(a=parseInt(dom.query("#GIFExportEnd").value())),"GIFExportEnd"==e.target.id&&(a=timeline.app.totalFrames),parseInt(t)>a&&(e.target.value=a.toString())},validateMin:function(e){var t=e.target.value,a=e.target.dataset.min;"GIFExportEnd"==e.target.id&&(a=parseInt(dom.query("#GIFExportStart").value())),parseInt(t)<a&&(e.target.value=a.toString())},toggleAmount:function(e){var t,a;e.target==document.activeElement&&(e.target.value.length||(e.target.value=1),t=e.wheelDeltaY<0,a=parseFloat(e.target.value),t?a--:a++,"GIFExportWidth"!=e.target.id&&"GIFExportHeight"!=e.target.id||(a=a.toFixed(2)),e.target.value=a.toString(),this.validateAmount(e))},validate:function(){var e=dom.query("#GIFExportName").value(),t=parseInt(dom.query("#GIFExportStart").value()),a=parseInt(dom.query("#GIFExportEnd").value()),r=a-t+1,o=parseFloat(dom.query("#GIFExportWidth").value()),i=parseFloat(dom.query("#GIFExportHeight").value()),n=dom.query("#GIFExportBackground").value(),d=dom.query("#GIFExportShowSkin").query(".checkbox").hasClass("checked"),l=dom.query("#GIFExportShowBones").query(".checkbox").hasClass("checked");events.emit("exportGIF",{name:e.length?e:utils.uid(),start:t,end:a,totalFrames:r,width:o,height:i,showSkin:d,showBones:l,background:n})}}});module.exports=GIFExportApp;
+"use strict";
+
+var events = require("../../../lib/events.js");
+
+var utils = require("../../../lib/utils.js");
+
+var dom = require("../../../lib/dom.js");
+
+var timeline = require("./timeline.js");
+
+var randomTitle = require("../random.title.js");
+
+var GIFExportApp = new Vue({
+  el: "#GIFExportApp",
+  data: {
+    hidden: true
+  },
+  methods: {
+    show: function show() {
+      var _this = this;
+
+      this.hidden = false;
+      this.$nextTick(function () {
+        _this.$el.style.opacity = "1";
+        dom.query("#GIFExportApp .drag").draggable({
+          restrict: true,
+          root: _this.$el
+        });
+        dom.query("#GIFExportApp .custom-checkbox", true).on("click", function (event) {
+          var el = dom.query(event.target).query(".checkbox");
+          el.toggleClass("checked");
+        });
+        dom.query("#GIFExportName").value(randomTitle.generate());
+        var startFrame = timeline.graph.playbackHandle.start.mark + 1;
+        var endFrame = timeline.graph.playbackHandle.end.mark + 1;
+        var bounds = rigModel.bounds;
+        var frameWidth = bounds.max.x - bounds.min.x;
+        var frameHeight = bounds.max.y - bounds.min.y;
+        dom.query("#GIFExportStart").value(startFrame);
+        dom.query("#GIFExportEnd").value(endFrame);
+        dom.query("#GIFExportWidth").value(frameWidth.toFixed(2));
+        dom.query("#GIFExportHeight").value(frameHeight.toFixed(2));
+        setTimeout(function () {
+          var title = document.getElementById("GIFExportName");
+          title.focus();
+        }, 100);
+        events.emit("renderSleep");
+      });
+    },
+    hide: function hide() {
+      this.hidden = true;
+      events.emit("renderFocus");
+    },
+    validateFormat: function validateFormat(e) {
+      e.target.value = e.target.value.replace(/[^0-9.-]/g, "").replace(/(\..*)\./g, "$1").replace(/^0+/g, "").replace(/(?<!^)-/g, "");
+      this.validateMax(e);
+    },
+    validateAmount: function validateAmount(e) {
+      this.validateMin(e);
+      this.validateMax(e);
+    },
+    validateMax: function validateMax(e) {
+      var value = e.target.value;
+      var max = e.target.dataset.max;
+
+      if (e.target.id == "GIFExportStart") {
+        max = parseInt(dom.query("#GIFExportEnd").value());
+      }
+
+      if (e.target.id == "GIFExportEnd") {
+        max = timeline.app.totalFrames;
+      }
+
+      if (parseInt(value) > max) {
+        e.target.value = max.toString();
+      }
+    },
+    validateMin: function validateMin(e) {
+      var value = e.target.value;
+      var min = e.target.dataset.min;
+
+      if (e.target.id == "GIFExportEnd") {
+        min = parseInt(dom.query("#GIFExportStart").value());
+      }
+
+      if (parseInt(value) < min) {
+        e.target.value = min.toString();
+      }
+    },
+    toggleAmount: function toggleAmount(e) {
+      if (e.target != document.activeElement) return;
+
+      if (!e.target.value.length) {
+        e.target.value = 1;
+      }
+
+      var isDown = e.wheelDeltaY < 0;
+      var value = parseFloat(e.target.value);
+
+      if (isDown) {
+        value--;
+      } else {
+        value++;
+      }
+
+      if (e.target.id == "GIFExportWidth" || e.target.id == "GIFExportHeight") {
+        value = value.toFixed(2);
+      }
+
+      e.target.value = value.toString();
+      this.validateAmount(e);
+    },
+    validate: function validate() {
+      var name = dom.query("#GIFExportName").value();
+      var startFrame = parseInt(dom.query("#GIFExportStart").value());
+      var endFrame = parseInt(dom.query("#GIFExportEnd").value());
+      var totalFrames = endFrame - startFrame + 1;
+      var width = parseFloat(dom.query("#GIFExportWidth").value());
+      var height = parseFloat(dom.query("#GIFExportHeight").value());
+      var background = dom.query("#GIFExportBackground").value();
+      var showSkin = dom.query("#GIFExportShowSkin").query(".checkbox").hasClass("checked");
+      var showBones = dom.query("#GIFExportShowBones").query(".checkbox").hasClass("checked");
+      events.emit("exportGIF", {
+        name: name.length ? name : utils.uid(),
+        start: startFrame,
+        end: endFrame,
+        totalFrames: totalFrames,
+        width: width,
+        height: height,
+        showSkin: showSkin,
+        showBones: showBones,
+        background: background
+      });
+    }
+  }
+});
+module.exports = GIFExportApp;

@@ -1,6 +1,5 @@
 const gulp = require("gulp");
 const nodemon = require("gulp-nodemon");
-const jsuglify = require("gulp-uglify");
 const cssuglify = require("gulp-uglifycss")
 const autoprefixer = require("gulp-autoprefixer")
 const htmlminify = require("gulp-minify-html");
@@ -30,31 +29,37 @@ const paths = {
 };
 
 const babelConfig = {
-	presets: ['@babel/preset-env']
+	presets: [
+		[
+			"@babel/preset-env", {
+				forceAllTransforms: true
+			}
+		]
+	]
 };
 
-gulp.task("move:client:entry", function () {
+gulp.task("move:client:entry", function() {
 	return gulp.src([paths.client.entry])
 		.pipe(webpack(require("./webpack.config.js")))
 		.pipe(gulp.dest("dist/client/js/"));
 });
 
-gulp.task("move:client:js", function () {
+gulp.task("move:client:js", function() {
 	return gulp.src([paths.client.js, `!${paths.client.entry}`])
 		.pipe(gulp.dest("dist/client/"));
 });
 
-gulp.task("move:client:css", function () {
+gulp.task("move:client:css", function() {
 	return gulp.src([paths.client.css])
 		.pipe(gulp.dest("dist/client/"));
 });
 
-gulp.task("move:client:img", function () {
+gulp.task("move:client:img", function() {
 	return gulp.src([paths.client.img])
 		.pipe(gulp.dest("dist/client/assets/images/"));
 });
 
-gulp.task("move:client:svg", function () {
+gulp.task("move:client:svg", function() {
 	return gulp.src([paths.client.svg])
 		.pipe(gulp.dest("dist/client/assets/svg/"));
 });
@@ -81,17 +86,15 @@ gulp.task("move:lib:global", function() {
 
 gulp.task("client:entry", function() {
 	return gulp.src([paths.client.entry])
-		.pipe(babel(babelConfig))
 		.pipe(webpack(require("./webpack.config.js")))
-		.pipe(jsuglify())
 		.pipe(replace("__development = true", "__development = false"))
+		.pipe(babel(babelConfig))
 		.pipe(gulp.dest("dist/client/js/"));
 });
 
 gulp.task("client:js", function() {
 	return gulp.src([paths.client.js, `!${paths.client.entry}`, "!src/client/lib/**/*.*"])
 		.pipe(babel(babelConfig))
-		.pipe(jsuglify())
 		.pipe(gulp.dest("dist/client/"));
 });
 
@@ -124,21 +127,18 @@ gulp.task("client:html", function() {
 gulp.task("server:js", function() {
 	return gulp.src([paths.server.js])
 		.pipe(babel(babelConfig))
-		.pipe(jsuglify())
 		.pipe(gulp.dest("dist/server/"));
 });
 
 gulp.task("lib:client", function() {
-	return gulp.src([paths.libClient])
-		//.pipe(babel(babelConfig))
-		//.pipe(jsuglify())
+	return gulp.src([paths.libClient, "!src/client/lib/tfjs.js", "!src/client/lib/posenet.js"])
+		.pipe(babel(babelConfig))
 		.pipe(gulp.dest("dist/client/lib/"));
 });
 
 gulp.task("lib:global", function() {
 	return gulp.src([paths.libGlobal])
 		.pipe(babel(babelConfig))
-		.pipe(jsuglify())
 		.pipe(gulp.dest("dist/lib/"));
 });
 
@@ -146,7 +146,7 @@ gulp.task("build:client", gulp.series(["client:entry", "client:js", "client:css"
 
 gulp.task("build:server", gulp.series(["server:js"]));
 
-gulp.task("build:lib", gulp.series(["lib:client", "lib:global"]));
+gulp.task("build:lib", gulp.series(["move:lib:client", "lib:client", "lib:global"]));
 
 gulp.task("build", gulp.series(["build:server", "build:client", "build:lib"]));
 
@@ -159,10 +159,10 @@ gulp.task("move:lib", gulp.series(["move:lib:client", "move:lib:global"]));
 gulp.task("move", gulp.series(["move:server", "move:client", "move:lib"]));
 
 gulp.task("page", function() {
-  return gulp.src("dist/client/**/*")
-    .pipe(ghPages({
-    	branch: "page"
-    }));
+	return gulp.src("dist/client/**/*")
+		.pipe(ghPages({
+			branch: "page"
+		}));
 });
 
 gulp.task("deploy", gulp.series(["build", "page"]));

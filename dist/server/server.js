@@ -1,1 +1,11 @@
-"use strict";var express=require("express"),app=express(),port=process.env.PORT||3e3,server=app.listen(port,function(){console.log("Listening on port ".concat(port))});app.use(express.static(__dirname+"/../client"));
+"use strict";
+
+//Setup server
+var express = require("express");
+
+var app = express();
+var port = process.env.PORT || 3000;
+var server = app.listen(port, function () {
+  console.log("Listening on port ".concat(port));
+});
+app.use(express["static"](__dirname + "/../client"));

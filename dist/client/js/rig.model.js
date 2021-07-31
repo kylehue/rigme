@@ -1,1 +1,1169 @@
-"use strict";function _typeof(i){return(_typeof="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(i){return typeof i}:function(i){return i&&"function"==typeof Symbol&&i.constructor===Symbol&&i!==Symbol.prototype?"symbol":typeof i})(i)}function _toConsumableArray(i){return _arrayWithoutHoles(i)||_iterableToArray(i)||_unsupportedIterableToArray(i)||_nonIterableSpread()}function _nonIterableSpread(){throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}function _unsupportedIterableToArray(i,e){if(i){if("string"==typeof i)return _arrayLikeToArray(i,e);var t=Object.prototype.toString.call(i).slice(8,-1);return"Map"===(t="Object"===t&&i.constructor?i.constructor.name:t)||"Set"===t?Array.from(i):"Arguments"===t||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t)?_arrayLikeToArray(i,e):void 0}}function _iterableToArray(i){if("undefined"!=typeof Symbol&&null!=i[Symbol.iterator]||null!=i["@@iterator"])return Array.from(i)}function _arrayWithoutHoles(i){if(Array.isArray(i))return _arrayLikeToArray(i)}function _arrayLikeToArray(i,e){(null==e||e>i.length)&&(e=i.length);for(var t=0,n=new Array(e);t<e;t++)n[t]=i[t];return n}function _classCallCheck(i,e){if(!(i instanceof e))throw new TypeError("Cannot call a class as a function")}function _defineProperties(i,e){for(var t=0;t<e.length;t++){var n=e[t];n.enumerable=n.enumerable||!1,n.configurable=!0,"value"in n&&(n.writable=!0),Object.defineProperty(i,n.key,n)}}function _createClass(i,e,t){return e&&_defineProperties(i.prototype,e),t&&_defineProperties(i,t),i}var timeline,events=require("../../lib/events.js"),mouse=require("../../lib/mouse.js"),vector=require("../../lib/vector.js"),config=require("../../lib/config.js"),utils=require("../../lib/utils.js"),history=require("./history.js"),showSkeleton=document.getElementById("showSkeleton"),RigModel=function(){function i(){_classCallCheck(this,i),this.joints=[],this.keyframes={},this.totalKeyframes=0,this.mouseBuffer=10,this.activeJoint=null,this.bounds={min:vector(),max:vector()},this._moved=!1}return _createClass(i,[{key:"updateBounds",value:function(){for(var i=Object.keys(this.keyframes),e=[],t=[],n=0;n<i.length;n++)for(var s=this.keyframes[i[n]],o=0;o<s.joints.length;o++){var r=s.joints[o];if(e.push(r.position.x+config.render.joint.radius),t.push(r.position.y+config.render.joint.radius),e.push(r.position.x-config.render.joint.radius),t.push(r.position.y-config.render.joint.radius),r.skin.vertices)for(var a=0;a<r.skin.vertices.length;a++)e.push(r.skin.vertices[a].x),t.push(r.skin.vertices[a].y)}this.bounds.min.set({x:Math.min.apply(Math,e),y:Math.min.apply(Math,t)}),this.bounds.max.set({x:Math.max.apply(Math,e),y:Math.max.apply(Math,t)})}},{key:"reset",value:function(){this.keyframes={},this.joints=[],this.totalKeyframes=0,this.activeJoint=null,timeline.graph&&(this.setKeyframe(0,{position:{x:timeline.graph.hatchMark.spacing/2,y:0},locked:!0,ignoreHistory:!0}),timeline.graph.setCurrentMark(0),timeline.graph.updateState()),this.updateBounds(),history.add({label:"Clear",value:this.clone(),group:"keyframe"})}},{key:"clone",value:function(i){return i=i||this.keyframes,this.fromJSON(this.toJSON(i))}},{key:"getKeyframe",value:function(e,t){var i=Object.values(this.keyframes).find(function(i){return i[e]===t});return i?this.keyframes[i.index]:null}},{key:"editJoints",value:function(i){for(var e=Object.values(this.keyframes),t=0;t<e.length;t++)for(var n=e[t],s=0;s<n.joints.length;s++){var o=n.joints[s];"function"==typeof i&&i(o,n)}}},{key:"editJoint",value:function(e,i,t){for(var n=Object.values(this.keyframes),s=0;s<n.length;s++){var o=n[s].joints.find(function(i){return i.id===e});if(i=t?JSON.parse(JSON.stringify(i)):i,o)for(var r=Object.keys(i),a=0;a<r.length;a++)o[r[a]]=i[r[a]]}}},{key:"addSubKeyframes",value:function(i,e){if(timeline.graph){for(var t=Object.keys(this.keyframes),n=0;n<t.length;n++)if("sub"==this.keyframes[t[n]].type){t.splice(n,1);break}this.clone();if(1<t.length){timeline.graph.updateState();for(n=e-1;i+1<=n;n--){var s=this.clone(),o=s[e].joints,o={id:utils.uid(),type:"sub",index:n,activeJointId:s.activeJointId,joints:o,render:{size:12,color:"red",position:vector(n*timeline.graph.hatchMark.spacing+timeline.graph.hatchMark.spacing/2,0)}};this.keyframes[n]=o}}}this.updateSubKeyframes(),timeline.graph.updateState(),timeline.graph.redraw()}},{key:"updateSubKeyframes",value:function(){for(var i=Object.keys(this.keyframes),e=i.length-1;0<=e;e--){var r=this.keyframes[i[e]];if(r&&"head"!=r.type){for(var t=null,a=r.index;0<=a;a--){var n=this.keyframes[a];if(n&&"head"==n.type){t=n.index;break}}for(var s=null,a=r.index;a<timeline.app.totalFrames;a++){var o=this.keyframes[a];if(o&&"head"==o.type){s=o.index;break}}for(var h,l=utils.map(r.index,s,t,0,1),c=this.keyframes[s],f=this.keyframes[t],a=0;a<r.joints.length;a++)!function(){var e=r.joints[a];if(e&&c&&f){var i=c.joints.find(function(i){return i.id===e.id}),t=f.joints.find(function(i){return i.id===e.id});if(i&&t){var n=i.position.copy().lerp(t.position,l),s=utils.lerp(i.length,t.length,l);for(e.length=s,e.position.set(n),config.animateSkin&&t.skin&&i.skin&&t.skin.offset&&i.skin.offset&&(e.skin.offset={x:utils.lerp(i.skin.offset.x,t.skin.offset.x,l),y:utils.lerp(i.skin.offset.y,t.skin.offset.y,l),scaleX:utils.lerp(i.skin.offset.scaleX,t.skin.offset.scaleX,l),scaleY:utils.lerp(i.skin.offset.scaleY,t.skin.offset.scaleY,l),angle:utils.lerp(i.skin.offset.angle,t.skin.offset.angle,l)}),h=0;h<e.children.length;h++){var o=e.children[h];o.angle=o.position.heading(e.position)}}e.id==f.activeJointId&&(r.activeJointId=e.id)}}();"linear"!=config.riggingMode&&("forwardKinematics"==config.riggingMode?this.computeKinematics(r.joints):"inverseKinematics"==config.riggingMode&&this.computeKinematics(r.joints,!0)),this.updateSkin(r.joints)}}}},{key:"setKeyframe",value:function(i,e){if("number"==typeof i){var t,n={type:"head",index:(e=e||{}).keyframe?e.keyframe.index:i,activeJointId:e.keyframe?e.keyframe.activeJointId:this.activeJoint?this.activeJoint.id:null,joints:e.joints,render:{size:config.render.keyframe.size,color:config.render.keyframe.color.default,position:e.position||vector(i*timeline.graph.hatchMark.spacing+timeline.graph.hatchMark.spacing/2,0)},locked:e.locked||!1};if(timeline.graph&&(t=(t=this.clone()[timeline.graph.state.currentFrame])?t.joints:[],e.joints&&(t=e.joints),n.joints=t),n.id=e.id||utils.uid(),this.keyframes[i]=n,timeline.graph&&(timeline.graph.updateState(),t=timeline.graph.state.currentFrame,i=timeline.graph.state.previousFrame,this.addSubKeyframes(i,t),timeline.graph.redraw()),!e.ignoreHistory){for(var s=Object.values(this.keyframes),o=0,r=0;r<s.length;r++)"head"==s[r].type&&o++;e="Add keyframe";return o==this.totalKeyframes&&(e="Move keyframe"),this.updateBounds(),history.add({label:e,value:this.clone(),group:"keyframe"}),this.totalKeyframes=o,n}}}},{key:"deleteKeyframe",value:function(i){i=this.getKeyframe("id",i);if(i&&!(Object.keys(this.keyframes).length<=1)){for(var e,t,n=[],s=i.index-1;0<=s;s--){var o=this.keyframes[s];if(o&&("sub"==o.type&&n.push(o),"head"==o.type)){e=o;break}}for(s=i.index+1;s<timeline.app.totalFrames;s++){var r=this.keyframes[s];if(r&&("sub"==r.type&&n.push(r),"head"==r.type)){t=r;break}}for(s=0;s<n.length;s++){var a=this.getKeyframe("id",n[s].id);delete this.keyframes[a.index]}delete this.keyframes[i.index],t&&e&&this.addSubKeyframes(e.index,t.index),timeline.graph&&(timeline.graph.updateState(),timeline.graph.redraw()),this.updateBounds()}}},{key:"updateKeyframe",value:function(i,e){for(var t=Object.keys(e),n=0;n<t.length;n++)this.keyframes[i][t[n]]=e[t[n]];this.updateSubKeyframes()}},{key:"addJoint",value:function(i,e,t){t=t||{},timeline.graph&&timeline.graph.setCurrentMark(timeline.graph.state.currentFrame,!1);var n=t.parent||this.activeJoint,e={id:"J"+utils.uid(),name:"Joint ".concat(this.joints.length+1),position:vector(i,e),positionPrev:vector(i,e),angle:n?vector(i,e).heading(n.position):0,parent:n||null,children:[],length:n?n.position.dist(i,e):0,hierarchy:n?n.hierarchy+1:1,skin:{},zIndex:this.joints.length+1};return n&&n.children.push(e),t.ignoreDefaults||(this.activeJoint=e),this.joints.push(e),timeline.graph&&this.updateKeyframe(timeline.graph.state.currentFrame,{activeJointId:this.activeJoint.id}),this.updateBounds(),t.ignoreHistory||history.add({label:"Add joint",value:this.clone(),group:"keyframe"}),events.emit("jointChange",this.joints),e}},{key:"selectJoint",value:function(t,n){var e;this.joints.length&&((e=this.joints.slice()).sort(function(i,e){return i.position.dist(t,n)-e.position.dist(t,n)}),this.activeJoint=this.joints.find(function(i){return i.id===e[0].id}),events.emit("jointChange",this.joints),timeline.graph&&this.updateKeyframe(timeline.graph.state.currentFrame,{activeJointId:this.activeJoint.id}))}},{key:"removeJointById",value:function(e){for(var i=Object.keys(this.keyframes),t=0;t<i.length;t++){var n=this.keyframes[i[t]],s=n.joints.find(function(i){return i.id===e});if(s){for(var o,r=0;r<s.children.length;r++){var a=s.children[r];a.parent=s.parent,a.length+=s.length,this.activeJoint=a}s.parent?(s.parent.children.splice(s.parent.children.indexOf(s),1),(o=s.parent.children).push.apply(o,_toConsumableArray(s.children)),this.activeJoint=s.parent):this.activeJoint=s.children[0],n.joints.splice(n.joints.indexOf(s),1)}}this.activeJoint&&this.moveJoint(this.activeJoint.position.x,this.activeJoint.position.y),this.updateBounds(),history.add({label:"Remove joint",value:this.clone(),group:"keyframe"}),events.emit("jointChange",this.joints)}},{key:"removeJointByPosition",value:function(i,e){if(this.joints.length)for(var t=0;t<this.joints.length;t++){var n=this.joints[t];n.position.dist(i,e)<config.render.joint.radius+this.mouseBuffer&&this.removeJointById(n.id)}}},{key:"computeKinematics",value:function(i,e){if(e)for(n=i.length-1;0<=n;n--){var t=i[n];t.parent&&(t.parent.angle=t.position.heading(t.parent.position),t.parent.position.set({x:t.position.x+Math.cos(t.parent.angle)*t.length,y:t.position.y+Math.sin(t.parent.angle)*t.length}))}else for(var n=0;n<i.length;n++)for(var s=i[n],o=0;o<s.children.length;o++){var r=s.children[o];r.angle=r.position.heading(s.position),r.position.set({x:s.position.x-Math.cos(r.angle)*r.length,y:s.position.y-Math.sin(r.angle)*r.length})}}},{key:"updateSkin",value:function(i){i=i||this.joints;for(var e=0;e<i.length;e++){var t=i[e],n=t.length,s=t.length,o=0,r=t.skin.crop,a=0,h=0;r&&(a=r.to.x-r.from.x,h=r.to.y-r.from.y),h<a?s=Number.MAX_SAFE_INTEGER:(n=Number.MAX_SAFE_INTEGER,o=Math.PI/2),t.skin.size=utils.scaleSize(a,h,n,s),t.skin._sizeOriginal={width:a,height:h},t.skin.angleAuto=o;var h=0,o=0,l=1,c=1,f=0;if(t.skin.offset&&(h=t.skin.offset.x||0,o=t.skin.offset.y||0,l=t.skin.offset.scaleX||0,c=t.skin.offset.scaleY||0,f=t.skin.offset.angle||0),t.parent&&r){t.skin.position={x:(t.position.x+t.parent.position.x)/2,y:(t.position.y+t.parent.position.y)/2};for(var o=[{x:t.skin.position.x+h-t.skin.size.width/2,y:t.skin.position.y+o-t.skin.size.height/2},{x:t.skin.position.x+h+t.skin.size.width/2,y:t.skin.position.y+o-t.skin.size.height/2},{x:t.skin.position.x+h+t.skin.size.width/2,y:t.skin.position.y+o+t.skin.size.height/2},{x:t.skin.position.x+h-t.skin.size.width/2,y:t.skin.position.y+o+t.skin.size.height/2}],d=0,p=o;d<p.length;d++){var u=p[d],y=u.x-t.skin.position.x,g=u.y-t.skin.position.y;u.x=u.x+y*(l-1),u.y=u.y+g*(c-1)}for(var m=0,k=o;m<k.length;m++){var v=k[m],j=t.angle+t.skin.angleAuto+f,x=(v.x-t.skin.position.x)*Math.cos(j)-(v.y-t.skin.position.y)*Math.sin(j),j=(v.x-t.skin.position.x)*Math.sin(j)+(v.y-t.skin.position.y)*Math.cos(j);v.x=x+t.skin.position.x,v.y=j+t.skin.position.y}t.skin.vertices=o}}}},{key:"moveJointById",value:function(i,e,t){if(this.activeJoint=this.getJoint(i),this.activeJoint){var n;if(timeline.graph&&(config.animation.autoAddKeyframe?this.activeJoint.position.equals(e,t)||(n=timeline.graph.state.currentMark,(i=this.keyframes[n])&&"head"==i.type||this.setKeyframe(n)):(timeline.graph.setCurrentMark(timeline.graph.state.currentFrame,!1),timeline.graph.updateState()),this.updateSubKeyframes()),e&&t&&(1<this.activeJoint.position.dist(this.activeJoint.positionPrev)&&(this._moved=!0,this.activeJoint.positionPrev.set(this.activeJoint.position.x,this.activeJoint.position.y)),this.activeJoint.position.set(e,t),"linear"==config.riggingMode)){this.activeJoint.parent&&(this.activeJoint.angle=this.activeJoint.position.heading(this.activeJoint.parent.position),this.activeJoint.length=this.activeJoint.position.dist(this.activeJoint.parent.position));for(var s=0;s<this.activeJoint.children.length;s++){var o=this.activeJoint.children[s];o.length=o.position.dist(this.activeJoint.position)}}return"linear"!=config.riggingMode&&("forwardKinematics"==config.riggingMode?this.computeKinematics(this.joints):"inverseKinematics"==config.riggingMode&&this.computeKinematics(this.joints,!0)),this.updateSkin(),this.updateBounds(),this.activeJoint}}},{key:"moveJoint",value:function(i,e){this.moveJointById(this.activeJoint.id,i,e)}},{key:"getJoint",value:function(e){return this.joints.find(function(i){return i.id===e})||null}},{key:"toJSON",value:function(i,e){for(var t=i||this.clone(),n={},s=Object.keys(t),o=0;o<s.length;o++){for(var r=t[s[o]],a={id:r.id,activeJointId:r.activeJointId,index:r.index,joints:[],render:r.render,type:r.type,locked:r.locked},h=0;h<r.joints.length;h++){for(var l=r.joints[h],c={id:l.id,name:l.name,angle:l.angle,position:l.position,positionPrev:l.positionPrev,length:l.length,parent:l.parent?l.parent.id:null,hierarchy:l.hierarchy,children:[],skinImageSrc:l.skin&&!e?l.skin.imageSrc:void 0,skinCrop:l.skin?l.skin.crop:null,skinOffset:l.skin?l.skin.offset:null,skinPosition:l.skin?l.skin.position:null,skinAngleAuto:l.skin?l.skin.angleAuto:void 0,skinSize:l.skin?l.skin.size:null,_skinSizeOriginal:l.skin?l.skin._sizeOriginal:null,_vueCrop:l.skin?l.skin._vueCrop:null,zIndex:l.zIndex},f=0;f<l.children.length;f++){var d=l.children[f];c.children.push(d.id)}a.joints.push(c)}n[a.index]=a}return n}},{key:"fromJSON",value:function(o){if(o){for(var r,a,h={},l=Object.keys(o),i=function(){var i=l[c],e=o[i],n=(e.joints.find(function(i){return i.id===e.activeJointId}),[]);for(r=0;r<e.joints.length;r++){var t=e.joints[r],t={id:t.id,name:t.name,angle:t.angle,position:vector(t.position),positionPrev:vector(t.positionPrev),length:t.length,hierarchy:t.hierarchy,parent:t.parent,children:t.children.slice(),skin:{offset:t.skinOffset,crop:t.skinCrop,_vueCrop:t._vueCrop,imageSrc:t.skinImageSrc,position:t.skinPosition,angleAuto:t.angleAuto,size:t.skinSize,_sizeOriginal:t._skinSizeOriginal},zIndex:t.zIndex};n.push(t)}function s(){var t=n[r];for(t.parent=n.find(function(i){return i.id===t.parent})||null,a=0;a<t.children.length;a++)!function(){var e=t.children[a];t.children[a]=n.find(function(i){return i.id===e})||null}()}for(r=0;r<n.length;r++)s();i={activeJointId:e.activeJointId,id:e.id,index:e.index,joints:n,locked:e.locked,render:e.render,type:e.type};h[e.index]=i},c=0;c<l.length;c++)i();return h}}},{key:"import",value:function(i){this.keyframes=this.clone(i);for(var e=Object.values(this.keyframes),t=0,n=0;n<e.length;n++)"head"==e[n].type&&t++;this.totalKeyframes=t,timeline.graph&&((i=this.keyframes[timeline.graph.state.currentMark])&&(this.activeJoint=this.getKeyframe("id",i.activeJointId),this.activeJoint&&this.updateKeyframe(timeline.graph.state.currentFrame,{activeJointId:this.activeJoint.id})),timeline.graph.updateState()),this.updateSkin(),this.updateBounds(),events.emit("jointChange",this.joints)}},{key:"renderTo",value:function(i,e){var t=this.keyframes[(e=e||{}).frame];if(t){e.position=e.position||{x:0,y:0};var n=-this.bounds.min.x+e.position.x,s=-this.bounds.min.y+e.position.y;if(t.joints.sort(function(i,e){return i.zIndex-e.zIndex}),e.showSkin)for(var o=0;o<t.joints.length;o++){var r,a,h,l,c,f=t.joints[o];f.parent&&(f.skin.imageSrc&&(f.skin.image?f.skin.image.width||((l=new Image).src=f.skin.imageSrc,f.skin.image=l,this.updateSkin(),this.updateBounds()):((c=new Image).src=f.skin.imageSrc,f.skin.image=c,this.updateSkin(),this.updateBounds())),f.skin&&"object"==_typeof(f.skin.image)&&f.skin.image.src&&f.skin.position&&(i.save(),i.translate(f.skin.position.x+n,f.skin.position.y+s),i.rotate(f.angle+f.skin.angleAuto),f.skin.offset&&(r=f.skin.offset.x,a=f.skin.offset.y,h=f.skin.offset.scaleX,l=f.skin.offset.scaleY,c=f.skin.offset.angle,i.rotate(c),i.translate(r,a),i.scale(h,l)),i.drawImage(f.skin.image,f.skin.crop.from.x,f.skin.crop.from.y,f.skin._sizeOriginal.width,f.skin._sizeOriginal.height,-f.skin.size.width/2,-f.skin.size.height/2,f.skin.size.width,f.skin.size.height),i.restore(),f.skin.vertices||(this.updateSkin(),this.updateBounds())))}if(e.showBones){for(o=0;o<t.joints.length;o++){var d=t.joints[o];d.parent&&(i.beginPath(),i.moveTo(d.position.x+n,d.position.y+s),i.lineTo(d.parent.position.x+n,d.parent.position.y+s),i.lineWidth=config.render.segment.width,i.lineCap="round",i.strokeStyle=config.render.segment.color,i.stroke())}for(o=0;o<t.joints.length;o++){var p=t.joints[o],u=p===this.activeJoint?config.render.joint.color.selected:config.render.joint.color.default;timeline.graph&&(this.activeJoint&&!timeline.graph.state.isPlaying&&(this.activeJoint.children.length&&(u=this.activeJoint.children.includes(p)?"#5bff85":u),this.activeJoint.parent&&(u=this.activeJoint.parent===p?"#9b68e1":u)),timeline.graph.state.isPlaying&&(u=config.render.joint.color.default)),i.beginPath(),i.arc(p.position.x+n,p.position.y+s,config.render.joint.radius,0,2*Math.PI),i.closePath(),i.fillStyle=e.workColor?u:config.render.joint.color.default,i.fill()}}}}},{key:"render",value:function(i){var e,t,n,s,o=showSkeleton.checked;timeline.graph&&(e=timeline.graph.state.previousFrame,t=timeline.graph.state.currentFrame,n=timeline.graph.state.nextFrame,s=timeline.graph.state.currentMark,i.save(),i.context.globalAlpha=.1,this.renderTo(i.context,{frame:e,position:{x:this.bounds.min.x,y:this.bounds.min.y},showBones:o}),this.renderTo(i.context,{frame:t,position:{x:this.bounds.min.x,y:this.bounds.min.y},showBones:o}),this.renderTo(i.context,{frame:n,position:{x:this.bounds.min.x,y:this.bounds.min.y},showBones:o}),i.restore(),this.keyframes[s]||(s=t),this.renderTo(i.context,{frame:s,position:{x:this.bounds.min.x,y:this.bounds.min.y},showBones:o,showSkin:!0,workColor:!0}))}}]),i}(),rigModel=new RigModel;events.once("loadedApps",function(i){timeline=i.timeline,rigModel.setKeyframe(0,{locked:!0,ignoreHistory:!0})}),module.exports=rigModel;
+"use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var events = require("../../lib/events.js");
+
+var mouse = require("../../lib/mouse.js");
+
+var vector = require("../../lib/vector.js");
+
+var config = require("../../lib/config.js");
+
+var utils = require("../../lib/utils.js");
+
+var history = require("./history.js");
+
+var timeline;
+var showSkeleton = document.getElementById("showSkeleton");
+
+var RigModel = /*#__PURE__*/function () {
+  function RigModel() {
+    _classCallCheck(this, RigModel);
+
+    this.joints = [];
+    this.keyframes = {};
+    this.totalKeyframes = 0;
+    this.mouseBuffer = 10;
+    this.activeJoint = null;
+    this.bounds = {
+      min: vector(),
+      max: vector()
+    };
+    this._moved = false;
+  }
+
+  _createClass(RigModel, [{
+    key: "updateBounds",
+    value: function updateBounds() {
+      var keys = Object.keys(this.keyframes);
+      var xAxes = [];
+      var yAxes = [];
+
+      for (var i = 0; i < keys.length; i++) {
+        var frame = this.keyframes[keys[i]];
+
+        for (var j = 0; j < frame.joints.length; j++) {
+          var joint = frame.joints[j];
+          xAxes.push(joint.position.x + config.render.joint.radius);
+          yAxes.push(joint.position.y + config.render.joint.radius);
+          xAxes.push(joint.position.x - config.render.joint.radius);
+          yAxes.push(joint.position.y - config.render.joint.radius);
+
+          if (joint.skin.vertices) {
+            for (var k = 0; k < joint.skin.vertices.length; k++) {
+              xAxes.push(joint.skin.vertices[k].x);
+              yAxes.push(joint.skin.vertices[k].y);
+            }
+          }
+        }
+      }
+
+      this.bounds.min.set({
+        x: Math.min.apply(Math, xAxes),
+        y: Math.min.apply(Math, yAxes)
+      });
+      this.bounds.max.set({
+        x: Math.max.apply(Math, xAxes),
+        y: Math.max.apply(Math, yAxes)
+      });
+    }
+  }, {
+    key: "reset",
+    value: function reset() {
+      this.keyframes = {};
+      this.joints = [];
+      this.totalKeyframes = 0;
+      this.activeJoint = null;
+
+      if (timeline.graph) {
+        this.setKeyframe(0, {
+          position: {
+            x: timeline.graph.hatchMark.spacing / 2,
+            y: 0
+          },
+          locked: true,
+          ignoreHistory: true
+        });
+        timeline.graph.setCurrentMark(0);
+        timeline.graph.updateState();
+      }
+
+      this.updateBounds();
+      history.add({
+        label: "Clear",
+        value: this.clone(),
+        group: "keyframe"
+      });
+    }
+  }, {
+    key: "clone",
+    value: function clone(keyframes) {
+      keyframes = keyframes || this.keyframes;
+      var clone = this.fromJSON(this.toJSON(keyframes));
+      return clone;
+    }
+  }, {
+    key: "getKeyframe",
+    value: function getKeyframe(findKey, value) {
+      var keyframes = Object.values(this.keyframes);
+      var res = keyframes.find(function (k) {
+        return k[findKey] === value;
+      });
+
+      if (res) {
+        return this.keyframes[res.index];
+      }
+
+      return null;
+    }
+  }, {
+    key: "editJoints",
+    value: function editJoints(f) {
+      var keyframes = Object.values(this.keyframes);
+
+      for (var i = 0; i < keyframes.length; i++) {
+        var frame = keyframes[i];
+
+        for (var j = 0; j < frame.joints.length; j++) {
+          var joint = frame.joints[j];
+
+          if (typeof f == "function") {
+            f(joint, frame);
+          }
+        }
+      }
+    }
+  }, {
+    key: "editJoint",
+    value: function editJoint(id, prop, unique) {
+      var keyframes = Object.values(this.keyframes);
+
+      for (var i = 0; i < keyframes.length; i++) {
+        var frame = keyframes[i];
+        var joint = frame.joints.find(function (j) {
+          return j.id === id;
+        });
+        prop = unique ? JSON.parse(JSON.stringify(prop)) : prop;
+
+        if (joint) {
+          var _props = Object.keys(prop);
+
+          for (var j = 0; j < _props.length; j++) {
+            joint[_props[j]] = prop[_props[j]];
+          }
+        }
+      }
+    }
+  }, {
+    key: "addSubKeyframes",
+    value: function addSubKeyframes(start, end) {
+      if (timeline.graph) {
+        var keys = Object.keys(this.keyframes);
+
+        for (var i = 0; i < keys.length; i++) {
+          if (this.keyframes[keys[i]].type == "sub") {
+            keys.splice(i, 1);
+            break;
+          }
+        }
+
+        var clone = this.clone(); //If there's more than 1 frame
+
+        if (keys.length > 1) {
+          //...then add the hidden key frames
+          timeline.graph.updateState();
+
+          for (var i = end - 1; i >= start + 1; i--) {
+            var _clone = this.clone();
+
+            var subJoints = _clone[end].joints;
+            var subKeyframe = {
+              id: utils.uid(),
+              type: "sub",
+              index: i,
+              activeJointId: _clone.activeJointId,
+              joints: subJoints,
+              render: {
+                size: 12,
+                color: "red",
+                position: vector(i * timeline.graph.hatchMark.spacing + timeline.graph.hatchMark.spacing / 2, 0)
+              }
+            };
+            this.keyframes[i] = subKeyframe;
+          }
+        }
+      }
+
+      this.updateSubKeyframes();
+      timeline.graph.updateState();
+      timeline.graph.redraw();
+    }
+  }, {
+    key: "updateSubKeyframes",
+    value: function updateSubKeyframes() {
+      var keys = Object.keys(this.keyframes);
+
+      for (var i = keys.length - 1; i >= 0; i--) {
+        var frame = this.keyframes[keys[i]];
+        if (!frame) continue;
+        if (frame.type == "head") continue;
+        var back = null;
+
+        for (var j = frame.index; j >= 0; j--) {
+          var key = this.keyframes[j];
+
+          if (key) {
+            if (key.type == "head") {
+              back = key.index;
+              break;
+            }
+          }
+        }
+
+        var front = null;
+
+        for (var j = frame.index; j < timeline.app.totalFrames; j++) {
+          var _key = this.keyframes[j];
+
+          if (_key) {
+            if (_key.type == "head") {
+              front = _key.index;
+              break;
+            }
+          }
+        }
+
+        var lerpWeight = utils.map(frame.index, front, back, 0, 1);
+        var frontFrame = this.keyframes[front];
+        var backFrame = this.keyframes[back];
+
+        var _loop = function _loop() {
+          var joint = frame.joints[j];
+
+          if (joint && frontFrame && backFrame) {
+            var frontJoint = frontFrame.joints.find(function (fj) {
+              return fj.id === joint.id;
+            });
+            var backJoint = backFrame.joints.find(function (bj) {
+              return bj.id === joint.id;
+            });
+
+            if (frontJoint && backJoint) {
+              var position = frontJoint.position.copy().lerp(backJoint.position, lerpWeight);
+              var length = utils.lerp(frontJoint.length, backJoint.length, lerpWeight);
+              joint.length = length;
+              joint.position.set(position);
+
+              if (config.animateSkin) {
+                if (backJoint.skin && frontJoint.skin) {
+                  if (backJoint.skin.offset && frontJoint.skin.offset) {
+                    joint.skin.offset = {
+                      x: utils.lerp(frontJoint.skin.offset.x, backJoint.skin.offset.x, lerpWeight),
+                      y: utils.lerp(frontJoint.skin.offset.y, backJoint.skin.offset.y, lerpWeight),
+                      scaleX: utils.lerp(frontJoint.skin.offset.scaleX, backJoint.skin.offset.scaleX, lerpWeight),
+                      scaleY: utils.lerp(frontJoint.skin.offset.scaleY, backJoint.skin.offset.scaleY, lerpWeight),
+                      angle: utils.lerp(frontJoint.skin.offset.angle, backJoint.skin.offset.angle, lerpWeight)
+                    };
+                  }
+                }
+              }
+
+              for (k = 0; k < joint.children.length; k++) {
+                var child = joint.children[k];
+                child.angle = child.position.heading(joint.position);
+              }
+            }
+
+            if (joint.id == backFrame.activeJointId) {
+              frame.activeJointId = joint.id;
+            }
+          }
+        };
+
+        for (var j = 0; j < frame.joints.length; j++) {
+          var k;
+
+          _loop();
+        }
+
+        if (config.riggingMode != "linear") {
+          if (config.riggingMode == "forwardKinematics") {
+            this.computeKinematics(frame.joints);
+          } else if (config.riggingMode == "inverseKinematics") {
+            this.computeKinematics(frame.joints, true);
+          }
+        }
+
+        this.updateSkin(frame.joints);
+      }
+    }
+  }, {
+    key: "setKeyframe",
+    value: function setKeyframe(index, options) {
+      if (typeof index != "number") return;
+      options = options || {};
+      var keyframe = {
+        type: "head",
+        index: options.keyframe ? options.keyframe.index : index,
+        activeJointId: options.keyframe ? options.keyframe.activeJointId : this.activeJoint ? this.activeJoint.id : null,
+        joints: options.joints,
+        render: {
+          size: config.render.keyframe.size,
+          color: config.render.keyframe.color["default"],
+          position: options.position || vector(index * timeline.graph.hatchMark.spacing + timeline.graph.hatchMark.spacing / 2, 0)
+        },
+        locked: options.locked || false
+      };
+
+      if (timeline.graph) {
+        var clone = this.clone()[timeline.graph.state.currentFrame];
+        var joints = clone ? clone.joints : [];
+        if (options.joints) joints = options.joints;
+        keyframe.joints = joints;
+      }
+
+      keyframe.id = options.id || utils.uid();
+      this.keyframes[index] = keyframe;
+
+      if (timeline.graph) {
+        timeline.graph.updateState();
+        var currentFrame = timeline.graph.state.currentFrame;
+        var previousFrame = timeline.graph.state.previousFrame;
+        this.addSubKeyframes(previousFrame, currentFrame);
+        timeline.graph.redraw();
+      } //History
+
+
+      if (!options.ignoreHistory) {
+        var frames = Object.values(this.keyframes);
+        var headCount = 0;
+
+        for (var i = 0; i < frames.length; i++) {
+          var frame = frames[i];
+          if (frame.type == "head") headCount++;
+        }
+
+        var historyLabel = "Add keyframe";
+
+        if (headCount == this.totalKeyframes) {
+          historyLabel = "Move keyframe";
+        }
+
+        this.updateBounds();
+        history.add({
+          label: historyLabel,
+          value: this.clone(),
+          group: "keyframe"
+        });
+        this.totalKeyframes = headCount;
+        return keyframe;
+      }
+    }
+  }, {
+    key: "deleteKeyframe",
+    value: function deleteKeyframe(id) {
+      var keyframe = this.getKeyframe("id", id);
+      if (!keyframe) return;
+      if (Object.keys(this.keyframes).length <= 1) return;
+      var subs = [];
+      var leftHead;
+      var rightHead; //Get left subs
+
+      for (var i = keyframe.index - 1; i >= 0; i--) {
+        var key = this.keyframes[i];
+
+        if (key) {
+          if (key.type == "sub") {
+            subs.push(key);
+          }
+
+          if (key.type == "head") {
+            leftHead = key;
+            break;
+          }
+        }
+      } //Get right subs
+
+
+      for (var i = keyframe.index + 1; i < timeline.app.totalFrames; i++) {
+        var _key2 = this.keyframes[i];
+
+        if (_key2) {
+          if (_key2.type == "sub") {
+            subs.push(_key2);
+          }
+
+          if (_key2.type == "head") {
+            rightHead = _key2;
+            break;
+          }
+        }
+      } //Delete left & right subs
+
+
+      for (var i = 0; i < subs.length; i++) {
+        var frame = this.getKeyframe("id", subs[i].id);
+        delete this.keyframes[frame.index];
+      } //Delete head
+
+
+      delete this.keyframes[keyframe.index];
+      if (rightHead && leftHead) this.addSubKeyframes(leftHead.index, rightHead.index);
+
+      if (timeline.graph) {
+        timeline.graph.updateState();
+        timeline.graph.redraw();
+      }
+
+      this.updateBounds();
+    }
+  }, {
+    key: "updateKeyframe",
+    value: function updateKeyframe(index, data) {
+      var d = Object.keys(data);
+
+      for (var i = 0; i < d.length; i++) {
+        this.keyframes[index][d[i]] = data[d[i]];
+      }
+
+      this.updateSubKeyframes();
+    }
+  }, {
+    key: "addJoint",
+    value: function addJoint(x, y, options) {
+      options = options || {};
+
+      if (timeline.graph) {
+        timeline.graph.setCurrentMark(timeline.graph.state.currentFrame, false);
+      }
+
+      var parent = options.parent || this.activeJoint;
+      var joint = {
+        id: "J" + utils.uid(),
+        name: "Joint ".concat(this.joints.length + 1),
+        position: vector(x, y),
+        positionPrev: vector(x, y),
+        angle: parent ? vector(x, y).heading(parent.position) : 0,
+        parent: parent || null,
+        children: [],
+        length: parent ? parent.position.dist(x, y) : 0,
+        hierarchy: parent ? parent.hierarchy + 1 : 1,
+        skin: {},
+        zIndex: this.joints.length + 1
+      };
+      if (parent) parent.children.push(joint);
+
+      if (!options.ignoreDefaults) {
+        this.activeJoint = joint;
+      }
+
+      this.joints.push(joint);
+
+      if (timeline.graph) {
+        this.updateKeyframe(timeline.graph.state.currentFrame, {
+          activeJointId: this.activeJoint.id
+        });
+      }
+
+      this.updateBounds();
+
+      if (!options.ignoreHistory) {
+        history.add({
+          label: "Add joint",
+          value: this.clone(),
+          group: "keyframe"
+        });
+      }
+
+      events.emit("jointChange", this.joints);
+      return joint;
+    }
+  }, {
+    key: "selectJoint",
+    value: function selectJoint(x, y) {
+      if (!this.joints.length) return;
+      var joints = this.joints.slice();
+      joints.sort(function (a, b) {
+        return a.position.dist(x, y) - b.position.dist(x, y);
+      });
+      this.activeJoint = this.joints.find(function (j) {
+        return j.id === joints[0].id;
+      });
+      events.emit("jointChange", this.joints);
+
+      if (timeline.graph) {
+        this.updateKeyframe(timeline.graph.state.currentFrame, {
+          activeJointId: this.activeJoint.id
+        });
+      }
+    }
+  }, {
+    key: "removeJointById",
+    value: function removeJointById(id) {
+      var keys = Object.keys(this.keyframes);
+
+      for (var i = 0; i < keys.length; i++) {
+        var frame = this.keyframes[keys[i]];
+        var joint = frame.joints.find(function (j) {
+          return j.id === id;
+        });
+
+        if (joint) {
+          for (var j = 0; j < joint.children.length; j++) {
+            var child = joint.children[j];
+            child.parent = joint.parent;
+            child.length += joint.length;
+            this.activeJoint = child;
+          }
+
+          if (joint.parent) {
+            var _joint$parent$childre;
+
+            joint.parent.children.splice(joint.parent.children.indexOf(joint), 1);
+
+            (_joint$parent$childre = joint.parent.children).push.apply(_joint$parent$childre, _toConsumableArray(joint.children));
+
+            this.activeJoint = joint.parent;
+          } else {
+            this.activeJoint = joint.children[0];
+          }
+
+          frame.joints.splice(frame.joints.indexOf(joint), 1);
+        }
+      } //Fix position
+
+
+      if (this.activeJoint) {
+        this.moveJoint(this.activeJoint.position.x, this.activeJoint.position.y);
+      }
+
+      this.updateBounds();
+      history.add({
+        label: "Remove joint",
+        value: this.clone(),
+        group: "keyframe"
+      });
+      events.emit("jointChange", this.joints);
+    }
+  }, {
+    key: "removeJointByPosition",
+    value: function removeJointByPosition(x, y) {
+      if (!this.joints.length) return;
+
+      for (var i = 0; i < this.joints.length; i++) {
+        var joint = this.joints[i];
+
+        if (joint.position.dist(x, y) < config.render.joint.radius + this.mouseBuffer) {
+          this.removeJointById(joint.id);
+        }
+      }
+    }
+  }, {
+    key: "computeKinematics",
+    value: function computeKinematics(jointChain, inverse) {
+      /*let doforward = [];
+      let doinverse = [];
+      for (var i = 0; i < jointChain.length; i++) {
+      	let joint = jointChain[i];
+      	if (joint.hierarchy <= this.activeJoint.hierarchy) {
+      		doinverse.push(joint);
+      	} 
+      	if (joint.hierarchy >= this.activeJoint.hierarchy) {
+      		doforward.push(joint);
+      	}
+      }
+      doforward.sort((a, b) => a.hierarchy - b.hierarchy);
+      for (var i = 0; i < doforward.length; i++) {
+      	let joint = doforward[i];
+      	for (var j = 0; j < joint.children.length; j++) {
+      		let child = joint.children[j];
+      		child.angle = child.position.heading(joint.position);
+      		child.position.set({
+      			x: joint.position.x - Math.cos(child.angle) * child.length,
+      			y: joint.position.y - Math.sin(child.angle) * child.length
+      		});
+      	}
+      }
+      doinverse.sort((a, b) => b.hierarchy - a.hierarchy);
+      for (var i = doinverse.length - 1; i >= 0; i--) {
+      	let joint = doinverse[i];
+      	if (joint.parent !== this.activeJoint) {
+      		if (joint.parent) {
+      			joint.parent.angle = joint.position.heading(joint.parent.position);
+      			joint.parent.position.set({
+      				x: joint.position.x + Math.cos(joint.parent.angle) * joint.length,
+      				y: joint.position.y + Math.sin(joint.parent.angle) * joint.length
+      			});
+      		}
+      	}
+      }*/
+      if (!inverse) {
+        for (var i = 0; i < jointChain.length; i++) {
+          var joint = jointChain[i];
+
+          for (var j = 0; j < joint.children.length; j++) {
+            var child = joint.children[j];
+            child.angle = child.position.heading(joint.position);
+            child.position.set({
+              x: joint.position.x - Math.cos(child.angle) * child.length,
+              y: joint.position.y - Math.sin(child.angle) * child.length
+            });
+          }
+        }
+      } else {
+        for (var i = jointChain.length - 1; i >= 0; i--) {
+          var _joint = jointChain[i];
+
+          if (_joint.parent) {
+            _joint.parent.angle = _joint.position.heading(_joint.parent.position);
+
+            _joint.parent.position.set({
+              x: _joint.position.x + Math.cos(_joint.parent.angle) * _joint.length,
+              y: _joint.position.y + Math.sin(_joint.parent.angle) * _joint.length
+            });
+          }
+        }
+      }
+    }
+  }, {
+    key: "updateSkin",
+    value: function updateSkin(jointChain) {
+      jointChain = jointChain || this.joints;
+
+      for (var i = 0; i < jointChain.length; i++) {
+        var joint = jointChain[i];
+        var newWidth = joint.length;
+        var newHeight = joint.length;
+        var angleAuto = 0;
+        var crop = joint.skin.crop;
+        var cropWidth = 0;
+        var cropHeight = 0;
+
+        if (crop) {
+          cropWidth = crop.to.x - crop.from.x;
+          cropHeight = crop.to.y - crop.from.y;
+        }
+
+        if (cropWidth > cropHeight) {
+          newHeight = Number.MAX_SAFE_INTEGER;
+        } else {
+          newWidth = Number.MAX_SAFE_INTEGER;
+          angleAuto = Math.PI / 2;
+        }
+
+        joint.skin.size = utils.scaleSize(cropWidth, cropHeight, newWidth, newHeight);
+        ;
+        joint.skin._sizeOriginal = {
+          width: cropWidth,
+          height: cropHeight
+        };
+        joint.skin.angleAuto = angleAuto;
+        var xOffset = 0;
+        var yOffset = 0;
+        var scaleXOffset = 1;
+        var scaleYOffset = 1;
+        var angleOffset = 0;
+
+        if (joint.skin.offset) {
+          xOffset = joint.skin.offset.x || 0;
+          yOffset = joint.skin.offset.y || 0;
+          scaleXOffset = joint.skin.offset.scaleX || 0;
+          scaleYOffset = joint.skin.offset.scaleY || 0;
+          angleOffset = joint.skin.offset.angle || 0;
+        }
+
+        if (joint.parent && crop) {
+          joint.skin.position = {
+            x: (joint.position.x + joint.parent.position.x) / 2,
+            y: (joint.position.y + joint.parent.position.y) / 2
+          };
+          var vertices = [{
+            x: joint.skin.position.x + xOffset - joint.skin.size.width / 2,
+            y: joint.skin.position.y + yOffset - joint.skin.size.height / 2
+          }, {
+            x: joint.skin.position.x + xOffset + joint.skin.size.width / 2,
+            y: joint.skin.position.y + yOffset - joint.skin.size.height / 2
+          }, {
+            x: joint.skin.position.x + xOffset + joint.skin.size.width / 2,
+            y: joint.skin.position.y + yOffset + joint.skin.size.height / 2
+          }, {
+            x: joint.skin.position.x + xOffset - joint.skin.size.width / 2,
+            y: joint.skin.position.y + yOffset + joint.skin.size.height / 2
+          }];
+
+          for (var _i = 0, _vertices = vertices; _i < _vertices.length; _i++) {
+            var vert = _vertices[_i];
+            var vertexDelta = {
+              x: vert.x - joint.skin.position.x,
+              y: vert.y - joint.skin.position.y
+            };
+            vert.x = vert.x + vertexDelta.x * (scaleXOffset - 1);
+            vert.y = vert.y + vertexDelta.y * (scaleYOffset - 1);
+          }
+
+          for (var _i2 = 0, _vertices2 = vertices; _i2 < _vertices2.length; _i2++) {
+            var _vert = _vertices2[_i2];
+            var angle = joint.angle + joint.skin.angleAuto + angleOffset;
+            var x = (_vert.x - joint.skin.position.x) * Math.cos(angle) - (_vert.y - joint.skin.position.y) * Math.sin(angle);
+            var y = (_vert.x - joint.skin.position.x) * Math.sin(angle) + (_vert.y - joint.skin.position.y) * Math.cos(angle);
+            _vert.x = x + joint.skin.position.x;
+            _vert.y = y + joint.skin.position.y;
+          }
+
+          joint.skin.vertices = vertices;
+        }
+      }
+    }
+  }, {
+    key: "moveJointById",
+    value: function moveJointById(id, x, y) {
+      this.activeJoint = this.getJoint(id);
+      if (!this.activeJoint) return;
+
+      if (timeline.graph) {
+        if (config.animation.autoAddKeyframe) {
+          if (!this.activeJoint.position.equals(x, y)) {
+            var currentMark = timeline.graph.state.currentMark;
+            var frame = this.keyframes[currentMark];
+
+            if (!frame) {
+              this.setKeyframe(currentMark);
+            } else {
+              if (frame.type != "head") {
+                this.setKeyframe(currentMark);
+              }
+            }
+          }
+        } else {
+          timeline.graph.setCurrentMark(timeline.graph.state.currentFrame, false);
+          timeline.graph.updateState();
+        }
+
+        this.updateSubKeyframes();
+      }
+
+      if (x && y) {
+        if (this.activeJoint.position.dist(this.activeJoint.positionPrev) > 1) {
+          this._moved = true;
+          this.activeJoint.positionPrev.set(this.activeJoint.position.x, this.activeJoint.position.y);
+        }
+
+        this.activeJoint.position.set(x, y);
+
+        if (config.riggingMode == "linear") {
+          if (this.activeJoint.parent) {
+            this.activeJoint.angle = this.activeJoint.position.heading(this.activeJoint.parent.position);
+            this.activeJoint.length = this.activeJoint.position.dist(this.activeJoint.parent.position);
+          }
+
+          for (var i = 0; i < this.activeJoint.children.length; i++) {
+            var child = this.activeJoint.children[i];
+            child.length = child.position.dist(this.activeJoint.position);
+          }
+        }
+      }
+
+      if (config.riggingMode != "linear") {
+        if (config.riggingMode == "forwardKinematics") {
+          this.computeKinematics(this.joints);
+        } else if (config.riggingMode == "inverseKinematics") {
+          this.computeKinematics(this.joints, true);
+        }
+      }
+
+      this.updateSkin();
+      this.updateBounds();
+      return this.activeJoint;
+    }
+  }, {
+    key: "moveJoint",
+    value: function moveJoint(x, y) {
+      this.moveJointById(this.activeJoint.id, x, y);
+    }
+  }, {
+    key: "getJoint",
+    value: function getJoint(id) {
+      var joint = this.joints.find(function (j) {
+        return j.id === id;
+      }) || null;
+      return joint;
+    }
+  }, {
+    key: "toJSON",
+    value: function toJSON(_keyframes, excludeImageSrc) {
+      var keyframes = _keyframes || this.clone();
+
+      var json = {};
+      var keys = Object.keys(keyframes);
+
+      for (var i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        var frame = keyframes[key];
+        var keyframe = {
+          id: frame.id,
+          activeJointId: frame.activeJointId,
+          index: frame.index,
+          joints: [],
+          render: frame.render,
+          type: frame.type,
+          locked: frame.locked
+        };
+
+        for (var j = 0; j < frame.joints.length; j++) {
+          var joint = frame.joints[j];
+          var jointData = {
+            id: joint.id,
+            name: joint.name,
+            angle: joint.angle,
+            position: joint.position,
+            positionPrev: joint.positionPrev,
+            length: joint.length,
+            parent: joint.parent ? joint.parent.id : null,
+            hierarchy: joint.hierarchy,
+            children: [],
+            skinImageSrc: joint.skin && !excludeImageSrc ? joint.skin.imageSrc : undefined,
+            skinCrop: joint.skin ? joint.skin.crop : null,
+            skinOffset: joint.skin ? joint.skin.offset : null,
+            skinPosition: joint.skin ? joint.skin.position : null,
+            skinAngleAuto: joint.skin ? joint.skin.angleAuto : undefined,
+            skinSize: joint.skin ? joint.skin.size : null,
+            _skinSizeOriginal: joint.skin ? joint.skin._sizeOriginal : null,
+            _vueCrop: joint.skin ? joint.skin._vueCrop : null,
+            zIndex: joint.zIndex
+          };
+
+          for (var k = 0; k < joint.children.length; k++) {
+            var child = joint.children[k];
+            jointData.children.push(child.id);
+          }
+
+          keyframe.joints.push(jointData);
+        }
+
+        json[keyframe.index] = keyframe;
+      }
+
+      return json;
+    }
+  }, {
+    key: "fromJSON",
+    value: function fromJSON(json) {
+      if (!json) return;
+      var result = {};
+      var keys = Object.keys(json);
+
+      var _loop2 = function _loop2() {
+        var key = keys[i];
+        var frame = json[key];
+        var activeJoint = frame.joints.find(function (j) {
+          return j.id === frame.activeJointId;
+        });
+        var parsedJoints = []; //Parse joint data
+
+        for (j = 0; j < frame.joints.length; j++) {
+          var joint = frame.joints[j];
+          var data = {
+            id: joint.id,
+            name: joint.name,
+            angle: joint.angle,
+            position: vector(joint.position),
+            positionPrev: vector(joint.positionPrev),
+            length: joint.length,
+            hierarchy: joint.hierarchy,
+            parent: joint.parent,
+            children: joint.children.slice(),
+            skin: {
+              offset: joint.skinOffset,
+              crop: joint.skinCrop,
+              _vueCrop: joint._vueCrop,
+              imageSrc: joint.skinImageSrc,
+              position: joint.skinPosition,
+              angleAuto: joint.angleAuto,
+              size: joint.skinSize,
+              _sizeOriginal: joint._skinSizeOriginal
+            },
+            zIndex: joint.zIndex
+          };
+          parsedJoints.push(data);
+        } //Find parent and children
+
+
+        var _loop3 = function _loop3() {
+          var joint = parsedJoints[j];
+          joint.parent = parsedJoints.find(function (pj) {
+            return pj.id === joint.parent;
+          }) || null;
+
+          var _loop4 = function _loop4() {
+            var child = joint.children[k];
+            joint.children[k] = parsedJoints.find(function (pj) {
+              return pj.id === child;
+            }) || null;
+          };
+
+          for (k = 0; k < joint.children.length; k++) {
+            _loop4();
+          }
+        };
+
+        for (j = 0; j < parsedJoints.length; j++) {
+          _loop3();
+        }
+
+        var parsedFrame = {
+          activeJointId: frame.activeJointId,
+          id: frame.id,
+          index: frame.index,
+          joints: parsedJoints,
+          locked: frame.locked,
+          render: frame.render,
+          type: frame.type
+        };
+        result[frame.index] = parsedFrame;
+      };
+
+      for (var i = 0; i < keys.length; i++) {
+        var j;
+        var j;
+        var k;
+
+        _loop2();
+      }
+
+      return result;
+    }
+  }, {
+    key: "import",
+    value: function _import(keyframes) {
+      this.keyframes = this.clone(keyframes);
+      var frames = Object.values(this.keyframes);
+      var headCount = 0;
+
+      for (var i = 0; i < frames.length; i++) {
+        var frame = frames[i];
+        if (frame.type == "head") headCount++;
+      }
+
+      this.totalKeyframes = headCount;
+
+      if (timeline.graph) {
+        //timeline.graph.setCurrentMark(0, false);
+        var currentFrame = this.keyframes[timeline.graph.state.currentMark];
+
+        if (currentFrame) {
+          this.activeJoint = this.getKeyframe("id", currentFrame.activeJointId);
+
+          if (this.activeJoint) {
+            this.updateKeyframe(timeline.graph.state.currentFrame, {
+              activeJointId: this.activeJoint.id
+            });
+          }
+        }
+
+        timeline.graph.updateState();
+      }
+
+      this.updateSkin();
+      this.updateBounds();
+      events.emit("jointChange", this.joints);
+    }
+  }, {
+    key: "renderTo",
+    value: function renderTo(ctx, options) {
+      options = options || {};
+      var frame = this.keyframes[options.frame];
+      if (!frame) return;
+      options.position = options.position || {
+        x: 0,
+        y: 0
+      };
+      var offset = {
+        x: -this.bounds.min.x + options.position.x,
+        y: -this.bounds.min.y + options.position.y
+      };
+      frame.joints.sort(function (a, b) {
+        return a.zIndex - b.zIndex;
+      });
+
+      if (options.showSkin) {
+        for (var i = 0; i < frame.joints.length; i++) {
+          var joint = frame.joints[i];
+
+          if (joint.parent) {
+            //Load image if there's an image url
+            if (joint.skin.imageSrc) {
+              if (!joint.skin.image) {
+                var img = new Image();
+                img.src = joint.skin.imageSrc;
+                joint.skin.image = img;
+                this.updateSkin();
+                this.updateBounds();
+              } else {
+                if (!joint.skin.image.width) {
+                  var _img = new Image();
+
+                  _img.src = joint.skin.imageSrc;
+                  joint.skin.image = _img;
+                  this.updateSkin();
+                  this.updateBounds();
+                }
+              }
+            }
+
+            if (joint.skin) {
+              if (_typeof(joint.skin.image) == "object") {
+                if (joint.skin.image.src && joint.skin.position) {
+                  ctx.save();
+                  ctx.translate(joint.skin.position.x + offset.x, joint.skin.position.y + offset.y);
+                  ctx.rotate(joint.angle + joint.skin.angleAuto);
+
+                  if (joint.skin.offset) {
+                    var xOffset = joint.skin.offset.x;
+                    var yOffset = joint.skin.offset.y;
+                    var scaleXOffset = joint.skin.offset.scaleX;
+                    var scaleYOffset = joint.skin.offset.scaleY;
+                    var angleOffset = joint.skin.offset.angle;
+                    ctx.rotate(angleOffset);
+                    ctx.translate(xOffset, yOffset);
+                    ctx.scale(scaleXOffset, scaleYOffset);
+                  }
+
+                  ctx.drawImage(joint.skin.image, joint.skin.crop.from.x, joint.skin.crop.from.y, joint.skin._sizeOriginal.width, joint.skin._sizeOriginal.height, -joint.skin.size.width / 2, -joint.skin.size.height / 2, joint.skin.size.width, joint.skin.size.height);
+                  ctx.restore();
+
+                  if (!joint.skin.vertices) {
+                    this.updateSkin();
+                    this.updateBounds();
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if (options.showBones) {
+        for (var i = 0; i < frame.joints.length; i++) {
+          var _joint2 = frame.joints[i];
+
+          if (_joint2.parent) {
+            ctx.beginPath();
+            ctx.moveTo(_joint2.position.x + offset.x, _joint2.position.y + offset.y);
+            ctx.lineTo(_joint2.parent.position.x + offset.x, _joint2.parent.position.y + offset.y);
+            ctx.lineWidth = config.render.segment.width;
+            ctx.lineCap = "round";
+            ctx.strokeStyle = config.render.segment.color;
+            ctx.stroke();
+          }
+        }
+
+        for (var i = 0; i < frame.joints.length; i++) {
+          var _joint3 = frame.joints[i];
+          var jointColor = _joint3 === this.activeJoint ? config.render.joint.color.selected : config.render.joint.color["default"];
+
+          if (timeline.graph) {
+            if (this.activeJoint && !timeline.graph.state.isPlaying) {
+              if (this.activeJoint.children.length) jointColor = this.activeJoint.children.includes(_joint3) ? "#5bff85" : jointColor;
+              if (this.activeJoint.parent) jointColor = this.activeJoint.parent === _joint3 ? "#9b68e1" : jointColor;
+            }
+
+            if (timeline.graph.state.isPlaying) {
+              jointColor = config.render.joint.color["default"];
+            }
+          }
+
+          ctx.beginPath();
+          ctx.arc(_joint3.position.x + offset.x, _joint3.position.y + offset.y, config.render.joint.radius, 0, Math.PI * 2);
+          ctx.closePath();
+          ctx.fillStyle = options.workColor ? jointColor : config.render.joint.color["default"];
+          ctx.fill();
+        }
+      }
+    }
+  }, {
+    key: "render",
+    value: function render(renderer) {
+      var showBones = showSkeleton.checked;
+
+      if (timeline.graph) {
+        var previousFrame = timeline.graph.state.previousFrame;
+        var currentFrame = timeline.graph.state.currentFrame;
+        var nextFrame = timeline.graph.state.nextFrame;
+        var currentMark = timeline.graph.state.currentMark;
+        renderer.save();
+        renderer.context.globalAlpha = 0.1;
+        this.renderTo(renderer.context, {
+          frame: previousFrame,
+          position: {
+            x: this.bounds.min.x,
+            y: this.bounds.min.y
+          },
+          showBones: showBones
+        });
+        this.renderTo(renderer.context, {
+          frame: currentFrame,
+          position: {
+            x: this.bounds.min.x,
+            y: this.bounds.min.y
+          },
+          showBones: showBones
+        });
+        this.renderTo(renderer.context, {
+          frame: nextFrame,
+          position: {
+            x: this.bounds.min.x,
+            y: this.bounds.min.y
+          },
+          showBones: showBones
+        });
+        renderer.restore();
+
+        if (!this.keyframes[currentMark]) {
+          currentMark = currentFrame;
+        }
+
+        this.renderTo(renderer.context, {
+          frame: currentMark,
+          position: {
+            x: this.bounds.min.x,
+            y: this.bounds.min.y
+          },
+          showBones: showBones,
+          showSkin: true,
+          workColor: true
+        });
+      }
+    }
+  }]);
+
+  return RigModel;
+}();
+
+var rigModel = new RigModel();
+events.once("loadedApps", function (vue) {
+  timeline = vue.timeline;
+  rigModel.setKeyframe(0, {
+    locked: true,
+    ignoreHistory: true
+  });
+});
+module.exports = rigModel;
