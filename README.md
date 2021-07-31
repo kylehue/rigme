@@ -1,9 +1,18 @@
-<img style="text-align:center" alt="Logo" src="src/client/assets/svg/rigme.svg" width="140">
+<p align="center">
+  <a href="https://kylehue.github.io/rigme/">
+    <img style="text-align:center" alt="Logo" src="src/client/assets/svg/rigme-text.svg" height="140">
+  </a>
+</p>
 
-# Rigme
-An easy to use and very simple animator web application. [Try it here](https://kylehue.github.io/rigme/)
+<p align="center">
+  An easy to use and very simple animator web application.
+</p>
 
-<img alt="Sample gif" src="sample.gif" width="640">
+<p align="center">
+  <img alt="Sample gif" src="sample.gif" width="640">
+</p>
+
+#
 
 ### Features
 - Video Overlays
@@ -24,7 +33,7 @@ An easy to use and very simple animator web application. [Try it here](https://k
 - [PoseNet](https://github.com/tensorflow/tfjs-models/tree/master/posenet)
 - [Tensorflow](https://github.com/tensorflow/tfjs)
 
-### Some tips
+### Tips
 - Hold <kbd>Shift</kbd> while adding a joint to mirror it horizontally
 - Hold <kbd>Space</kbd> to pan camera
 - Drag the blue vertical lines in the timeline to change loop region
@@ -32,6 +41,12 @@ An easy to use and very simple animator web application. [Try it here](https://k
 - Drag the timeline's scrollbar from its left or right side to resize
 
 >The app autosaves your work in the browser everytime you make a move. However, it doesn't autosave the video overlay and images
+
+### Browser Support
+- Google Chrome
+- Mozilla Firefox
+- Microsoft Edge
+- Opera
 
 ### License
 MIT License
