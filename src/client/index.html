@@ -130,7 +130,7 @@
 							<div class="checkbox">
 								<img src="assets/svg/check.svg">
 							</div>
-							<p>Show bones</p>
+							<p>Show skeleton</p>
 						</div>
 					</div>
 				</div>
@@ -248,7 +248,7 @@
 							<div class="checkbox">
 								<img src="assets/svg/check.svg">
 							</div>
-							<p>Show bones</p>
+							<p>Show skeleton</p>
 						</div>
 					</div>
 				</div>
@@ -525,12 +525,12 @@
 						<!-- Timeline control -->
 						<div class="row-b">
 							<div class="left-wrapper">
-								<button id="zoomInTimeline" class="darko-a" title="Zoom in">
+								<!-- <button id="zoomInTimeline" class="darko-a" title="Zoom in">
 								<img src="assets/svg/magnifying-glass-plus.svg" class="" />
 								</button>
 								<button id="zoomOutTimeline" class="darko-a" title="Zoom out">
 								<img src="assets/svg/magnifying-glass-minus.svg" class="" />
-								</button>
+								</button> -->
 								<button id="lastFrame" class="darko-a" title="Previous frame">
 								<img src="assets/svg/previous.svg" class="" />
 								</button>
@@ -566,7 +566,7 @@
 					</div>
 				</div>
 			</div>
-			<div id="paneApp" class="panel-container darko-c">
+			<div id="paneApp" class="panel-container darko-h">
 				<div class="wrapper">
 					<div class="wrapper-top darko-b">
 						<div class="tab-wrapper">
@@ -666,11 +666,11 @@
 										</div>
 										<div class="input-wrapper">
 											<label for="skinScaleX">Scale X</label>
-											<input id="skinScaleX" type="text" class="" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:input="validateFormat" v-on:wheel="toggleAmount" v-on:focusout="handleFocusOut">
+											<input id="skinScaleX" type="text" class="" placeholder="1" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:input="validateFormat" v-on:wheel="toggleAmount" v-on:focusout="handleFocusOut">
 										</div>
 										<div class="input-wrapper">
 											<label for="skinScaleY">Scale Y</label>
-											<input id="skinScaleY" type="text" class="" placeholder="0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:input="validateFormat" v-on:wheel="toggleAmount" v-on:focusout="handleFocusOut">
+											<input id="skinScaleY" type="text" class="" placeholder="1" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="1" v-on:input="validateFormat" v-on:wheel="toggleAmount" v-on:focusout="handleFocusOut">
 										</div>
 										<div class="input-wrapper">
 											<label for="skinAngle">Angle</label>
