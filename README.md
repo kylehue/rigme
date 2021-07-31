@@ -36,9 +36,10 @@
 ### Tips
 - Hold <kbd>Shift</kbd> while adding a joint to mirror it horizontally
 - Hold <kbd>Space</kbd> to pan camera
-- Drag the blue vertical lines in the timeline to change loop region
-- Refrain moving mouse in the timeline to avoid viewport lag
+- Drag the blue vertical lines on the timeline to change loop region
 - Drag the timeline's scrollbar from its left or right side to resize
+- Focus to a joint's position by double-clicking joints on Joint Pane
+- Scroll on timeline to toggle zoom
 
 >The app autosaves your work in the browser everytime you make a move. However, it doesn't autosave the video overlay and images
 
