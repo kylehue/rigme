@@ -14,14 +14,10 @@ var fileApp = new Vue({
   el: "#fileApp",
   data: {
     showExportFormats: false,
-    hidden: true,
-    position: {
-      x: 0,
-      y: 0
-    }
+    hidden: true
   },
   methods: {
-    show: function show(x, y) {
+    show: function show() {
       var _this = this;
 
       this.hidden = false;

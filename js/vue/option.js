@@ -14,14 +14,10 @@ var optionApp = new Vue({
     hidden: true,
     overlayConfigHidden: true,
     showOverlayActions: false,
-    overlayConfigDisabled: true,
-    position: {
-      x: 0,
-      y: 0
-    }
+    overlayConfigDisabled: true
   },
   methods: {
-    show: function show(x, y) {
+    show: function show() {
       var _this = this;
 
       this.hidden = false;
