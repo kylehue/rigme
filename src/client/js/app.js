@@ -252,7 +252,7 @@ events.on("saveProject", filename => {
 	btn.addClass("disabled");
 	btn.text("Processing...", true);
 
-	let model = rigModel.toJSON(null, true);
+	let model = rigModel.toJSON();
 	let config = {
 		frameCount: vue.timeline.app.totalFrames,
 		animationSpeed: vue.timeline.app.animationSpeed,
@@ -1598,17 +1598,43 @@ events.on("renderFocus", () => {
 	sleep = false;
 });
 
-dom.query("#fileButton").on("mouseup", function() {
-	let fileApp = vue.fileApp;
-	if (fileApp.hidden) {
-		fileApp.show(mouse.x + 5, mouse.y + 5);
+dom.query("#fileButton").on("mousedown", function() {
+	if (!vue.fileApp.hidden) {
+		vue.fileApp.hide();
+	} else {
+		vue.fileApp.show();
 	}
 });
 
-dom.query("#optionButton").on("mouseup", function() {
-	let optionApp = vue.optionApp;
-	if (optionApp.hidden) {
-		optionApp.show(mouse.x + 5, mouse.y + 5);
+dom.query("#optionButton").on("mousedown", function() {
+	if (!vue.optionApp.hidden) {
+		vue.optionApp.hide();
+	} else {
+		vue.optionApp.show();
+	}
+});
+
+dom.query("#fileButton").on("mouseenter", function() {
+	if (!vue.optionApp.hidden) {
+		vue.optionApp.hide();
+		vue.fileApp.show();
+	}
+});
+
+dom.query("#optionButton").on("mouseenter", function() {
+	if (!vue.fileApp.hidden) {
+		vue.fileApp.hide();
+		vue.optionApp.show();
+	}
+});
+
+addEventListener("mousedown", function (event) {
+	if (event.target.id != "fileButton") {
+		vue.fileApp.hide();
+	}
+
+	if (event.target.id != "optionButton") {
+		vue.optionApp.hide();
 	}
 });
 
@@ -1686,8 +1712,8 @@ mouse.on("mouseup", function() {
 });
 
 mouse.on("mousedown", function() {
-	vue.fileApp.hide();
-	vue.optionApp.hide();
+	/*vue.fileApp.hide();
+	vue.optionApp.hide();*/
 	vue.contextMenuApp.hide();
 	selectOptions.css("display", "none");
 });
