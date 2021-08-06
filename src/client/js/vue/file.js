@@ -8,14 +8,10 @@ const fileApp = new Vue({
 	el: "#fileApp",
 	data: {
 		showExportFormats: false,
-		hidden: true,
-		position: {
-			x: 0,
-			y: 0
-		}
+		hidden: true
 	},
 	methods: {
-		show: function(x, y) {
+		show: function() {
 			this.hidden = false;
 			this.$nextTick(() => {
 				let fileButtonBounds = document.getElementById("fileButton").getBoundingClientRect();

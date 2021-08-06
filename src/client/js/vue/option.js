@@ -9,14 +9,10 @@ const optionApp = new Vue({
 		hidden: true,
 		overlayConfigHidden: true,
 		showOverlayActions: false,
-		overlayConfigDisabled: true,
-		position: {
-			x: 0,
-			y: 0
-		}
+		overlayConfigDisabled: true
 	},
 	methods: {
-		show: function(x, y) {
+		show: function() {
 			this.hidden = false;
 			this.$nextTick(() => {
 				let optionButtonBounds = document.getElementById("optionButton").getBoundingClientRect();
