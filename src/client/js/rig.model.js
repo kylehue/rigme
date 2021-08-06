@@ -607,12 +607,15 @@ class RigModel {
 
 			if (cropWidth > cropHeight) {
 				newHeight = Number.MAX_SAFE_INTEGER;
+				newWidth += cropHeight / 2;
 			} else {
+				newHeight += cropWidth / 2;
 				newWidth = Number.MAX_SAFE_INTEGER;
 				angleAuto = Math.PI / 2;
 			}
 
-			joint.skin.size = utils.scaleSize(cropWidth, cropHeight, newWidth, newHeight);;
+			joint.skin.size = utils.scaleSize(cropWidth, cropHeight, newWidth, newHeight);
+
 			joint.skin._sizeOriginal = {
 				width: cropWidth,
 				height: cropHeight
@@ -720,6 +723,7 @@ class RigModel {
 				for (var i = 0; i < this.activeJoint.children.length; i++) {
 					let child = this.activeJoint.children[i];
 					child.length = child.position.dist(this.activeJoint.position);
+					child.angle = child.position.heading(this.activeJoint.position);
 				}
 			}
 		}
