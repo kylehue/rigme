@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  An easy to use and very simple animator web application.
+  An easy to use and very simple animator web application. (This app is only a school project so don't expect too much from it)
 </p>
 
 <p align="center">
