@@ -1648,7 +1648,7 @@ addEventListener("mousedown", function (event) {
 let previousAction;
 key.on("keydown", function(event) {
 	let pickedAction = actions[shortcuts[event.code]];
-	if (pickedAction) {
+	if (pickedAction && document.activeElement.tagName.toLowerCase() != "input") {
 		setAction(pickedAction);
 		action = pickedAction;
 	}
@@ -1673,7 +1673,7 @@ key.on("keydown", function(event) {
 		}
 	}
 
-	if (event.keyCode == 32) {
+	if (event.keyCode == 32 && document.activeElement.tagName.toLowerCase() != "input") {
 		if (action != actions.pan) {
 			previousAction = action;
 			setAction(actions.pan);
