@@ -166,6 +166,13 @@ dom.query(".custom-checkbox", true).on("click", event => {
 	if (event.target.id == "animateSkin") {
 		config.animateSkin = el.hasClass("checked");
 	}
+
+	if (event.target.id == "autofitSkin") {
+		config.autofitSkin = el.hasClass("checked");
+	}
+
+	rigModel.updateSkin();
+	rigModel.updateBounds();
 });
 
 //Custom select

@@ -7,7 +7,6 @@ const history = require("./history.js");
 
 let timeline;
 
-let showSkeleton = document.getElementById("showSkeleton")
 class RigModel {
 	constructor() {
 		this.joints = [];
@@ -410,15 +409,7 @@ class RigModel {
 			children: [],
 			length: parent ? parent.position.dist(x, y) : 0,
 			hierarchy: parent ? parent.hierarchy + 1 : 1,
-			skin: {
-				offset: {
-					x: 0,
-					y: 0,
-					scaleX: 1,
-					scaleY: 1,
-					angle: 0
-				}
-			},
+			skin: {},
 			zIndex: this.joints.length + 1
 		};
 
@@ -597,13 +588,6 @@ class RigModel {
 			let newHeight = joint.length;
 			let angleAuto = 0;
 
-			if (!config.autofitSkin) {
-				if (joint.skin.image) {
-					newWidth = joint.skin.image.width;
-					newHeight = joint.skin.image.height;
-				}
-			}
-
 			let crop = joint.skin.crop;
 			let cropWidth = 0;
 			let cropHeight = 0;
@@ -614,15 +598,12 @@ class RigModel {
 
 			if (cropWidth > cropHeight) {
 				newHeight = Number.MAX_SAFE_INTEGER;
-				newWidth += cropHeight / 2;
 			} else {
-				newHeight += cropWidth / 2;
 				newWidth = Number.MAX_SAFE_INTEGER;
 				angleAuto = Math.PI / 2;
 			}
 
-			joint.skin.size = utils.scaleSize(cropWidth, cropHeight, newWidth, newHeight);
-
+			joint.skin.size = utils.scaleSize(cropWidth, cropHeight, newWidth, newHeight);;
 			joint.skin._sizeOriginal = {
 				width: cropWidth,
 				height: cropHeight
@@ -730,7 +711,6 @@ class RigModel {
 				for (var i = 0; i < this.activeJoint.children.length; i++) {
 					let child = this.activeJoint.children[i];
 					child.length = child.position.dist(this.activeJoint.position);
-					child.angle = child.position.heading(this.activeJoint.position);
 				}
 			}
 		}
@@ -1035,7 +1015,6 @@ class RigModel {
 	}
 
 	render(renderer) {
-		let showBones = showSkeleton.checked;
 		if (timeline.graph) {
 			let previousFrame = timeline.graph.state.previousFrame;
 			let currentFrame = timeline.graph.state.currentFrame;
@@ -1050,7 +1029,7 @@ class RigModel {
 					x: this.bounds.min.x,
 					y: this.bounds.min.y
 				},
-				showBones: showBones
+				showBones: true
 			});
 
 			this.renderTo(renderer.context, {
@@ -1059,7 +1038,7 @@ class RigModel {
 					x: this.bounds.min.x,
 					y: this.bounds.min.y
 				},
-				showBones: showBones
+				showBones: true
 			});
 
 			this.renderTo(renderer.context, {
@@ -1068,7 +1047,7 @@ class RigModel {
 					x: this.bounds.min.x,
 					y: this.bounds.min.y
 				},
-				showBones: showBones
+				showBones: true
 			});
 			renderer.restore();
 
@@ -1082,7 +1061,7 @@ class RigModel {
 					x: this.bounds.min.x,
 					y: this.bounds.min.y
 				},
-				showBones: showBones,
+				showBones: true,
 				showSkin: true,
 				workColor: true
 			});

@@ -60,5 +60,6 @@ module.exports = {
 		enabled: true,
 		threshold: 1
 	},
-	animateSkin: true
+	animateSkin: true,
+	autofitSkin: true
 };
