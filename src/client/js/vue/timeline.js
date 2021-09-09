@@ -337,7 +337,7 @@ class Timeline {
 		let onScrollbar, onTimeline, onKeyframe, onScrollbarLeft, onScrollbarRight, onPlaybackHandle;
 
 		const dragStart = event => {
-			if (event.target != this.canvas) return;
+			if (event.target != this.canvas || event.which != 1) return;
 			dragging = true;
 			events.emit("renderSleep");
 

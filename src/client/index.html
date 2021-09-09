@@ -33,13 +33,13 @@
 			<!-- Context Menu App -->
 			<div id="contextMenuApp" class="darko-d" v-if="!hidden">
 				<div class="wrapper">
-					<button id="copyKeyframe" class="darko-d" v-on:click="copy">
+					<button id="copyKeyframe" class="darko-d" v-on:mousedown="copy">
 					<div class="buttonIcon">
 						<img src="assets/svg/copy.svg" class="" />
 						<p>Copy</p>
 					</div>
 					</button>
-					<button id="pasteKeyframe" class="darko-d" v-on:click="paste">
+					<button id="pasteKeyframe" class="darko-d" v-on:mousedown="paste">
 					<div class="buttonIcon">
 						<img src="assets/svg/clipboard.svg" class="" />
 						<p>Paste</p>
