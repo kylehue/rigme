@@ -751,7 +751,8 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       enabled: !0,
       threshold: 1
     },
-    animateSkin: !0
+    animateSkin: !0,
+    autofitSkin: !0
   };
 }, function (e, t) {
   var i = new ( /*#__PURE__*/function () {
@@ -1001,7 +1002,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 
           _this5.scrollbar.color = o.render.timeline.scrollbar.color["default"], _this5.snap(), _this5.state.isDragging = !1, _this5.playbackHandle.start.isDragging = !1, _this5.playbackHandle.end.isDragging = !1, e = null, _this5.canvas.style.cursor = "default", _this5.redraw();
         }), addEventListener("mousedown", function (e) {
-          if (e.target == _this5.canvas) {
+          if (e.target == _this5.canvas && 1 == e.which) {
             if (m = !0, r.emit("renderSleep"), _this5.playbackHandle.end.mark >= p.totalFrames && 1 != p.totalFrames && (_this5.playbackHandle.end.mark = p.totalFrames - 1, _this5.playbackHandle.end._x = _this5.markToX(_this5.playbackHandle.end.mark), _this5.redraw()), m && !y) if (n) v = _this5.scrollbar.left - t, y = "scrollbar";else if (l) {
               y = "timeline";
 
@@ -1927,37 +1928,38 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
           var _i14 = e[t],
               _n18 = _i14.length,
               _r10 = _i14.length,
-              _a5 = 0,
-              _s4 = _i14.skin.crop,
-              _l = 0,
-              _h2 = 0;
-          _s4 && (_l = _s4.to.x - _s4.from.x, _h2 = _s4.to.y - _s4.from.y), _l > _h2 ? (_r10 = Number.MAX_SAFE_INTEGER, _n18 += _h2 / 2) : (_r10 += _l / 2, _n18 = Number.MAX_SAFE_INTEGER, _a5 = Math.PI / 2), _i14.skin.size = o.scaleSize(_l, _h2, _n18, _r10), _i14.skin._sizeOriginal = {
-            width: _l,
-            height: _h2
-          }, _i14.skin.angleAuto = _a5;
-          var _c2 = 0,
-              d = 0,
-              u = 1,
+              _s4 = 0;
+          a.autofitSkin || _i14.skin.image && (_n18 = _i14.skin.image.width, _r10 = _i14.skin.image.height);
+          var _l = _i14.skin.crop,
+              _h2 = 0,
+              _c2 = 0;
+          _l && (_h2 = _l.to.x - _l.from.x, _c2 = _l.to.y - _l.from.y), _h2 > _c2 ? (_r10 = Number.MAX_SAFE_INTEGER, _n18 += _c2 / 2) : (_r10 += _h2 / 2, _n18 = Number.MAX_SAFE_INTEGER, _s4 = Math.PI / 2), _i14.skin.size = o.scaleSize(_h2, _c2, _n18, _r10), _i14.skin._sizeOriginal = {
+            width: _h2,
+            height: _c2
+          }, _i14.skin.angleAuto = _s4;
+          var d = 0,
+              u = 0,
               p = 1,
-              f = 0;
+              f = 1,
+              g = 0;
 
-          if (_i14.skin.offset && (_c2 = _i14.skin.offset.x || 0, d = _i14.skin.offset.y || 0, u = _i14.skin.offset.scaleX || 0, p = _i14.skin.offset.scaleY || 0, f = _i14.skin.offset.angle || 0), _i14.parent && _s4) {
+          if (_i14.skin.offset && (d = _i14.skin.offset.x || 0, u = _i14.skin.offset.y || 0, p = _i14.skin.offset.scaleX || 0, f = _i14.skin.offset.scaleY || 0, g = _i14.skin.offset.angle || 0), _i14.parent && _l) {
             _i14.skin.position = {
               x: (_i14.position.x + _i14.parent.position.x) / 2,
               y: (_i14.position.y + _i14.parent.position.y) / 2
             };
             var _e37 = [{
-              x: _i14.skin.position.x + _c2 - _i14.skin.size.width / 2,
-              y: _i14.skin.position.y + d - _i14.skin.size.height / 2
+              x: _i14.skin.position.x + d - _i14.skin.size.width / 2,
+              y: _i14.skin.position.y + u - _i14.skin.size.height / 2
             }, {
-              x: _i14.skin.position.x + _c2 + _i14.skin.size.width / 2,
-              y: _i14.skin.position.y + d - _i14.skin.size.height / 2
+              x: _i14.skin.position.x + d + _i14.skin.size.width / 2,
+              y: _i14.skin.position.y + u - _i14.skin.size.height / 2
             }, {
-              x: _i14.skin.position.x + _c2 + _i14.skin.size.width / 2,
-              y: _i14.skin.position.y + d + _i14.skin.size.height / 2
+              x: _i14.skin.position.x + d + _i14.skin.size.width / 2,
+              y: _i14.skin.position.y + u + _i14.skin.size.height / 2
             }, {
-              x: _i14.skin.position.x + _c2 - _i14.skin.size.width / 2,
-              y: _i14.skin.position.y + d + _i14.skin.size.height / 2
+              x: _i14.skin.position.x + d - _i14.skin.size.width / 2,
+              y: _i14.skin.position.y + u + _i14.skin.size.height / 2
             }];
 
             for (var _i15 = 0, _e38 = _e37; _i15 < _e38.length; _i15++) {
@@ -1966,13 +1968,13 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
                 x: _t18.x - _i14.skin.position.x,
                 y: _t18.y - _i14.skin.position.y
               };
-              _t18.x = _t18.x + _e39.x * (u - 1), _t18.y = _t18.y + _e39.y * (p - 1);
+              _t18.x = _t18.x + _e39.x * (p - 1), _t18.y = _t18.y + _e39.y * (f - 1);
             }
 
             for (var _i16 = 0, _e40 = _e37; _i16 < _e40.length; _i16++) {
               var _t19 = _e40[_i16];
 
-              var _e41 = _i14.angle + _i14.skin.angleAuto + f,
+              var _e41 = _i14.angle + _i14.skin.angleAuto + g,
                   _n19 = (_t19.x - _i14.skin.position.x) * Math.cos(_e41) - (_t19.y - _i14.skin.position.y) * Math.sin(_e41),
                   _r11 = (_t19.x - _i14.skin.position.x) * Math.sin(_e41) + (_t19.y - _i14.skin.position.y) * Math.cos(_e41);
 
@@ -2217,9 +2219,9 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
                 var _i18 = _t22.skin.offset.x,
                     _n21 = _t22.skin.offset.y,
                     _r12 = _t22.skin.offset.scaleX,
-                    _a6 = _t22.skin.offset.scaleY,
+                    _a5 = _t22.skin.offset.scaleY,
                     _o3 = _t22.skin.offset.angle;
-                e.rotate(_o3), e.translate(_i18, _n21), e.scale(_r12, _a6);
+                e.rotate(_o3), e.translate(_i18, _n21), e.scale(_r12, _a5);
               }
 
               e.drawImage(_t22.skin.image, _t22.skin.crop.from.x, _t22.skin.crop.from.y, _t22.skin._sizeOriginal.width, _t22.skin._sizeOriginal.height, -_t22.skin.size.width / 2, -_t22.skin.size.height / 2, _t22.skin.size.width, _t22.skin.size.height), e.restore(), _t22.skin.vertices || (this.updateSkin(), this.updateBounds());
@@ -2250,7 +2252,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
           var _i19 = l.graph.state.previousFrame,
               _n22 = l.graph.state.currentFrame,
               _r13 = l.graph.state.nextFrame,
-              _a7 = l.graph.state.currentMark;
+              _a6 = l.graph.state.currentMark;
           e.save(), e.context.globalAlpha = .1, this.renderTo(e.context, {
             frame: _i19,
             position: {
@@ -2272,8 +2274,8 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
               y: this.bounds.min.y
             },
             showBones: t
-          }), e.restore(), this.keyframes[_a7] || (_a7 = _n22), this.renderTo(e.context, {
-            frame: _a7,
+          }), e.restore(), this.keyframes[_a6] || (_a6 = _n22), this.renderTo(e.context, {
+            frame: _a6,
             position: {
               x: this.bounds.min.x,
               y: this.bounds.min.y
@@ -2511,12 +2513,12 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     }
 
     var E,
-        j = Array.prototype,
-        C = Function.prototype,
+        C = Array.prototype,
+        j = Function.prototype,
         T = Object.prototype,
         I = f["__core-js_shared__"],
         M = (E = /[^.]+$/.exec(I && I.keys && I.keys.IE_PROTO || "")) ? "Symbol(src)_1." + E : "",
-        _ = C.toString,
+        _ = j.toString,
         q = T.hasOwnProperty,
         B = T.toString,
         F = RegExp("^" + _.call(q).replace(/[\\^$.*+?()[\]{}|]/g, "\\$&").replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, "$1.*?") + "$"),
@@ -2526,7 +2528,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
         R = S(Object.getPrototypeOf, Object),
         z = Object.create,
         L = T.propertyIsEnumerable,
-        H = j.splice,
+        H = C.splice,
         D = Object.getOwnPropertySymbols,
         N = J ? J.isBuffer : void 0,
         K = S(Object.keys, Object),
@@ -2618,7 +2620,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     function de(e, t, i, h, c, u, p) {
       var f;
       if (h && (f = u ? h(e, c, u, p) : h(e)), void 0 !== f) return f;
-      if (!Ce(e)) return e;
+      if (!je(e)) return e;
       var g = Se(e);
 
       if (g) {
@@ -2650,7 +2652,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
         if ("[object Object]" == m || m == n || y && !u) {
           if (w(e)) return u ? e : {};
           if (f = function (e) {
-            return "function" != typeof e.constructor || ke(e) ? {} : (t = R(e), Ce(t) ? z(t) : {});
+            return "function" != typeof e.constructor || ke(e) ? {} : (t = R(e), je(t) ? z(t) : {});
             var t;
           }(y ? {} : e), !t) return function (e, t) {
             return fe(e, ye(e), t);
@@ -2745,7 +2747,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     }
 
     function ue(e) {
-      return !(!Ce(e) || (t = e, M && M in t)) && (je(e) || w(e) ? F : h).test(we(e));
+      return !(!je(e) || (t = e, M && M in t)) && (Ce(e) || w(e) ? F : h).test(we(e));
       var t;
     }
 
@@ -2910,19 +2912,19 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
     function Ae(e) {
       return null != e && function (e) {
         return "number" == typeof e && e > -1 && e % 1 == 0 && e <= 9007199254740991;
-      }(e.length) && !je(e);
+      }(e.length) && !Ce(e);
     }
 
     var Ee = N || function () {
       return !1;
     };
 
-    function je(e) {
-      var t = Ce(e) ? B.call(e) : "";
+    function Ce(e) {
+      var t = je(e) ? B.call(e) : "";
       return t == r || t == a;
     }
 
-    function Ce(e) {
+    function je(e) {
       var t = _typeof(e);
 
       return !!e && ("object" == t || "function" == t);
@@ -3653,22 +3655,22 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       S = l(),
       A = l(),
       E = l(),
-      j = {
+      C = {
     pan: "pan",
     select: "select",
     add: "add",
     move: "move",
     remove: "remove"
   },
-      C = {
-    KeyQ: j.pan,
-    KeyW: j.select,
-    KeyE: j.move,
-    KeyR: j.add,
-    KeyT: j.remove
+      j = {
+    KeyQ: C.pan,
+    KeyW: C.select,
+    KeyE: C.move,
+    KeyR: C.add,
+    KeyT: C.remove
   },
       T = {},
-      I = j.pan;
+      I = C.pan;
   T.add = "assets/svg/joint-plus.svg", T.select = "assets/svg/joint-click.svg", T.move = "assets/svg/joint-arrow.svg", T.remove = "assets/svg/joint-trash.svg", T.pan = "assets/svg/quad-arrow.svg";
 
   var M = {
@@ -3687,7 +3689,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
   var _loop6 = function _loop6() {
     var e = _arr[_i21];
     M[e].on("click", function () {
-      q(j[e]);
+      q(C[e]);
     });
   };
 
@@ -3730,19 +3732,19 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 
     for (var i = 0; i < e.length; i++) {
       var _r14 = void 0,
-          _a8 = e[i];
+          _a7 = e[i];
 
       for (var n = 0; n < b.length; n++) {
         var _e56 = b[n];
 
-        if (_e56.file.name == _a8.name && _e56.file.lastModified == _a8.lastModified && _e56.file.size == _a8.size && _e56.file.type == _a8.type) {
+        if (_e56.file.name == _a7.name && _e56.file.lastModified == _a7.lastModified && _e56.file.size == _a7.size && _e56.file.type == _a7.type) {
           _r14 = _e56;
           break;
         }
       }
 
-      if (t.includes(_a8.type)) {
-        var _e57 = P(_a8);
+      if (t.includes(_a7.type)) {
+        var _e57 = P(_a7);
 
         b.push(_e57);
       }
@@ -3759,7 +3761,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 
   o.query(".custom-checkbox", !0).on("click", function (e) {
     var t = o.query(e.target).query(".checkbox");
-    t.toggleClass("checked"), o.query(e.target).prop("checked", t.hasClass("checked")), "animateSkin" == e.target.id && (u.animateSkin = t.hasClass("checked"));
+    t.toggleClass("checked"), o.query(e.target).prop("checked", t.hasClass("checked")), "animateSkin" == e.target.id && (u.animateSkin = t.hasClass("checked")), "autofitSkin" == e.target.id && (u.autofitSkin = t.hasClass("checked")), f.updateSkin(), f.updateBounds();
   });
   var L = o.query("#selectOptions");
   L.on("mousedown", function (e) {
@@ -3915,7 +3917,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
   }), s.on("removeOverlay", function () {
     D = [], p.optionApp.overlayConfigHidden = !0;
   }), s.on("rotoscope", /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
-    var e, t, i, n, r, a, o, h, c, d, g, m, y, v, b, k, w, x, S, A, E, j, C, _loop7, T;
+    var e, t, i, n, r, a, o, h, c, d, g, m, y, v, b, k, w, x, S, A, E, C, j, _loop7, T;
 
     return regeneratorRuntime.wrap(function _callee$(_context2) {
       while (1) {
@@ -3981,8 +3983,8 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
             A.name = "Left Knee";
             E = f.addJoint(0, 0);
             E.name = "Left Ankle";
-            C = f.addJoint(0, 0);
-            C.name = "Left Foot";
+            j = f.addJoint(0, 0);
+            j.name = "Left Foot";
             _loop7 = /*#__PURE__*/regeneratorRuntime.mark(function _loop7() {
               var I;
               return regeneratorRuntime.wrap(function _loop7$(_context) {
@@ -4127,9 +4129,9 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
                             ce = E.position.x + Math.cos(le) * he,
                             de = E.position.y + Math.sin(le) * he;
 
-                        if (C = f.moveJointById(C.id, ce, de), j) {
+                        if (j = f.moveJointById(j.id, ce, de), C) {
                           var _loop8 = function _loop8() {
-                            var t = j.keypoints[B],
+                            var t = C.keypoints[B],
                                 i = e.keypoints.find(function (e) {
                               return e.part == t.part;
                             });
@@ -4139,18 +4141,18 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
                                   _r16 = l(i.position);
 
                               if (_n27.dist(_r16) > 10 * p.overlayConfigApp.scale) {
-                                p.timeline.graph.setCurrentMark(T), p.timeline.graph.updateState(), f.setKeyframe(T), j = JSON.parse(JSON.stringify(e));
+                                p.timeline.graph.setCurrentMark(T), p.timeline.graph.updateState(), f.setKeyframe(T), C = JSON.parse(JSON.stringify(e));
                                 return "break";
                               }
                             }
                           };
 
-                          for (B = 0; B < j.keypoints.length; B++) {
+                          for (B = 0; B < C.keypoints.length; B++) {
                             var _ret = _loop8();
 
                             if (_ret === "break") break;
                           }
-                        } else p.timeline.graph.setCurrentMark(T), f.setKeyframe(T), j = JSON.parse(JSON.stringify(e));
+                        } else p.timeline.graph.setCurrentMark(T), f.setKeyframe(T), C = JSON.parse(JSON.stringify(e));
                       });
 
                     case 3:
@@ -4189,14 +4191,14 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 
     for (var r = e.start - 1; r <= e.end - 1; r++) {
       var _t33 = r - e.start + 1,
-          _a9 = Math.floor(_t33 % e.cols) * e.cellWidth,
+          _a8 = Math.floor(_t33 % e.cols) * e.cellWidth,
           _o4 = Math.floor(_t33 / e.cols) * e.cellHeight,
           _s7 = f.keyframes[r];
 
       _s7 && (i = r, f.updateSkin(_s7.joints)), f.renderTo(n, {
         frame: f.keyframes[r] ? r : i,
         position: {
-          x: _a9,
+          x: _a8,
           y: _o4
         },
         showSkin: e.showSkin,
@@ -4286,12 +4288,12 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       try {
         i.abort(), t.text("Export", !0), t.removeClass("disabled");
 
-        var _a10 = n.createWriteStream(e.name + ".gif", {
+        var _a9 = n.createWriteStream(e.name + ".gif", {
           size: r.size
         }),
             _o6 = r.stream();
 
-        if (window.WritableStream && _o6.pipeTo) return _o6.pipeTo(_a10);
+        if (window.WritableStream && _o6.pipeTo) return _o6.pipeTo(_a9);
       } catch (e) {
         console.warn(e);
       }
@@ -4364,11 +4366,11 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 
       _i27.value(e.name), _n29.value(e.length.toFixed(2)), _r17.value(parseInt(e.zIndex)), _r17.node._lastValue || (_r17.node._lastValue = _r17.value()), _i27.node._lastValue || (_i27.node._lastValue = _i27.value());
 
-      var _a11 = t.query("#jointX"),
+      var _a10 = t.query("#jointX"),
           _s8 = t.query("#jointY"),
           _l4 = t.query("#jointAngle");
 
-      _a11.value(e.position.x.toFixed(2)), _s8.value(e.position.y.toFixed(2));
+      _a10.value(e.position.x.toFixed(2)), _s8.value(e.position.y.toFixed(2));
 
       var _h4 = d.degrees(d.map(e.angle, -Math.PI, Math.PI, 0, 2 * Math.PI));
 
@@ -4377,13 +4379,13 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
             _i28 = o.query("#skinPositionY"),
             _n30 = o.query("#skinScaleX"),
             _r18 = o.query("#skinScaleY"),
-            _a12 = o.query("#skinAngle");
+            _a11 = o.query("#skinAngle");
 
         _t36.value(e.skin.offset.x.toFixed(2)), _i28.value(e.skin.offset.y.toFixed(2)), _n30.value(e.skin.offset.scaleX.toFixed(2)), _r18.value(e.skin.offset.scaleY.toFixed(2));
 
         var _s9 = d.degrees(e.skin.offset.angle);
 
-        _a12.value(_s9.toFixed(2)), _t36.node._lastValue || (_t36.node._lastValue = _t36.value()), _i28.node._lastValue || (_i28.node._lastValue = _i28.value()), _n30.node._lastValue || (_n30.node._lastValue = _n30.value()), _r18.node._lastValue || (_r18.node._lastValue = _r18.value()), _a12.node._lastValue || (_a12.node._lastValue = _a12.value());
+        _a11.value(_s9.toFixed(2)), _t36.node._lastValue || (_t36.node._lastValue = _t36.value()), _i28.node._lastValue || (_i28.node._lastValue = _i28.value()), _n30.node._lastValue || (_n30.node._lastValue = _n30.value()), _r18.node._lastValue || (_r18.node._lastValue = _r18.value()), _a11.node._lastValue || (_a11.node._lastValue = _a11.value());
       }
     } else t.addClass("disabled");
   }
@@ -4451,7 +4453,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
         var _i29 = parseFloat(o.query("#skinPositionX").value()),
             _n31 = parseFloat(o.query("#skinPositionY").value()),
             _r19 = parseFloat(o.query("#skinScaleX").value()),
-            _a13 = parseFloat(o.query("#skinScaleY").value()),
+            _a12 = parseFloat(o.query("#skinScaleY").value()),
             _s10 = parseFloat(o.query("#skinAngle").value()),
             _l5 = {
           from: {
@@ -4468,7 +4470,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
           x: _i29 || 0,
           y: _n31 || 0,
           scaleX: _r19 || 0,
-          scaleY: _a13 || 0,
+          scaleY: _a12 || 0,
           angle: d.radians(d.map(_s10, 0, 360, -180, 180)) + Math.PI || 0
         }), f.editJoints(function (i, n) {
           if (i.id === t.id) {
@@ -4582,14 +4584,14 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       var _i33 = t.skin,
           _n34 = parseFloat(o.query("#skinPositionX").value()),
           _r21 = parseFloat(o.query("#skinPositionY").value()),
-          _a14 = parseFloat(o.query("#skinScaleX").value()),
+          _a13 = parseFloat(o.query("#skinScaleX").value()),
           _s11 = parseFloat(o.query("#skinScaleY").value()),
           _l6 = parseFloat(o.query("#skinAngle").value());
 
       _i33.offset = {
         x: _n34,
         y: _r21,
-        scaleX: _a14,
+        scaleX: _a13,
         scaleY: _s11,
         angle: d.radians(d.map(_l6, 0, 360, -180, 180)) + Math.PI
       }, u.animateSkin || f.editJoint(t.id, {
@@ -4702,8 +4704,8 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
   }), addEventListener("mousedown", function (e) {
     "fileButton" != e.target.id && p.fileApp.hide(), "optionButton" != e.target.id && p.optionApp.hide();
   }), c.on("keydown", function (e) {
-    var t = j[C[e.code]];
-    if (t && (q(t), I = t), e.ctrlKey && (90 == e.keyCode && s.emit("undo"), 89 == e.keyCode && s.emit("redo")), e.shiftKey && I == j.add && f.activeJoint && (w || (w = f.activeJoint)), 32 == e.keyCode && I != j.pan && (Z = I, q(j.pan)), 46 == e.keyCode) if ("joints" == v) {
+    var t = C[j[e.code]];
+    if (t && "input" != document.activeElement.tagName.toLowerCase() && (q(t), I = t), e.ctrlKey && (90 == e.keyCode && s.emit("undo"), 89 == e.keyCode && s.emit("redo")), e.shiftKey && I == C.add && f.activeJoint && (w || (w = f.activeJoint)), 32 == e.keyCode && "input" != document.activeElement.tagName.toLowerCase() && I != C.pan && (Z = I, q(C.pan)), 46 == e.keyCode) if ("joints" == v) {
       var _e63 = f.activeJoint;
       _e63 && f.removeJointById(_e63.id);
     } else "timeline" == v && s.emit("deleteKeyframe");
@@ -4738,13 +4740,13 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
   }
 
   a.canvas.addEventListener("mousemove", function (e) {
-    h.dragged && !k && I === j.pan && (S.set({
+    h.dragged && !k && I === C.pan && (S.set({
       x: A.x - E.x + a.camera.movement.x,
       y: A.y - E.y + a.camera.movement.y
-    }), S.x = d.clamp(S.x, -9e3, 9e3), S.y = d.clamp(S.y, -9e3, 9e3)), I !== j.move || k || h.pressed && (v = "joints", f.moveJoint(E.x, E.y));
+    }), S.x = d.clamp(S.x, -9e3, 9e3), S.y = d.clamp(S.y, -9e3, 9e3)), I !== C.move || k || h.pressed && (v = "joints", f.moveJoint(E.x, E.y));
   }), a.canvas.addEventListener("click", function () {
     if (p.overlayApp.hidden && p.overlayConfigApp.hidden && p.fileApp.hidden && p.loadApp.hidden && p.saveApp.hidden && p.optionApp.hidden) {
-      if (I == j.add) {
+      if (I == C.add) {
         if (w) {
           var _e64 = f.activeJoint.position.x - E.x + w.position.x,
               _t44 = f.addJoint(_e64, E.y, {
@@ -4759,7 +4761,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
         f.addJoint(E.x, E.y), v = "joints";
       }
 
-      I === j.remove && (f.selectJoint(E.x, E.y), f.removeJointByPosition(E.x, E.y), v = "joints"), I === j.select && (f.selectJoint(E.x, E.y), v = "joints");
+      I === C.remove && (f.selectJoint(E.x, E.y), f.removeJointByPosition(E.x, E.y), v = "joints"), I === C.select && (f.selectJoint(E.x, E.y), v = "joints");
     }
   }), a.canvas.addEventListener("mousewheel", function () {
     h.scrollTop ? x -= 100 : x += 100, x = d.clamp(x, u.world.minZoom, u.world.maxZoom);
@@ -4780,7 +4782,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
           r = D.slice(0).splice(i, n - i),
           o = t.concat(r)[p.timeline.graph.state.currentMark];
 
-      if (o && (a.save(), a.context.globalAlpha = p.overlayConfigApp.opacity, a.context.scale(p.overlayConfigApp.scale, p.overlayConfigApp.scale), a.context.rotate(p.overlayConfigApp.angle), a.context.drawImage(o, -o.width / 2, -o.height / 2), a.restore()), e && I === j.add) {
+      if (o && (a.save(), a.context.globalAlpha = p.overlayConfigApp.opacity, a.context.scale(p.overlayConfigApp.scale, p.overlayConfigApp.scale), a.context.rotate(p.overlayConfigApp.angle), a.context.drawImage(o, -o.width / 2, -o.height / 2), a.restore()), e && I === C.add) {
         var _e65 = "rgba(240, 230, 255, 0.75)";
         a.save(), a.context.globalCompositeOperation = "overlay";
         var _t45 = f.activeJoint;
@@ -4912,7 +4914,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 
             return e.addEventListener("message", r), n;
           }(s.mitm)), f = new MessageChannel(), n = encodeURIComponent(n.replace(/\//g, ":")).replace(/['()]/g, escape).replace(/\*/g, "%2A");
-          var _a15 = {
+          var _a14 = {
             transferringReadable: i,
             pathname: d.pathname || Math.random().toString().slice(-6) + "/" + n,
             headers: {
@@ -4920,8 +4922,8 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
               "Content-Disposition": "attachment; filename*=UTF-8''" + n
             }
           };
-          d.size && (_a15.headers["Content-Length"] = d.size);
-          var _h5 = [_a15, "*", [f.port2]];
+          d.size && (_a14.headers["Content-Length"] = d.size);
+          var _h5 = [_a14, "*", [f.port2]];
 
           if (i) {
             var _e68 = "iframe" === o ? void 0 : {
@@ -5164,10 +5166,10 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 
           case "utf8":
           case "utf-8":
-            return j(this, t, i);
+            return C(this, t, i);
 
           case "ascii":
-            return C(this, t, i);
+            return j(this, t, i);
 
           case "latin1":
           case "binary":
@@ -5300,7 +5302,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       return 0 === t && i === e.length ? n.fromByteArray(e) : n.fromByteArray(e.slice(t, i));
     }
 
-    function j(e, t, i) {
+    function C(e, t, i) {
       i = Math.min(e.length, i);
 
       for (var n = [], r = t; r < i;) {
@@ -5452,7 +5454,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       return this;
     }, l.prototype.toString = function () {
       var e = 0 | this.length;
-      return 0 === e ? "" : 0 === arguments.length ? j(this, 0, e) : g.apply(this, arguments);
+      return 0 === e ? "" : 0 === arguments.length ? C(this, 0, e) : g.apply(this, arguments);
     }, l.prototype.equals = function (e) {
       if (!l.isBuffer(e)) throw new TypeError("Argument must be a Buffer");
       return this === e || 0 === l.compare(this, e);
@@ -5528,7 +5530,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
       };
     };
 
-    function C(e, t, i) {
+    function j(e, t, i) {
       var n = "";
       i = Math.min(e.length, i);
 
@@ -6192,14 +6194,14 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
                     },
                         _n37 = 0,
                         _r22 = 0,
-                        _a16 = 0;
+                        _a15 = 0;
 
                     if (l = i, h = e.charAt(++l), "u" === h) {
-                      for (_a16 = 0, _r22 = 0; _r22 < 4 && (_n37 = parseInt(h = e.charAt(++l), 16), isFinite(_n37)); _r22 += 1) {
-                        _a16 = 16 * _a16 + _n37;
+                      for (_a15 = 0, _r22 = 0; _r22 < 4 && (_n37 = parseInt(h = e.charAt(++l), 16), isFinite(_n37)); _r22 += 1) {
+                        _a15 = 16 * _a15 + _n37;
                       }
 
-                      e = e.slice(0, i) + String.fromCharCode(_a16) + e.slice(i + 6), l = i;
+                      e = e.slice(0, i) + String.fromCharCode(_a15) + e.slice(i + 6), l = i;
                     } else {
                       if ("string" != typeof _t52[h]) break;
                       e = e.slice(0, i) + _t52[h] + e.slice(i + 2), l = i + 1;
@@ -6952,9 +6954,9 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
               var _t54 = e[o],
                   _i38 = e[o + 1 == e.length ? 0 : o + 1],
                   _r23 = .5 * (_i38.x + _t54.x),
-                  _a17 = .5 * (_i38.y + _t54.y);
+                  _a16 = .5 * (_i38.y + _t54.y);
 
-              n.quadraticCurveTo(_t54.x, _t54.y, _r23, _a17);
+              n.quadraticCurveTo(_t54.x, _t54.y, _r23, _a16);
             }
 
             n.quadraticCurveTo(t.x, t.y, r, a), n.lineJoin = "round";
@@ -7476,11 +7478,11 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
           _i40 = e.clientY,
           _n38 = s.canvas.getBoundingClientRect(),
           _r24 = _t56 - _n38.x,
-          _a18 = _i40 - _n38.y;
+          _a17 = _i40 - _n38.y;
 
-      f = !0, h = l(_r24, _a18), c = {
+      f = !0, h = l(_r24, _a17), c = {
         x: _r24 - s.cropFrom.x,
-        y: _a18 - s.cropFrom.y
+        y: _a17 - s.cropFrom.y
       }, d = s.cropTo.x - s.cropFrom.x, u = s.cropTo.y - s.cropFrom.y;
     }
   }), addEventListener("mouseup", function () {

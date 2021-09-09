@@ -366,7 +366,7 @@ var Timeline = /*#__PURE__*/function () {
       var onScrollbar, onTimeline, onKeyframe, onScrollbarLeft, onScrollbarRight, onPlaybackHandle;
 
       var dragStart = function dragStart(event) {
-        if (event.target != _this3.canvas) return;
+        if (event.target != _this3.canvas || event.which != 1) return;
         dragging = true;
         events.emit("renderSleep");
 
